@@ -1,0 +1,22 @@
+{
+  "owners": [
+    {
+      "id": "none",
+      "name": "Unclaimed",
+      "short": "-",
+      "color": "#666666"
+    },
+    {
+      "id": "empire_01",
+      "name": "Confederacion Solar Humana",
+      "short": "CSH",
+      "color": "#2ecc78"
+    },
+    {
+      "id": "empire_02",
+      "name": "Unknown Threat",
+      "short": "Unknown",
+      "color": "#FF0000"
+    }
+  ]
+}

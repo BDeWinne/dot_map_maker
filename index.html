@@ -1,0 +1,853 @@
+<div id="map-view-toggles" class="map-view-toggles" role="group" aria-label="Visibilidad en el mapa">
+  <button type="button" id="toggle-map-icons" class="map-view-toggle is-on" aria-pressed="true">Iconos</button>
+  <button type="button" id="toggle-map-labels" class="map-view-toggle is-on" aria-pressed="true">Textos</button>
+  <button type="button" id="toggle-map-fleets" class="map-view-toggle is-on" aria-pressed="true">Flotas</button>
+</div>
+
+<div id="year-scrubber" class="year-scrubber" role="group" aria-label="Año del mapa">
+  <button type="button" id="year-prev" class="year-nav" aria-label="Año anterior">&lt;</button>
+  <button type="button" id="year-display" class="year-display" aria-label="Cambiar año">
+    &lt;<span id="year-value">2200</span>&gt;<span id="year-epoch" class="year-epoch"></span>
+  </button>
+  <button type="button" id="year-next" class="year-nav" aria-label="Año siguiente">&gt;</button>
+</div>
+
+<div id="ui-wrapper">
+  <nav class="sidebar-tabs" aria-label="Sidebar sections">
+    <button type="button" class="sidebar-tab" data-sidebar-tab="system" aria-selected="false">System</button>
+    <button type="button" class="sidebar-tab is-active" data-sidebar-tab="map" aria-selected="true">Map</button>
+    <button type="button" class="sidebar-tab" data-sidebar-tab="owners" aria-selected="false">Owners</button>
+    <button type="button" class="sidebar-tab" data-sidebar-tab="timeline" aria-selected="false">Timeline</button>
+    <button type="button" class="sidebar-tab" data-sidebar-tab="chronicle" aria-selected="false">Chronicle</button>
+    <button type="button" class="sidebar-tab" data-sidebar-tab="routes" aria-selected="false">Routes</button>
+    <button type="button" class="sidebar-tab" data-sidebar-tab="stats" aria-selected="false">Stats</button>
+    <button type="button" class="sidebar-tab" data-sidebar-tab="help" aria-selected="false">Help</button>
+  </nav>
+
+  <div class="sidebar-panels">
+    <section id="tab-panel-system" class="tab-panel" data-sidebar-panel="system" hidden>
+      <p id="system-empty" class="panel-empty">Select a system on the map to edit it.</p>
+      <div id="system-form" class="panel-scroll" hidden>
+        <h3 class="section-title">Node Editor</h3>
+        <label>Name</label>
+        <input id="node-name" />
+        <label>Owned By</label>
+        <select id="node-owned-by"></select>
+        <label>Occupied By</label>
+        <select id="node-occupied-by"></select>
+        <label>Star Type</label>
+        <input id="node-star-type" />
+        <label for="node-description">Description</label>
+        <textarea id="node-description" rows="4" placeholder="System description..."></textarea>
+        <label class="checkbox-row">
+          <input id="node-is-capital" type="checkbox" />
+          Capital system (seat of government — one per owner)
+        </label>
+        <label>Population</label>
+        <input id="node-population" type="text" inputmode="decimal" placeholder="300.000 · 12M · 30 B" />
+        <p id="node-population-preview" class="population-preview"></p>
+        <p class="mode-hint">Puntos = miles (300.000). También 12M, 30 B, ~30 mil millones al importar.</p>
+        <label>Size (economy / population weight)</label>
+        <input id="node-size" type="number" step="0.1" min="0.5" max="2.5" />
+        <label>Installations (map icons)</label>
+        <p class="mode-hint">Iconos sobre el sistema en el mapa. Abajo a la izquierda: mostrar/ocultar iconos y textos.</p>
+        <div id="node-facilities" class="facility-grid"></div>
+        <label>Fleets (left of node)</label>
+        <p class="mode-hint">Nave + número por imperio (color del dueño). «+ Add fleet» usa el dueño del sistema. El año de vista y la timeline también cambian las flotas visibles.</p>
+        <div id="node-fleets-editor" class="fleet-editor"></div>
+        <button id="node-fleet-add" type="button" class="btn-muted fleet-add-btn">+ Add fleet</button>
+        <p class="mode-hint">Occupied: legal owner stays; red stripes = military occupier.</p>
+        <div class="panel-actions">
+          <button id="save-node" type="button">Save system</button>
+          <button id="delete-node" type="button" class="btn-danger">Delete</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-panel-owners" class="tab-panel panel-scroll" data-sidebar-panel="owners" hidden>
+      <h3 class="section-title">Owner editor</h3>
+      <p class="mode-hint">Factions on the map: color, name, and short tag (labels &amp; stats).</p>
+      <div id="owner-list" class="owner-list"></div>
+      <div id="owner-form-wrap" class="owner-form-wrap">
+        <h4 class="subsection-title">Edit owner</h4>
+        <p id="owner-usage-hint" class="mode-hint"></p>
+        <label>Id (unique key)</label>
+        <input id="owner-id" type="text" placeholder="empire_01" autocomplete="off" />
+        <label>Name</label>
+        <input id="owner-name" type="text" placeholder="Confederación Solar Humana" />
+        <label>Short tag</label>
+        <input id="owner-short" type="text" maxlength="12" placeholder="CSH" />
+        <label>Color</label>
+        <div class="owner-color-row">
+          <input id="owner-color" type="color" value="#2ecc78" />
+          <input id="owner-color-hex" type="text" placeholder="#2ecc78" />
+        </div>
+        <h4 class="subsection-title">Leader</h4>
+        <p class="mode-hint">Ruler or head of government for this faction (lore / narrative).</p>
+        <label>Leader name</label>
+        <input id="owner-leader-name" type="text" placeholder="e.g. Elena Voss" />
+        <label>Age <span class="field-hint">(at view year)</span></label>
+        <input id="owner-leader-age" type="number" min="0" max="9999" step="1" placeholder="—" />
+        <label>Personality</label>
+        <textarea id="owner-leader-personality" rows="3" placeholder="Pragmatic, cautious, expansionist…"></textarea>
+        <div class="panel-actions row-actions">
+          <button id="owner-save-btn" type="button">Save owner</button>
+          <button id="owner-add-btn" type="button" class="btn-muted">New owner</button>
+          <button id="owner-delete-btn" type="button" class="btn-danger">Delete owner</button>
+        </div>
+      </div>
+      <h4 class="subsection-title">Owners file</h4>
+      <button id="owner-export-btn" type="button">Export owners JSON</button>
+      <button id="owner-import-btn" type="button">Import owners JSON</button>
+      <input type="file" id="owner-import-file" accept=".json,application/json" hidden />
+      <button id="owner-reset-btn" type="button" class="btn-muted">Reset to defaults</button>
+      <p id="owner-editor-status" class="mode-hint" role="status"></p>
+    </section>
+
+    <section id="tab-panel-map" class="tab-panel is-active panel-scroll" data-sidebar-panel="map">
+      <h3 class="section-title">Map Controls</h3>
+      <details class="facility-legend-details">
+        <summary class="subsection-title">Installation icon legend</summary>
+        <div id="facility-legend-map" class="facility-legend"></div>
+      </details>
+      <label>Galaxy background</label>
+      <button id="set-background" type="button">Choose image...</button>
+      <input type="file" id="background-file" accept="image/*" hidden />
+      <button id="clear-background" type="button" disabled>Remove background</button>
+      <label>Background opacity</label>
+      <input type="range" id="background-opacity" min="5" max="100" value="100" disabled />
+      <label>Click mode</label>
+      <select id="map-edit-mode">
+        <option value="edit">Place nodes</option>
+        <option value="moveBackground">Move background</option>
+        <option value="moveNodes">Move all nodes</option>
+      </select>
+      <p id="map-edit-mode-hint" class="mode-hint"></p>
+      <label>Export</label>
+      <button id="export-map" type="button">Export JSON</button>
+      <button id="export-png" type="button">Export PNG (view)</button>
+    <button id="import-map" type="button">Import JSON</button>
+    <input type="file" id="import-file" accept=".json,application/json" hidden />
+    <p id="import-status" class="mode-hint" role="status"></p>
+    </section>
+
+    <section id="tab-panel-timeline" class="tab-panel panel-scroll" data-sidebar-panel="timeline" hidden>
+      <h3 class="section-title">Galaxy calendar</h3>
+      <label>Epoch / era name</label>
+      <input id="map-epoch" type="text" placeholder="e.g. Imperial Era" />
+      <label>Default year (new events)</label>
+      <input id="map-default-year" type="number" value="2200" step="1" />
+
+      <h3 class="section-title">System timeline</h3>
+      <p class="mode-hint">Events ≤ view year (top-left) change the map. <strong>Colonized</strong> = appears; <strong>Owner change</strong> = conquest; <strong>Abandoned</strong> = hidden.</p>
+      <p class="mode-hint">System: <strong id="timeline-system-label">—</strong></p>
+      <p id="timeline-no-system" class="panel-empty">Select a system to add historical events.</p>
+
+      <div id="timeline-form-wrap" hidden>
+        <div id="timeline-entries-list" class="timeline-list"></div>
+        <h4 class="subsection-title">Add / edit event</h4>
+        <label>Year</label>
+        <input id="entry-year" type="number" step="1" />
+        <label>Event type</label>
+        <select id="entry-type"></select>
+        <label>Actor (who)</label>
+        <select id="entry-actor"></select>
+        <label>Title</label>
+        <input id="entry-title" type="text" placeholder="Battle of ..." />
+        <label>Description</label>
+        <textarea id="entry-description" rows="3"></textarea>
+        <label>Population</label>
+        <input id="entry-population" type="text" placeholder="12M, +500K..." />
+        <label>Fleets</label>
+        <div id="entry-fleet-change-fields">
+          <p class="mode-hint">Tipo <strong>Fleet change</strong>: dueño + cantidad abajo.</p>
+          <div id="entry-fleets-editor" class="fleet-editor"></div>
+          <button id="entry-fleet-add" type="button" class="btn-muted fleet-add-btn">+ Add fleet</button>
+        </div>
+        <div id="entry-fleet-move-fields" hidden>
+          <label>Destination system</label>
+          <select id="entry-target-system"></select>
+          <label>Fleet count</label>
+          <input id="entry-fleet-count" type="number" min="1" max="9999" step="1" value="1" />
+          <p class="mode-hint">Tipo <strong>Fleet movement</strong>: mueve flotas al destino. Actor = imperio.</p>
+        </div>
+        <label>Economy</label>
+        <input id="entry-economy" type="text" placeholder="Trade hub, recession..." />
+        <label>Minerals / resources</label>
+        <input id="entry-minerals" type="text" />
+        <label>Flavor / notes</label>
+        <input id="entry-flavor" type="text" />
+        <div class="panel-actions row-actions">
+          <button id="entry-add-btn" type="button">Save event</button>
+          <button id="entry-clear-btn" type="button" class="btn-muted">Clear form</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-panel-chronicle" class="tab-panel panel-scroll" data-sidebar-panel="chronicle" hidden>
+      <h3 class="section-title">Galaxy chronicle</h3>
+      <p class="mode-hint">All system and route events, sorted by year. Click an entry to jump to that year.</p>
+      <label class="checkbox-row">
+        <input id="chronicle-limit-year" type="checkbox" checked />
+        Only events ≤ view year
+      </label>
+      <label>Filter by actor</label>
+      <select id="chronicle-filter-owner"></select>
+      <label>Filter by type</label>
+      <select id="chronicle-filter-type"></select>
+      <label>Search</label>
+      <input id="chronicle-search" type="search" placeholder="Title, system, route..." />
+      <div id="chronicle-list" class="timeline-list"></div>
+    </section>
+
+    <section id="tab-panel-routes" class="tab-panel panel-scroll" data-sidebar-panel="routes" hidden>
+      <h3 class="section-title">Hyperlane editor</h3>
+      <p class="mode-hint">Shift+click two systems to create a lane. Click a line on the map to edit it.</p>
+      <p id="route-empty" class="panel-empty">Select a hyperlane on the map.</p>
+      <div id="route-form" hidden>
+        <p class="mode-hint">Route: <strong id="route-endpoints-label">—</strong></p>
+        <label>Name (optional)</label>
+        <input id="route-name" type="text" placeholder="Solar — Wolf corridor" />
+        <label>Route type</label>
+        <select id="route-type"></select>
+        <button id="route-save-btn" type="button">Save route</button>
+        <h4 class="subsection-title">Route timeline</h4>
+        <p class="mode-hint">Open / close the lane at a given year (affects map at view year).</p>
+        <div id="route-timeline-list" class="timeline-list"></div>
+        <h4 class="subsection-title">Add / edit route event</h4>
+        <label>Year</label>
+        <input id="route-event-year" type="number" step="1" />
+        <label>Event type</label>
+        <select id="route-event-type"></select>
+        <label>Title</label>
+        <input id="route-event-title" type="text" />
+        <label>Description</label>
+        <textarea id="route-event-description" rows="2"></textarea>
+        <div class="panel-actions row-actions">
+          <button id="route-event-save" type="button">Save route event</button>
+          <button id="route-event-clear" type="button" class="btn-muted">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-panel-stats" class="tab-panel panel-scroll" data-sidebar-panel="stats" hidden>
+      <h3 class="section-title">By owner</h3>
+      <p class="mode-hint">Live summary from all systems on the map.</p>
+      <div id="stats-by-owner"></div>
+    </section>
+
+    <section id="tab-panel-help" class="tab-panel panel-scroll" data-sidebar-panel="help" hidden>
+      <h3 class="section-title">Shortcuts & controls</h3>
+      <dl class="help-list">
+        <div><dt>Left click (empty)</dt><dd>Place system — Edit mode</dd></div>
+        <div><dt>Left drag</dt><dd>Move background or all nodes — per Click mode</dd></div>
+        <div><dt>Middle drag</dt><dd>Pan camera</dd></div>
+        <div><dt>Space + drag</dt><dd>Pan camera</dd></div>
+        <div><dt>Mouse wheel</dt><dd>Zoom in / out</dd></div>
+        <div><dt>Click system</dt><dd>Select · opens System tab data</dd></div>
+        <div><dt>Owners tab</dt><dd>Edit factions, colors, export/import owners JSON</dd></div>
+        <div><dt>System → Installations</dt><dd>Icons above nodes (bastion, shipyard, mining…)</dd></div>
+        <div><dt>Shift + click</dt><dd>Connect two systems (hyperlane)</dd></div>
+        <div><dt>Click connection</dt><dd>Select line (dimmed)</dd></div>
+        <div><dt>Right click</dt><dd>Blocked (no context menu)</dd></div>
+      </dl>
+      <h4 class="subsection-title">Click modes</h4>
+      <ul class="help-bullets">
+        <li><strong>Place nodes</strong> — add systems on empty space</li>
+        <li><strong>Move background</strong> — drag galaxy image</li>
+        <li><strong>Move all nodes</strong> — drag every system together</li>
+      </ul>
+      <h4 class="subsection-title">Timeline & export</h4>
+      <ul class="help-bullets">
+        <li>Events are stored per system in JSON export</li>
+        <li>Calendar epoch + default year apply map-wide</li>
+        <li>PNG export captures the current canvas view</li>
+      </ul>
+    </section>
+  </div>
+</div>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .map-view-toggles {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    z-index: 30;
+    display: flex;
+    gap: 6px;
+    padding: 6px 8px;
+    background: rgba(12, 12, 12, 0.92);
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    font-family: system-ui, sans-serif;
+    pointer-events: auto;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .map-view-toggle {
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #888;
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .map-view-toggle:hover {
+    background: #2a2a2a;
+    color: #ccc;
+  }
+
+  .map-view-toggle.is-on {
+    color: #eee;
+    background: #2e4a62;
+    border-color: #5a9fd4;
+  }
+
+  .year-scrubber {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    background: rgba(12, 12, 12, 0.92);
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    font-family: system-ui, sans-serif;
+    pointer-events: auto;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .year-nav,
+  .year-display {
+    margin: 0;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #eee;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .year-nav {
+    padding: 6px 12px;
+    line-height: 1;
+  }
+
+  .year-nav:hover,
+  .year-display:hover {
+    background: #363636;
+  }
+
+  .year-display {
+    min-width: 88px;
+    color: #7eb8e8;
+  }
+
+  .year-display.is-historical {
+    color: #e8c07e;
+    border-color: #6a5a30;
+  }
+
+  .year-epoch {
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    margin-left: 4px;
+  }
+  canvas { display: block; }
+
+  #ui-wrapper {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: min(320px, 100vw);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    background: #0c0c0c;
+    border-left: 1px solid #2a2a2a;
+    box-sizing: border-box;
+    pointer-events: auto;
+    font-family: system-ui, sans-serif;
+    color: #eee;
+  }
+
+  .sidebar-tabs {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 6px 6px 0;
+    background: #0a0a0a;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  .sidebar-tab {
+    flex: 1 1 auto;
+    min-width: 52px;
+    padding: 6px 4px;
+    font-size: 11px;
+    color: #aaa;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .sidebar-tab.is-active {
+    color: #fff;
+    border-bottom-color: #5a9fd4;
+  }
+
+  .sidebar-panels {
+    flex: 1 1 auto;
+    min-height: 0;
+    position: relative;
+  }
+
+  .tab-panel {
+    display: none;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .tab-panel.is-active {
+    display: block;
+  }
+
+  .panel-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 14px 16px;
+    height: 100%;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+  }
+
+  .section-title {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .subsection-title {
+    margin: 14px 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ccc;
+  }
+
+  .tab-panel label {
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: #b0b0b0;
+  }
+
+  .tab-panel input,
+  .tab-panel select,
+  .tab-panel textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #eee;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+  }
+
+  .tab-panel textarea {
+    resize: vertical;
+    min-height: 64px;
+  }
+
+  .tab-panel,
+  .sidebar-tabs {
+    pointer-events: auto;
+  }
+
+  .tab-panel button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #eee;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .tab-panel button:hover:not(:disabled) { background: #363636; }
+  .tab-panel button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-danger {
+    background: #3a1a1a !important;
+    border-color: #6a2a2a !important;
+    color: #ffb0b0 !important;
+  }
+
+  .btn-muted { background: #222 !important; color: #aaa !important; }
+
+  .panel-actions { margin-top: 12px; padding-top: 10px; border-top: 1px solid #2a2a2a; }
+  .row-actions { display: flex; flex-direction: column; gap: 6px; }
+
+  .mode-hint, .panel-empty {
+    font-size: 11px;
+    line-height: 1.45;
+    color: #888;
+    margin: 0 0 8px;
+  }
+
+  .panel-empty { font-style: italic; padding: 8px 0; }
+
+  .timeline-list { margin-bottom: 12px; }
+
+  .chronicle-entry {
+    cursor: pointer;
+  }
+
+  .chronicle-entry:hover {
+    border-color: #444;
+    background: #161616;
+  }
+
+  .timeline-entry {
+    background: #161616;
+    border: 1px solid #2e2e2e;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+
+  .timeline-entry-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 10px;
+    color: #888;
+  }
+
+  .timeline-year { color: #7eb8e8; font-weight: 600; }
+  .timeline-entry p { margin: 4px 0 0; color: #bbb; }
+  .timeline-meta { font-size: 10px; color: #777; }
+  .timeline-flavor { font-style: italic; color: #999; }
+  .timeline-entry-actions { display: flex; gap: 6px; margin-top: 8px; }
+  .btn-small {
+    width: auto !important;
+    flex: 1;
+    margin: 0 !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+
+  .owner-stat-card {
+    background: #161616;
+    border: 1px solid #2e2e2e;
+    border-left: 3px solid var(--owner-color, #666);
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .owner-stat-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .owner-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--owner-color);
+  }
+
+  .owner-stat-name { font-size: 10px; color: #888; margin-left: auto; }
+
+  .owner-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 10px;
+    margin: 0;
+    font-size: 11px;
+  }
+
+  .owner-stat-grid dt { color: #777; margin: 0; }
+  .owner-stat-grid dd { margin: 0; color: #ddd; font-weight: 600; }
+
+  .owner-stat-grid .stat-wide {
+    grid-column: 1 / -1;
+  }
+
+  .checkbox-row {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+
+  .checkbox-row input {
+    width: auto !important;
+    margin: 0;
+  }
+
+  .stats-summary { font-size: 11px; color: #888; margin-bottom: 12px; }
+
+  .help-list { margin: 0; font-size: 12px; }
+  .help-list > div {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .help-list dt { color: #7eb8e8; margin: 0; font-weight: 600; }
+  .help-list dd { margin: 0; color: #bbb; }
+
+  .help-bullets {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.5;
+  }
+
+  .facility-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .facility-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #ddd;
+    cursor: pointer;
+    margin: 0;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+  }
+
+  .facility-option:hover {
+    border-color: #444;
+    background: #1a1a1a;
+  }
+
+  .facility-option input {
+    width: auto !important;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .facility-symbol {
+    width: 1.4em;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .facility-name {
+    flex: 1;
+    line-height: 1.25;
+  }
+
+  .fleet-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .fleet-row {
+    display: grid;
+    grid-template-columns: 1fr 64px 28px;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .fleet-owner-select,
+  .fleet-count-input {
+    width: 100%;
+    padding: 4px 6px;
+    font-size: 12px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #eee;
+    box-sizing: border-box;
+  }
+
+  .fleet-remove-btn {
+    padding: 4px 0;
+    font-size: 16px;
+    line-height: 1;
+    background: #2a1a1a;
+    border: 1px solid #533;
+    border-radius: 4px;
+    color: #f88;
+    cursor: pointer;
+  }
+
+  .fleet-remove-btn:hover {
+    background: #3a2222;
+  }
+
+  .fleet-add-btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .facility-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 11px;
+    color: #aaa;
+    margin: 8px 0 12px;
+  }
+
+  .facility-legend span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .facility-legend .facility-legend-sym {
+    width: 1.5em;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .population-preview {
+    margin: 2px 0 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #7eb8e8;
+    min-height: 1.2em;
+  }
+
+  .hidden { display: none !important; }
+
+  .owner-list { margin-bottom: 12px; }
+
+  .owner-list-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    border: 1px solid #2a2a2a;
+    border-left: 3px solid var(--owner-color, #666);
+    border-radius: 6px;
+    background: #141414;
+    overflow: hidden;
+  }
+
+  .owner-list-item.is-selected {
+    border-color: #5a9fd4;
+    box-shadow: 0 0 0 1px #5a9fd4 inset;
+  }
+
+  .owner-list-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin: 0;
+    border: none;
+    background: transparent;
+    color: #eee;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+  }
+
+  .owner-list-main:hover { background: #1e1e1e; }
+
+  .owner-list-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  .owner-list-text span {
+    font-size: 10px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .owner-list-id {
+    font-size: 9px;
+    color: #666;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .owner-list-meta {
+    flex-shrink: 0;
+    padding-right: 8px;
+    font-size: 10px;
+    color: #777;
+  }
+
+  .owner-list-leader {
+    font-size: 11px;
+    color: #9ab;
+    font-style: italic;
+  }
+
+  .owner-form-wrap { margin-top: 8px; padding-top: 8px; border-top: 1px solid #2a2a2a; }
+
+  .owner-color-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .owner-color-row input[type="color"] {
+    width: 48px;
+    height: 36px;
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .owner-color-row input[type="text"] { flex: 1; }
+</style>
