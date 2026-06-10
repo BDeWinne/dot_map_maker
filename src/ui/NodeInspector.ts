@@ -35,22 +35,20 @@ export class NodeInspector {
     () =>
       selectionManager.getSelected()?.data.owner ??
       (document.getElementById("node-owned-by") as HTMLSelectElement).value,
+    () => this.saveChanges(),
   );
   private fleetAddBtn = document.getElementById("node-fleet-add") as HTMLButtonElement;
-  private saveButton: HTMLButtonElement;
   private deleteButton: HTMLButtonElement;
+  private suppressAutoSave = false;
+  private autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.buildFacilityCheckboxes();
     this.fleetAddBtn?.addEventListener("click", () => this.fleetRowEditor.addRow());
-    this.saveButton = document.getElementById("save-node") as HTMLButtonElement;
     this.deleteButton = document.getElementById("delete-node") as HTMLButtonElement;
-    this.saveButton.addEventListener("click", () => this.saveChanges());
     this.deleteButton.addEventListener("click", () => selectionManager.deleteSelectedNode());
     this.populateOwners();
-
-    this.ownerSelect.addEventListener("change", () => this.syncCapitalCheckbox());
-    this.populationInput.addEventListener("input", () => this.updatePopulationPreview());
+    this.bindAutoSave();
 
     selectionManager.on("node:selected", () => {
       const node = selectionManager.getSelected();
@@ -65,6 +63,47 @@ export class NodeInspector {
       const node = selectionManager.getSelected();
       if (node) this.load(node.data);
     });
+  }
+
+  public init() {}
+
+  private bindAutoSave() {
+    const schedule = () => this.scheduleAutoSave();
+    const saveNow = () => this.saveChanges();
+
+    const textFields: (HTMLInputElement | HTMLTextAreaElement | null)[] = [
+      this.nameInput,
+      this.starTypeInput,
+      this.descriptionInput,
+      this.populationInput,
+      this.sizeInput,
+    ];
+    for (const el of textFields) {
+      el?.addEventListener("input", schedule);
+      el?.addEventListener("change", saveNow);
+    }
+
+    const immediateFields: (HTMLElement | null)[] = [
+      this.ownerSelect,
+      this.occupiedBySelect,
+      this.isCapitalInput,
+    ];
+    for (const el of immediateFields) {
+      el?.addEventListener("change", saveNow);
+    }
+
+    this.ownerSelect.addEventListener("change", () => this.syncCapitalCheckbox());
+    this.populationInput.addEventListener("input", () => this.updatePopulationPreview());
+    this.facilitiesEl.addEventListener("change", saveNow);
+  }
+
+  private scheduleAutoSave() {
+    if (this.suppressAutoSave || galaxyScene.getPlayMode()) return;
+    if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+    this.autoSaveTimer = setTimeout(() => {
+      this.autoSaveTimer = null;
+      this.saveChanges();
+    }, 400);
   }
 
   public populateOwners() {
@@ -99,6 +138,12 @@ export class NodeInspector {
   }
 
   public load(data: SystemData) {
+    this.suppressAutoSave = true;
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = null;
+    }
+
     this.systemEmpty.hidden = true;
     this.systemForm.hidden = false;
     this.nameInput.value = data.name;
@@ -110,13 +155,14 @@ export class NodeInspector {
     const display = getDisplayStateAtYear(
       data,
       galaxyScene.getViewYear(),
-      galaxyScene.getPresentYear()
+      galaxyScene.getPresentYear(),
     );
     this.populationInput.value = formatNumberWithDots(display.population);
     this.updatePopulationPreview();
     this.isCapitalInput.checked = !!data.isCapital;
     this.syncFacilityCheckboxes(normalizeFacilities(data.facilities));
     this.fleetRowEditor.render(display.fleets);
+    this.suppressAutoSave = false;
   }
 
   private buildFacilityCheckboxes() {
@@ -169,6 +215,12 @@ export class NodeInspector {
   }
 
   public clear() {
+    this.suppressAutoSave = true;
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = null;
+    }
+
     this.systemEmpty.hidden = false;
     this.systemForm.hidden = true;
     this.nameInput.value = "";
@@ -181,9 +233,12 @@ export class NodeInspector {
     this.isCapitalInput.checked = false;
     this.syncFacilityCheckboxes([]);
     this.fleetRowEditor.clear();
+    this.suppressAutoSave = false;
   }
 
   private saveChanges() {
+    if (this.suppressAutoSave || galaxyScene.getPlayMode()) return;
+
     const selectedNode: NodeSystem | null = selectionManager.getSelected();
     if (!selectedNode) return;
 
@@ -218,7 +273,9 @@ export class NodeInspector {
     selectedNode.updateNodes();
     selectedNode.setSelected(true);
 
+    galaxyScene.applyTimelineView();
     document.dispatchEvent(new CustomEvent("map:updated"));
+    document.dispatchEvent(new CustomEvent("node:saved"));
   }
 }
 

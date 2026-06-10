@@ -13,8 +13,12 @@ export class Sidebar {
   private readonly tabButtons = new Map<SidebarTabId, HTMLButtonElement>();
   private readonly tabPanels = new Map<SidebarTabId, HTMLElement>();
   private onTabChange?: (tab: SidebarTabId) => void;
+  private bound = false;
 
-  constructor() {
+  public init() {
+    if (this.bound) return;
+    this.bound = true;
+
     document.querySelectorAll<HTMLButtonElement>("[data-sidebar-tab]").forEach((btn) => {
       const tab = btn.dataset.sidebarTab as SidebarTabId;
       this.tabButtons.set(tab, btn);

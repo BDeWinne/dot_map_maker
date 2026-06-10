@@ -1,8 +1,9 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  entry: "./src/main.ts",
+  entry: "./src/boot.ts",
 
   output: {
     filename: "bundle.js",
@@ -26,13 +27,21 @@ module.exports = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./index.html"
-    })
+      template: "./index.html",
+      inject: "body",
+      scriptLoading: "defer",
+    }),
+    new CopyWebpackPlugin({
+      patterns: [{ from: "test-presets", to: "test-presets" }],
+    }),
   ],
 
   devServer: {
-    static: "./dist",
+    static: [
+      { directory: path.resolve(__dirname, "dist") },
+      { directory: path.resolve(__dirname, "test-presets"), publicPath: "/test-presets" },
+    ],
     hot: true,
-    port: 3000
-  }
+    port: 3000,
+  },
 };

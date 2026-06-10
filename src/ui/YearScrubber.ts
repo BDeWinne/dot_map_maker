@@ -1,4 +1,5 @@
 import { galaxyScene } from "../scene/GalaxyScene";
+import { getLocale, t } from "../i18n/locale";
 
 export class YearScrubber {
   private valueEl = document.getElementById("year-value")!;
@@ -22,6 +23,11 @@ export class YearScrubber {
 
     document.addEventListener("map:loaded", () => this.sync(galaxyScene.getViewYear()));
     document.addEventListener("map:updated", () => this.syncEpoch());
+    document.addEventListener("calendar:changed", () => this.syncEpoch());
+    document.addEventListener("locale:changed", () => {
+      this.sync(galaxyScene.getViewYear());
+      this.syncEpoch();
+    });
 
     this.sync(galaxyScene.getViewYear());
     this.syncEpoch();
@@ -29,7 +35,7 @@ export class YearScrubber {
 
   private promptYear() {
     const current = galaxyScene.getViewYear();
-    const raw = window.prompt("Año a visualizar", String(current));
+    const raw = window.prompt(t("year.prompt"), String(current));
     if (raw === null || raw.trim() === "") return;
     galaxyScene.setViewYear(Number(raw));
   }
@@ -39,9 +45,10 @@ export class YearScrubber {
     const present = galaxyScene.getPresentYear();
     const historical = year < present;
     this.displayBtn.classList.toggle("is-historical", historical);
+    const locale = getLocale();
     this.displayBtn.title = historical
-      ? `Vista histórica · presente: año ${present}`
-      : `Vista presente (año ${present})`;
+      ? t("year.historicalTitle", locale).replace("{present}", String(present))
+      : t("year.presentTitle", locale).replace("{present}", String(present));
   }
 
   private syncEpoch() {

@@ -1,16 +1,10 @@
 import { selectionManager } from "../editor/SelectionManager";
 import { ConnectionLine } from "../galaxy/ConnectionLine";
 import { galaxyScene } from "../scene/GalaxyScene";
-import {
-  ROUTE_TYPE_LABELS,
-  routeLabel,
-  type RouteType,
-  type SystemConnection,
-} from "../data/ConnectionTypes";
-import {
-  ROUTE_TIMELINE_LABELS,
-  type RouteTimelineEntryType,
-} from "../data/RouteTypes";
+import { routeLabel, type RouteType, type SystemConnection } from "../data/ConnectionTypes";
+import type { RouteTimelineEntryType } from "../data/RouteTypes";
+import { getRouteTimelineLabel, getRouteTypeLabel } from "../i18n/routeLabels";
+import { getLocale, t } from "../i18n/locale";
 import { ensureRouteTimelineEntry, syncPresentRouteStatus } from "../data/routeState";
 import { sidebar } from "./Sidebar";
 
@@ -48,25 +42,34 @@ export class ConnectionInspector {
       this.load(e.detail);
     }) as EventListener);
     document.addEventListener("connection:deselected", () => this.clear());
+    document.addEventListener("locale:changed", () => {
+      this.populateRouteTypes();
+      this.populateEventTypes();
+      const conn = this.getConn();
+      if (conn) this.renderEventList(conn);
+    });
   }
 
   private populateRouteTypes() {
+    const locale = getLocale();
     this.typeSelect.innerHTML = "";
-    (Object.keys(ROUTE_TYPE_LABELS) as RouteType[]).forEach((type) => {
+    const types: RouteType[] = ["hyperlane", "trade", "military", "clandestine"];
+    types.forEach((type) => {
       const opt = document.createElement("option");
       opt.value = type;
-      opt.textContent = ROUTE_TYPE_LABELS[type];
+      opt.textContent = getRouteTypeLabel(type, locale);
       this.typeSelect.appendChild(opt);
     });
   }
 
   private populateEventTypes() {
+    const locale = getLocale();
     this.eventType.innerHTML = "";
-    (Object.keys(ROUTE_TIMELINE_LABELS) as RouteTimelineEntryType[]).forEach(
+    (["route_open", "route_close"] as RouteTimelineEntryType[]).forEach(
       (type) => {
         const opt = document.createElement("option");
         opt.value = type;
-        opt.textContent = ROUTE_TIMELINE_LABELS[type];
+        opt.textContent = getRouteTimelineLabel(type, locale);
         this.eventType.appendChild(opt);
       },
     );
@@ -119,7 +122,7 @@ export class ConnectionInspector {
       (a, b) => a.year - b.year || a.title.localeCompare(b.title),
     );
     if (events.length === 0) {
-      this.listEl.innerHTML = `<p class="panel-empty">No route events yet.</p>`;
+      this.listEl.innerHTML = `<p class="panel-empty">${t("routes.noEvents")}</p>`;
       return;
     }
 
@@ -129,7 +132,7 @@ export class ConnectionInspector {
         <article class="timeline-entry" data-route-event="${e.id}">
           <div class="timeline-entry-head">
             <span class="timeline-year">Y${e.year}</span>
-            <span class="timeline-type">${ROUTE_TIMELINE_LABELS[e.type]}</span>
+            <span class="timeline-type">${getRouteTimelineLabel(e.type, getLocale())}</span>
           </div>
           <strong>${escapeHtml(e.title)}</strong>
           ${e.description ? `<p>${escapeHtml(e.description)}</p>` : ""}

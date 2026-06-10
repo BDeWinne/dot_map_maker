@@ -1,6 +1,8 @@
 import { formatPopulation, parsePopulationToInt } from "../data/population";
 import { galaxyScene } from "../scene/GalaxyScene";
 import { ownerManager, getLeaderAgeAtYear } from "../galaxy/OwnerManager";
+import { getActiveTerminology } from "./MapProfilePanel";
+import { t } from "../i18n/locale";
 import type { NodeSystem } from "../galaxy/NodeSystem";
 
 const MAJOR_SYSTEM_SIZE = 1.15;
@@ -47,6 +49,8 @@ export class StatsPanel {
   private container = document.getElementById("stats-by-owner")!;
 
   constructor() {
+    document.addEventListener("terminology:changed", () => this.refresh());
+    document.addEventListener("locale:changed", () => this.refresh());
     this.refresh();
   }
 
@@ -87,7 +91,7 @@ export class StatsPanel {
       .sort((a, b) => b.ownedSystems - a.ownedSystems);
 
     if (rows.length === 0) {
-      this.container.innerHTML = `<p class="panel-empty">No owned systems yet.</p>`;
+      this.container.innerHTML = `<p class="panel-empty">${t("stats.empty")}</p>`;
       return;
     }
 
@@ -95,8 +99,9 @@ export class StatsPanel {
       (n) => n.data.owner && n.data.owner !== "None" && n.data.owner !== "none"
     ).length;
 
-    let html = `<p class="stats-summary">${ownedTotal} systems · ${galaxyScene.getConnections().length} hyperlanes</p>`;
-    html += `<p class="mode-hint">Legal owner ≠ military control. Size ≈ economy / population weight.</p>`;
+    const terms = getActiveTerminology();
+    let html = `<p class="stats-summary">${ownedTotal} ${terms.statsSummaryNode} · ${galaxyScene.getConnections().length} ${terms.statsSummaryConnection}</p>`;
+    html += `<p class="mode-hint">${t("stats.hintOcc")}</p>`;
 
     for (const row of rows) {
       row.populationDisplay = formatPopulation(row.populationSum);
@@ -115,7 +120,7 @@ export class StatsPanel {
         galaxyScene.getCalendar().defaultYear,
       );
       const leaderHtml = leader
-        ? `<div class="stat-wide"><dt>Leader</dt><dd>${escapeHtml(leader.name)}${leaderAge !== undefined ? ` (${leaderAge})` : ""}${leader.personality ? ` — ${escapeHtml(leader.personality)}` : ""}</dd></div>`
+        ? `<div class="stat-wide"><dt>${t("stats.leader")}</dt><dd>${escapeHtml(leader.name)}${leaderAge !== undefined ? ` (${leaderAge})` : ""}${leader.personality ? ` — ${escapeHtml(leader.personality)}` : ""}</dd></div>`
         : "";
 
       html += `
@@ -127,14 +132,14 @@ export class StatsPanel {
           </header>
           <dl class="owner-stat-grid">
             ${leaderHtml}
-            <div><dt>Owned</dt><dd>${row.ownedSystems}</dd></div>
-            <div><dt>Capital</dt><dd>${escapeHtml(capital)}</dd></div>
-            <div><dt>Population</dt><dd>${row.populationDisplay}</dd></div>
-            <div><dt>Major (size)</dt><dd>${row.majorSystems}</dd></div>
-            <div><dt>Lost to enemy</dt><dd>${row.underOccupation}</dd></div>
-            <div><dt>Holding (occ.)</dt><dd>${row.militaryPresence}</dd></div>
-            <div class="stat-wide"><dt>Occupying</dt><dd>${escapeHtml(occupying)}</dd></div>
-            <div><dt>Timeline</dt><dd>${row.timelineEvents}</dd></div>
+            <div><dt>${t("stats.owned")}</dt><dd>${row.ownedSystems}</dd></div>
+            <div><dt>${t("stats.capital")}</dt><dd>${escapeHtml(capital)}</dd></div>
+            <div><dt>${t("stats.population")}</dt><dd>${row.populationDisplay}</dd></div>
+            <div><dt>${t("stats.major")}</dt><dd>${row.majorSystems}</dd></div>
+            <div><dt>${t("stats.lost")}</dt><dd>${row.underOccupation}</dd></div>
+            <div><dt>${t("stats.holding")}</dt><dd>${row.militaryPresence}</dd></div>
+            <div class="stat-wide"><dt>${t("stats.occupying")}</dt><dd>${escapeHtml(occupying)}</dd></div>
+            <div><dt>${t("stats.timeline")}</dt><dd>${row.timelineEvents}</dd></div>
           </dl>
         </article>
       `;

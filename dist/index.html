@@ -1,4 +1,4 @@
-<head><script defer="defer" src="bundle.js"></script></head><div id="map-view-toggles" class="map-view-toggles" role="group" aria-label="Visibilidad en el mapa"><button type="button" id="toggle-map-icons" class="map-view-toggle is-on" aria-pressed="true">Iconos</button> <button type="button" id="toggle-map-labels" class="map-view-toggle is-on" aria-pressed="true">Textos</button> <button type="button" id="toggle-map-fleets" class="map-view-toggle is-on" aria-pressed="true">Flotas</button></div><div id="year-scrubber" class="year-scrubber" role="group" aria-label="Año del mapa"><button type="button" id="year-prev" class="year-nav" aria-label="Año anterior">&lt;</button> <button type="button" id="year-display" class="year-display" aria-label="Cambiar año">&lt;<span id="year-value">2200</span>&gt;<span id="year-epoch" class="year-epoch"></span></button> <button type="button" id="year-next" class="year-nav" aria-label="Año siguiente">&gt;</button></div><div id="ui-wrapper"><nav class="sidebar-tabs" aria-label="Sidebar sections"><button type="button" class="sidebar-tab" data-sidebar-tab="system" aria-selected="false">System</button> <button type="button" class="sidebar-tab is-active" data-sidebar-tab="map" aria-selected="true">Map</button> <button type="button" class="sidebar-tab" data-sidebar-tab="owners" aria-selected="false">Owners</button> <button type="button" class="sidebar-tab" data-sidebar-tab="timeline" aria-selected="false">Timeline</button> <button type="button" class="sidebar-tab" data-sidebar-tab="chronicle" aria-selected="false">Chronicle</button> <button type="button" class="sidebar-tab" data-sidebar-tab="routes" aria-selected="false">Routes</button> <button type="button" class="sidebar-tab" data-sidebar-tab="stats" aria-selected="false">Stats</button> <button type="button" class="sidebar-tab" data-sidebar-tab="help" aria-selected="false">Help</button></nav><div class="sidebar-panels"><section id="tab-panel-system" class="tab-panel" data-sidebar-panel="system" hidden><p id="system-empty" class="panel-empty">Select a system on the map to edit it.</p><div id="system-form" class="panel-scroll" hidden><h3 class="section-title">Node Editor</h3><label>Name</label> <input id="node-name"/> <label>Owned By</label> <select id="node-owned-by"></select> <label>Occupied By</label> <select id="node-occupied-by"></select> <label>Star Type</label> <input id="node-star-type"/> <label for="node-description">Description</label> <textarea id="node-description" rows="4" placeholder="System description..."></textarea> <label class="checkbox-row"><input id="node-is-capital" type="checkbox"/> Capital system (seat of government — one per owner)</label> <label>Population</label> <input id="node-population" inputmode="decimal" placeholder="300.000 · 12M · 30 B"/><p id="node-population-preview" class="population-preview"></p><p class="mode-hint">Puntos = miles (300.000). También 12M, 30 B, ~30 mil millones al importar.</p><label>Size (economy / population weight)</label> <input id="node-size" type="number" step="0.1" min="0.5" max="2.5"/> <label>Installations (map icons)</label><p class="mode-hint">Iconos sobre el sistema en el mapa. Abajo a la izquierda: mostrar/ocultar iconos y textos.</p><div id="node-facilities" class="facility-grid"></div><label>Fleets (left of node)</label><p class="mode-hint">Nave + número por imperio (color del dueño). «+ Add fleet» usa el dueño del sistema. El año de vista y la timeline también cambian las flotas visibles.</p><div id="node-fleets-editor" class="fleet-editor"></div><button id="node-fleet-add" type="button" class="btn-muted fleet-add-btn">+ Add fleet</button><p class="mode-hint">Occupied: legal owner stays; red stripes = military occupier.</p><div class="panel-actions"><button id="save-node" type="button">Save system</button> <button id="delete-node" type="button" class="btn-danger">Delete</button></div></div></section><section id="tab-panel-owners" class="tab-panel panel-scroll" data-sidebar-panel="owners" hidden><h3 class="section-title">Owner editor</h3><p class="mode-hint">Factions on the map: color, name, and short tag (labels &amp; stats).</p><div id="owner-list" class="owner-list"></div><div id="owner-form-wrap" class="owner-form-wrap"><h4 class="subsection-title">Edit owner</h4><p id="owner-usage-hint" class="mode-hint"></p><label>Id (unique key)</label> <input id="owner-id" placeholder="empire_01" autocomplete="off"/> <label>Name</label> <input id="owner-name" placeholder="Confederación Solar Humana"/> <label>Short tag</label> <input id="owner-short" maxlength="12" placeholder="CSH"/> <label>Color</label><div class="owner-color-row"><input id="owner-color" type="color" value="#2ecc78"/> <input id="owner-color-hex" placeholder="#2ecc78"/></div><h4 class="subsection-title">Leader</h4><p class="mode-hint">Ruler or head of government for this faction (lore / narrative).</p><label>Leader name</label> <input id="owner-leader-name" placeholder="e.g. Elena Voss"/> <label>Age <span class="field-hint">(at view year)</span></label> <input id="owner-leader-age" type="number" min="0" max="9999" step="1" placeholder="—"/> <label>Personality</label> <textarea id="owner-leader-personality" rows="3" placeholder="Pragmatic, cautious, expansionist…"></textarea><div class="panel-actions row-actions"><button id="owner-save-btn" type="button">Save owner</button> <button id="owner-add-btn" type="button" class="btn-muted">New owner</button> <button id="owner-delete-btn" type="button" class="btn-danger">Delete owner</button></div></div><h4 class="subsection-title">Owners file</h4><button id="owner-export-btn" type="button">Export owners JSON</button> <button id="owner-import-btn" type="button">Import owners JSON</button> <input type="file" id="owner-import-file" accept=".json,application/json" hidden/> <button id="owner-reset-btn" type="button" class="btn-muted">Reset to defaults</button><p id="owner-editor-status" class="mode-hint" role="status"></p></section><section id="tab-panel-map" class="tab-panel is-active panel-scroll" data-sidebar-panel="map"><h3 class="section-title">Map Controls</h3><details class="facility-legend-details"><summary class="subsection-title">Installation icon legend</summary><div id="facility-legend-map" class="facility-legend"></div></details><label>Galaxy background</label> <button id="set-background" type="button">Choose image...</button> <input type="file" id="background-file" accept="image/*" hidden/> <button id="clear-background" type="button" disabled="disabled">Remove background</button> <label>Background opacity</label> <input type="range" id="background-opacity" min="5" max="100" value="100" disabled="disabled"/> <label>Click mode</label> <select id="map-edit-mode"><option value="edit">Place nodes</option><option value="moveBackground">Move background</option><option value="moveNodes">Move all nodes</option></select><p id="map-edit-mode-hint" class="mode-hint"></p><label>Export</label> <button id="export-map" type="button">Export JSON</button> <button id="export-png" type="button">Export PNG (view)</button> <button id="import-map" type="button">Import JSON</button> <input type="file" id="import-file" accept=".json,application/json" hidden/><p id="import-status" class="mode-hint" role="status"></p></section><section id="tab-panel-timeline" class="tab-panel panel-scroll" data-sidebar-panel="timeline" hidden><h3 class="section-title">Galaxy calendar</h3><label>Epoch / era name</label> <input id="map-epoch" placeholder="e.g. Imperial Era"/> <label>Default year (new events)</label> <input id="map-default-year" type="number" value="2200" step="1"/><h3 class="section-title">System timeline</h3><p class="mode-hint">Events ≤ view year (top-left) change the map. <strong>Colonized</strong> = appears; <strong>Owner change</strong> = conquest; <strong>Abandoned</strong> = hidden.</p><p class="mode-hint">System: <strong id="timeline-system-label">—</strong></p><p id="timeline-no-system" class="panel-empty">Select a system to add historical events.</p><div id="timeline-form-wrap" hidden><div id="timeline-entries-list" class="timeline-list"></div><h4 class="subsection-title">Add / edit event</h4><label>Year</label> <input id="entry-year" type="number" step="1"/> <label>Event type</label> <select id="entry-type"></select> <label>Actor (who)</label> <select id="entry-actor"></select> <label>Title</label> <input id="entry-title" placeholder="Battle of ..."/> <label>Description</label> <textarea id="entry-description" rows="3"></textarea> <label>Population</label> <input id="entry-population" placeholder="12M, +500K..."/> <label>Fleets</label><div id="entry-fleet-change-fields"><p class="mode-hint">Tipo <strong>Fleet change</strong>: dueño + cantidad abajo.</p><div id="entry-fleets-editor" class="fleet-editor"></div><button id="entry-fleet-add" type="button" class="btn-muted fleet-add-btn">+ Add fleet</button></div><div id="entry-fleet-move-fields" hidden><label>Destination system</label> <select id="entry-target-system"></select> <label>Fleet count</label> <input id="entry-fleet-count" type="number" min="1" max="9999" step="1" value="1"/><p class="mode-hint">Tipo <strong>Fleet movement</strong>: mueve flotas al destino. Actor = imperio.</p></div><label>Economy</label> <input id="entry-economy" placeholder="Trade hub, recession..."/> <label>Minerals / resources</label> <input id="entry-minerals"/> <label>Flavor / notes</label> <input id="entry-flavor"/><div class="panel-actions row-actions"><button id="entry-add-btn" type="button">Save event</button> <button id="entry-clear-btn" type="button" class="btn-muted">Clear form</button></div></div></section><section id="tab-panel-chronicle" class="tab-panel panel-scroll" data-sidebar-panel="chronicle" hidden><h3 class="section-title">Galaxy chronicle</h3><p class="mode-hint">All system and route events, sorted by year. Click an entry to jump to that year.</p><label class="checkbox-row"><input id="chronicle-limit-year" type="checkbox" checked="checked"/> Only events ≤ view year</label> <label>Filter by actor</label> <select id="chronicle-filter-owner"></select> <label>Filter by type</label> <select id="chronicle-filter-type"></select> <label>Search</label> <input id="chronicle-search" type="search" placeholder="Title, system, route..."/><div id="chronicle-list" class="timeline-list"></div></section><section id="tab-panel-routes" class="tab-panel panel-scroll" data-sidebar-panel="routes" hidden><h3 class="section-title">Hyperlane editor</h3><p class="mode-hint">Shift+click two systems to create a lane. Click a line on the map to edit it.</p><p id="route-empty" class="panel-empty">Select a hyperlane on the map.</p><div id="route-form" hidden><p class="mode-hint">Route: <strong id="route-endpoints-label">—</strong></p><label>Name (optional)</label> <input id="route-name" placeholder="Solar — Wolf corridor"/> <label>Route type</label> <select id="route-type"></select> <button id="route-save-btn" type="button">Save route</button><h4 class="subsection-title">Route timeline</h4><p class="mode-hint">Open / close the lane at a given year (affects map at view year).</p><div id="route-timeline-list" class="timeline-list"></div><h4 class="subsection-title">Add / edit route event</h4><label>Year</label> <input id="route-event-year" type="number" step="1"/> <label>Event type</label> <select id="route-event-type"></select> <label>Title</label> <input id="route-event-title"/> <label>Description</label> <textarea id="route-event-description" rows="2"></textarea><div class="panel-actions row-actions"><button id="route-event-save" type="button">Save route event</button> <button id="route-event-clear" type="button" class="btn-muted">Clear</button></div></div></section><section id="tab-panel-stats" class="tab-panel panel-scroll" data-sidebar-panel="stats" hidden><h3 class="section-title">By owner</h3><p class="mode-hint">Live summary from all systems on the map.</p><div id="stats-by-owner"></div></section><section id="tab-panel-help" class="tab-panel panel-scroll" data-sidebar-panel="help" hidden><h3 class="section-title">Shortcuts & controls</h3><dl class="help-list"><div><dt>Left click (empty)</dt><dd>Place system — Edit mode</dd></div><div><dt>Left drag</dt><dd>Move background or all nodes — per Click mode</dd></div><div><dt>Middle drag</dt><dd>Pan camera</dd></div><div><dt>Space + drag</dt><dd>Pan camera</dd></div><div><dt>Mouse wheel</dt><dd>Zoom in / out</dd></div><div><dt>Click system</dt><dd>Select · opens System tab data</dd></div><div><dt>Owners tab</dt><dd>Edit factions, colors, export/import owners JSON</dd></div><div><dt>System → Installations</dt><dd>Icons above nodes (bastion, shipyard, mining…)</dd></div><div><dt>Shift + click</dt><dd>Connect two systems (hyperlane)</dd></div><div><dt>Click connection</dt><dd>Select line (dimmed)</dd></div><div><dt>Right click</dt><dd>Blocked (no context menu)</dd></div></dl><h4 class="subsection-title">Click modes</h4><ul class="help-bullets"><li><strong>Place nodes</strong> — add systems on empty space</li><li><strong>Move background</strong> — drag galaxy image</li><li><strong>Move all nodes</strong> — drag every system together</li></ul><h4 class="subsection-title">Timeline & export</h4><ul class="help-bullets"><li>Events are stored per system in JSON export</li><li>Calendar epoch + default year apply map-wide</li><li>PNG export captures the current canvas view</li></ul></section></div></div><style>html, body {
+<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dot Map Maker</title></head><body><div id="map-view-toggles" class="map-view-toggles" role="group" data-i18n-aria="toggle.mapAria"><button type="button" id="toggle-map-icons" class="map-view-toggle is-on" aria-pressed="true" data-i18n="toggle.icons">Iconos</button> <button type="button" id="toggle-map-labels" class="map-view-toggle is-on" aria-pressed="true" data-i18n="toggle.labels">Textos</button> <button type="button" id="toggle-map-fleets" class="map-view-toggle is-on" aria-pressed="true">Flotas</button> <button type="button" id="toggle-map-progress" class="map-view-toggle is-on" aria-pressed="true" data-i18n="toggle.progress">Progreso</button></div><div id="map-viewport-hud" class="map-viewport-hud"><div id="map-status-hud" class="map-status-hud" aria-live="polite"><div class="map-hud-compact-row"><select id="hud-map-profile" class="map-hud-select" data-i18n-aria="hud.profile" aria-label="Map profile"></select> <label class="map-hud-play-toggle" data-i18n-title="hud.mode" title="Mode"><span class="map-hud-play-off" data-i18n="hud.modeEditor">Editor</span> <input type="checkbox" id="hud-play-mode"/> <span class="map-hud-play-track" aria-hidden="true"></span> <span class="map-hud-play-on" data-i18n="hud.modePlay">Play</span></label></div><div class="map-hud-row map-hud-row-compact" id="hud-edit-mode-row"><select id="hud-map-edit-mode" class="map-hud-select map-hud-select-full" data-i18n-aria="map.clickMode" aria-label="Click mode"><option value="edit" data-i18n="map.clickEdit">Place nodes</option><option value="moveBackground" data-i18n="map.clickMoveBg">Move background</option><option value="moveNodes" data-i18n="map.clickMoveNodes">Move all nodes</option></select></div></div><div id="map-milestone-hud" class="map-milestone-hud" hidden><div class="milestone-hud-header"><h3 id="milestone-hud-title" class="milestone-hud-title">—</h3><code id="milestone-hud-id" class="milestone-hud-id"></code></div><p id="milestone-play-hint" class="milestone-play-hint" data-i18n="milestone.playModeHint">Play mode — mark progress only. Switch to Editor to change setup.</p><label class="milestone-complete-toggle" for="milestone-completed"><input id="milestone-completed" type="checkbox"/> <span class="milestone-complete-icon" aria-hidden="true">✓</span> <span class="milestone-complete-copy"><span class="milestone-complete-title" data-i18n="milestone.completeTitle">Milestone completed</span> <span class="milestone-complete-hint" data-i18n="milestone.completeHint">Clears this node in play mode and unlocks neighbors</span></span></label><div class="milestone-hud-flags"><label class="milestone-flag"><input id="milestone-start" type="checkbox"/> <span data-i18n="adventure.start">Start</span></label> <label class="milestone-flag"><input id="milestone-locked" type="checkbox"/> <span data-i18n="adventure.locked">Locked</span></label></div><details class="milestone-unlock-block"><summary data-i18n="adventure.requires">Unlock requires</summary><input id="milestone-requires" class="milestone-requires" data-i18n-placeholder="adventure.requiresPh" placeholder="node_a, node_b" autocomplete="off"/><p class="milestone-hint" data-i18n="adventure.requiresHint">If empty and locked: unlocks when a connected neighbor is completed.</p></details><div class="milestone-encounters-head"><span class="milestone-subtitle" data-i18n="milestone.encountersTitle">Encounters</span> <button type="button" id="milestone-add-encounter" class="milestone-add-encounter" data-i18n="milestone.addEncounter">+ Add</button></div><div id="milestone-encounters-list" class="milestone-encounters-list"></div></div></div><div id="year-scrubber" class="year-scrubber" role="group" data-i18n-aria="year.scrubberAria"><button type="button" id="year-prev" class="year-nav" data-i18n-aria="year.prev">&lt;</button> <button type="button" id="year-display" class="year-display" data-i18n-aria="year.change">&lt;<span id="year-value">2200</span>&gt;<span id="year-epoch" class="year-epoch"></span></button> <button type="button" id="year-next" class="year-nav" data-i18n-aria="year.next">&gt;</button></div><div id="ui-wrapper"><div class="global-locale-bar"><span class="locale-label" data-i18n="locale.label">Idioma</span><div class="help-lang-toggle" role="group" data-i18n-aria="locale.label"><button type="button" data-locale-set="es" class="help-lang-btn is-active" aria-pressed="true" data-i18n="locale.es">Español</button> <button type="button" data-locale-set="en" class="help-lang-btn" aria-pressed="false" data-i18n="locale.en">English</button></div></div><nav class="sidebar-tabs" aria-label="Sidebar sections"><button type="button" class="sidebar-tab" data-sidebar-tab="system" aria-selected="false"><span id="term-node-tab">System</span></button> <button type="button" class="sidebar-tab is-active" data-sidebar-tab="map" aria-selected="true" data-i18n="tab.map">Map</button> <button type="button" class="sidebar-tab" data-sidebar-tab="owners" aria-selected="false" data-i18n="tab.owners">Owners</button> <button type="button" class="sidebar-tab" data-sidebar-tab="timeline" aria-selected="false" data-i18n="tab.timeline">Timeline</button> <button type="button" class="sidebar-tab" data-sidebar-tab="chronicle" aria-selected="false" data-i18n="tab.chronicle">Chronicle</button> <button type="button" class="sidebar-tab" data-sidebar-tab="routes" aria-selected="false" data-i18n="tab.routes">Routes</button> <button type="button" class="sidebar-tab" data-sidebar-tab="stats" aria-selected="false" data-i18n="tab.stats">Stats</button> <button type="button" class="sidebar-tab" data-sidebar-tab="help" aria-selected="false" data-i18n="tab.help">Help</button></nav><div class="sidebar-panels"><section id="tab-panel-system" class="tab-panel" data-sidebar-panel="system" hidden><p id="system-empty" class="panel-empty"><span id="term-select-node-empty">Select a system on the map to edit it.</span></p><div id="system-form" class="panel-scroll" hidden><h3 class="section-title"><span id="term-node-editor">Node Editor</span></h3><label><span id="term-node-name">Name</span></label> <input id="node-name"/> <label><span id="term-owned-by">Owned By</span></label> <select id="node-owned-by"></select> <label><span id="term-occupied-by">Occupied By</span></label> <select id="node-occupied-by"></select> <label><span id="term-star-type">Star Type</span></label> <input id="node-star-type"/> <label for="node-description"><span id="term-description">Description</span></label> <textarea id="node-description" rows="4" data-i18n-placeholder="system.descPlaceholder" placeholder="System description..."></textarea> <label class="checkbox-row"><input id="node-is-capital" type="checkbox"/> <span id="term-capital">Capital system (seat of government — one per owner)</span></label> <label><span id="term-population">Population</span></label> <input id="node-population" inputmode="decimal" placeholder="300.000 · 12M · 30 B"/><p id="node-population-preview" class="population-preview"></p><p class="mode-hint" data-i18n="system.popHint">Puntos = miles (300.000). También 12M, 30 B, ~30 mil millones al importar.</p><label><span id="term-size">Size (economy / population weight)</span></label> <input id="node-size" type="number" step="0.1" min="0.5" max="2.5"/> <label><span id="term-installations">Installations (map icons)</span></label><p class="mode-hint" data-i18n="system.facilitiesHint">Iconos sobre el sistema en el mapa. Abajo a la izquierda: mostrar/ocultar iconos y textos.</p><div id="node-facilities" class="facility-grid"></div><label><span id="term-fleets">Fleets (left of node)</span></label><p class="mode-hint" data-i18n="system.fleetsHint">Nave + número por imperio (color del dueño). «+ Add fleet» usa el dueño del sistema. El año de vista y la timeline también cambian las flotas visibles.</p><div id="node-fleets-editor" class="fleet-editor"></div><button id="node-fleet-add" type="button" class="btn-muted fleet-add-btn" data-i18n="system.addFleet">+ Add fleet</button><p class="mode-hint" data-i18n="system.occupiedHint">Occupied: legal owner stays; red stripes = military occupier.</p><div class="panel-actions"><button id="delete-node" type="button" class="btn-danger"><span id="term-delete-node">Delete</span></button></div></div></section><section id="tab-panel-owners" class="tab-panel panel-scroll" data-sidebar-panel="owners" hidden><h3 class="section-title" data-i18n="owners.title">Owner editor</h3><p class="mode-hint" data-i18n="owners.hint">Factions on the map: color, name, and short tag (labels &amp; stats).</p><div id="owner-list" class="owner-list"></div><div id="owner-form-wrap" class="owner-form-wrap"><h4 class="subsection-title" data-i18n="owners.edit">Edit owner</h4><p id="owner-usage-hint" class="mode-hint"></p><label data-i18n="owners.id">Id (unique key)</label> <input id="owner-id" placeholder="empire_01" autocomplete="off"/> <label data-i18n="owners.name">Name</label> <input id="owner-name" placeholder="Confederación Solar Humana"/> <label data-i18n="owners.short">Short tag</label> <input id="owner-short" maxlength="12" placeholder="CSH"/> <label data-i18n="owners.color">Color</label><div class="owner-color-row"><input id="owner-color" type="color" value="#2ecc78"/> <input id="owner-color-hex" placeholder="#2ecc78"/></div><h4 class="subsection-title" data-i18n="owners.leader">Leader</h4><p class="mode-hint" data-i18n="owners.leaderHint">Ruler or head of government for this faction (lore / narrative).</p><label data-i18n="owners.leaderName">Leader name</label> <input id="owner-leader-name" placeholder="e.g. Elena Voss"/> <label><span data-i18n="owners.leaderAge">Age</span> <span class="field-hint" data-i18n="owners.leaderAgeHint">(at view year)</span></label> <input id="owner-leader-age" type="number" min="0" max="9999" step="1" placeholder="—"/> <label data-i18n="owners.leaderPersonality">Personality</label> <textarea id="owner-leader-personality" rows="3" placeholder="Pragmatic, cautious, expansionist…"></textarea><div class="panel-actions row-actions"><button id="owner-save-btn" type="button" data-i18n="owners.save">Save owner</button> <button id="owner-add-btn" type="button" class="btn-muted" data-i18n="owners.new">New owner</button> <button id="owner-delete-btn" type="button" class="btn-danger" data-i18n="owners.delete">Delete owner</button></div></div><h4 class="subsection-title" data-i18n="owners.file">Owners file</h4><button id="owner-export-btn" type="button" data-i18n="owners.export">Export owners JSON</button> <button id="owner-import-btn" type="button" data-i18n="owners.import">Import owners JSON</button> <input type="file" id="owner-import-file" accept=".json,application/json" hidden/> <button id="owner-reset-btn" type="button" class="btn-muted" data-i18n="owners.reset">Reset to defaults</button><p id="owner-editor-status" class="mode-hint" role="status"></p></section><section id="tab-panel-map" class="tab-panel is-active panel-scroll" data-sidebar-panel="map"><h3 class="section-title" data-i18n="map.title">Map Controls</h3><h4 class="subsection-title" data-i18n="map.calendar">Calendar</h4><label data-i18n="map.epoch">Epoch / era name</label> <input id="map-epoch-map" data-i18n-placeholder="map.epochPh" placeholder="e.g. Imperial Era"/> <label data-i18n="map.defaultYear">Default year</label> <input id="map-default-year-map" type="number" value="2200" step="1"/><p class="mode-hint" data-i18n-html="map.defaultYearHint">Used for new timeline/route events and leader age reference. Saved in export JSON (<code>metadata.defaultYear</code>).</p><button id="map-set-view-default-year" type="button" class="btn-muted" data-i18n="map.setViewDefault">Set view year to default</button><details class="facility-legend-details"><summary class="subsection-title" data-i18n="map.legend">Installation icon legend</summary><div id="facility-legend-map" class="facility-legend"></div></details><label><span id="term-background">Galaxy background</span></label> <button id="set-background" type="button" data-i18n="map.chooseBg">Choose image...</button> <input type="file" id="background-file" accept="image/*" hidden/> <button id="clear-background" type="button" disabled="disabled" data-i18n="map.clearBg">Remove background</button> <label data-i18n="map.bgOpacity">Background opacity</label> <input type="range" id="background-opacity" min="5" max="100" value="100" disabled="disabled"/><p id="map-edit-mode-hint" class="mode-hint"></p><label data-i18n="map.export">Export</label> <button id="export-map" type="button" data-i18n="map.exportJson">Export JSON</button> <button id="export-png" type="button" data-play-allow data-i18n="map.exportPng">Export PNG (view)</button> <button id="import-map" type="button" data-i18n="map.importJson">Import JSON</button> <input type="file" id="import-file" accept=".json,application/json" hidden/><p id="import-status" class="mode-hint" role="status"></p></section><section id="tab-panel-timeline" class="tab-panel panel-scroll" data-sidebar-panel="timeline" hidden><h3 class="section-title"><span id="term-timeline-title">Galaxy calendar</span></h3><label data-i18n="map.epoch">Epoch / era name</label> <input id="map-epoch" data-i18n-placeholder="map.epochPh" placeholder="e.g. Imperial Era"/> <label data-i18n="map.defaultYear">Default year (new events)</label> <input id="map-default-year" type="number" value="2200" step="1"/><p class="mode-hint" data-i18n-html="timeline.defaultYearHint">Same as Map → Calendar. Import restores this from <code>metadata.defaultYear</code> when present.</p><h3 class="section-title" data-i18n="timeline.systemTitle">System timeline</h3><p class="mode-hint" data-i18n-html="timeline.hint">Events ≤ view year (top-left) change the map. <strong>Colonized</strong> = appears; <strong>Owner change</strong> = conquest; <strong>Abandoned</strong> = hidden.</p><p class="mode-hint"><span data-i18n="timeline.systemLabel">System:</span> <strong id="timeline-system-label">—</strong></p><p id="timeline-no-system" class="panel-empty" data-i18n="timeline.noSystem">Select a system to add historical events.</p><div id="timeline-form-wrap" hidden><div id="timeline-entries-list" class="timeline-list"></div><h4 class="subsection-title" data-i18n="timeline.addEvent">Add / edit event</h4><label data-i18n="timeline.year">Year</label> <input id="entry-year" type="number" step="1"/> <label data-i18n="timeline.eventType">Event type</label> <select id="entry-type"></select> <label data-i18n="timeline.actor">Actor (who)</label> <select id="entry-actor"></select> <label data-i18n="timeline.title">Title</label> <input id="entry-title" data-i18n-placeholder="timeline.titlePh" placeholder="Battle of ..."/> <label data-i18n="timeline.description">Description</label> <textarea id="entry-description" rows="3"></textarea> <label data-i18n="timeline.population">Population</label> <input id="entry-population" placeholder="12M, +500K..."/> <label data-i18n="timeline.fleets">Fleets</label><div id="entry-fleet-change-fields"><p class="mode-hint" data-i18n-html="timeline.fleetChangeHint">Tipo <strong>Fleet change</strong>: dueño + cantidad abajo.</p><div id="entry-fleets-editor" class="fleet-editor"></div><button id="entry-fleet-add" type="button" class="btn-muted fleet-add-btn" data-i18n="system.addFleet">+ Add fleet</button></div><div id="entry-fleet-move-fields" hidden><label data-i18n="timeline.destSystem">Destination system</label> <select id="entry-target-system"></select> <label data-i18n="timeline.fleetCount">Fleet count</label> <input id="entry-fleet-count" type="number" min="1" max="9999" step="1" value="1"/><p class="mode-hint" data-i18n-html="timeline.fleetMoveHint">Tipo <strong>Fleet movement</strong>: mueve flotas al destino. Actor = imperio.</p></div><label data-i18n="timeline.economy">Economy</label> <input id="entry-economy" data-i18n-placeholder="timeline.economyPh" placeholder="Trade hub, recession..."/> <label data-i18n="timeline.minerals">Minerals / resources</label> <input id="entry-minerals"/> <label data-i18n="timeline.flavor">Flavor / notes</label> <input id="entry-flavor"/><div class="panel-actions row-actions"><button id="entry-add-btn" type="button" data-i18n="timeline.saveEvent">Save event</button> <button id="entry-clear-btn" type="button" class="btn-muted" data-i18n="timeline.clearForm">Clear form</button></div></div></section><section id="tab-panel-chronicle" class="tab-panel panel-scroll" data-sidebar-panel="chronicle" hidden><h3 class="section-title"><span id="term-chronicle-title">Galaxy chronicle</span></h3><p class="mode-hint" data-i18n="chronicle.hint">All system and route events, sorted by year. Click an entry to jump to that year.</p><label class="checkbox-row"><input id="chronicle-limit-year" type="checkbox" checked="checked"/> <span data-i18n="chronicle.limitYear">Only events ≤ view year</span></label> <label data-i18n="chronicle.filterActor">Filter by actor</label> <select id="chronicle-filter-owner"></select> <label data-i18n="chronicle.filterType">Filter by type</label> <select id="chronicle-filter-type"></select> <label data-i18n="chronicle.search">Search</label> <input id="chronicle-search" type="search" data-i18n-placeholder="chronicle.searchPh" placeholder="Title, system, route..."/><div id="chronicle-list" class="timeline-list"></div></section><section id="tab-panel-routes" class="tab-panel panel-scroll" data-sidebar-panel="routes" hidden><h3 class="section-title"><span id="term-routes-title">Hyperlane editor</span></h3><p class="mode-hint"><span id="term-routes-hint">Shift+click two systems to create a lane. Click a line on the map to edit it.</span></p><p id="route-empty" class="panel-empty" data-i18n="routes.empty">Select a hyperlane on the map.</p><div id="route-form" hidden><p class="mode-hint"><span data-i18n="routes.routeLabel">Route:</span> <strong id="route-endpoints-label">—</strong></p><label data-i18n="routes.name">Name (optional)</label> <input id="route-name" data-i18n-placeholder="routes.namePh" placeholder="Solar — Wolf corridor"/> <label data-i18n="routes.type">Route type</label> <select id="route-type"></select> <button id="route-save-btn" type="button" data-i18n="routes.save">Save route</button><h4 class="subsection-title" data-i18n="routes.timeline">Route timeline</h4><p class="mode-hint" data-i18n="routes.timelineHint">Open / close the lane at a given year (affects map at view year).</p><div id="route-timeline-list" class="timeline-list"></div><h4 class="subsection-title" data-i18n="routes.addEvent">Add / edit route event</h4><label data-i18n="timeline.year">Year</label> <input id="route-event-year" type="number" step="1"/> <label data-i18n="timeline.eventType">Event type</label> <select id="route-event-type"></select> <label data-i18n="timeline.title">Title</label> <input id="route-event-title"/> <label data-i18n="timeline.description">Description</label> <textarea id="route-event-description" rows="2"></textarea><div class="panel-actions row-actions"><button id="route-event-save" type="button" data-i18n="routes.saveEvent">Save route event</button> <button id="route-event-clear" type="button" class="btn-muted" data-i18n="timeline.clearForm">Clear</button></div></div></section><section id="tab-panel-stats" class="tab-panel panel-scroll" data-sidebar-panel="stats" hidden><h3 class="section-title" data-i18n="stats.title">By owner</h3><p class="mode-hint" data-i18n="stats.hint">Live summary from all systems on the map.</p><div id="stats-by-owner"></div></section><section id="tab-panel-help" class="tab-panel panel-scroll" data-sidebar-panel="help" hidden><div class="help-lang-bar"><h3 class="section-title help-lang-title" data-i18n="help.title">Ayuda</h3><div class="help-lang-toggle" role="group" data-i18n-aria="locale.label"><button type="button" data-locale-set="es" class="help-lang-btn is-active" aria-pressed="true" data-i18n="locale.es">Español</button> <button type="button" data-locale-set="en" class="help-lang-btn" aria-pressed="false" data-i18n="locale.en">English</button></div></div><div id="help-content"></div></section></div></div><style>html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -43,6 +43,614 @@
     color: #eee;
     background: #2e4a62;
     border-color: #5a9fd4;
+  }
+
+  .map-viewport-hud {
+    position: fixed;
+    top: 12px;
+    right: calc(min(320px, 100vw) + 12px);
+    z-index: 31;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: min(248px, calc(100vw - min(320px, 100vw) - 36px));
+    max-height: calc(100vh - 24px);
+    pointer-events: none;
+    font-family: system-ui, sans-serif;
+  }
+
+  .map-status-hud,
+  .map-milestone-hud {
+    pointer-events: auto;
+  }
+
+  .map-status-hud {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    background: rgba(12, 12, 12, 0.94);
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    font-size: 11px;
+    color: #ccc;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    flex-shrink: 0;
+  }
+
+  .map-status-hud.is-play-mode {
+    border-color: #3a7a4a;
+    box-shadow: 0 0 0 1px rgba(46, 204, 113, 0.15), 0 2px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .map-hud-compact-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .map-hud-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .map-hud-row-compact {
+    margin: 0;
+  }
+
+  .map-hud-select {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 5px;
+    font-size: 11px;
+    background: #1a1a1a;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+
+  .map-hud-select-full {
+    width: 100%;
+  }
+
+  .map-hud-play-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .map-hud-play-toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .map-hud-play-off,
+  .map-hud-play-on {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #666;
+    transition: color 0.15s;
+  }
+
+  .map-hud-play-track {
+    width: 30px;
+    height: 16px;
+    background: #2a3a4a;
+    border: 1px solid #4a6a8a;
+    border-radius: 10px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .map-hud-play-track::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    background: #8ec8ff;
+    border-radius: 50%;
+    transition: transform 0.15s, background 0.15s;
+  }
+
+  .map-hud-play-toggle input:checked ~ .map-hud-play-track {
+    background: #2a4a32;
+    border-color: #3a7a4a;
+  }
+
+  .map-hud-play-toggle input:checked ~ .map-hud-play-track::after {
+    transform: translateX(14px);
+    background: #7ee8a0;
+  }
+
+  .map-hud-play-toggle input:checked ~ .map-hud-play-on {
+    color: #7ee8a0;
+  }
+
+  .map-hud-play-toggle input:not(:checked) ~ .map-hud-play-off {
+    color: #8ec8ff;
+  }
+
+  .map-milestone-hud {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px;
+    background: rgba(14, 16, 22, 0.96);
+    border: 1px solid #4a5a7a;
+    border-radius: 8px;
+    font-size: 11px;
+    color: #ddd;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+  }
+
+  .milestone-hud-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #333;
+  }
+
+  .milestone-hud-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #eee;
+    line-height: 1.2;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .milestone-hud-id {
+    font-size: 9px;
+    color: #9ab;
+    background: #1a1a22;
+    padding: 1px 4px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    max-width: 42%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .milestone-play-hint {
+    display: none;
+    margin: 0 0 8px;
+    padding: 6px 8px;
+    font-size: 10px;
+    line-height: 1.35;
+    color: #8ab;
+    background: #121a28;
+    border: 1px solid #2a4060;
+    border-radius: 6px;
+  }
+
+  .map-milestone-hud.is-play-mode .milestone-play-hint {
+    display: block;
+  }
+
+  .milestone-complete-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: #141820;
+    border: 2px solid #3a4558;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .milestone-complete-toggle:hover {
+    border-color: #5a7a5a;
+    background: #161c24;
+  }
+
+  .milestone-complete-toggle:has(input:checked) {
+    background: linear-gradient(135deg, #152418 0%, #1a3020 100%);
+    border-color: #3ecf7a;
+    box-shadow: 0 0 0 1px rgba(62, 207, 122, 0.25), inset 0 0 12px rgba(62, 207, 122, 0.08);
+  }
+
+  .milestone-complete-toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .milestone-complete-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+    color: #556;
+    background: #1e2430;
+    border: 2px solid #445;
+    border-radius: 50%;
+    transition: color 0.15s, background 0.15s, border-color 0.15s, transform 0.15s;
+  }
+
+  .milestone-complete-toggle:has(input:checked) .milestone-complete-icon {
+    color: #0d1a12;
+    background: #3ecf7a;
+    border-color: #5ee89a;
+    transform: scale(1.05);
+  }
+
+  .milestone-complete-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .milestone-complete-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #dde;
+    line-height: 1.2;
+  }
+
+  .milestone-complete-toggle:has(input:checked) .milestone-complete-title {
+    color: #9ef0b8;
+  }
+
+  .milestone-complete-hint {
+    font-size: 10px;
+    color: #778;
+    line-height: 1.3;
+  }
+
+  .milestone-complete-toggle:has(input:checked) .milestone-complete-hint {
+    color: #6a9a7a;
+  }
+
+  .milestone-hud-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin-bottom: 6px;
+  }
+
+  .milestone-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #bbb;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .milestone-flag input {
+    margin: 0;
+    width: 12px;
+    height: 12px;
+  }
+
+  .milestone-unlock-block {
+    margin-bottom: 6px;
+    border: 1px solid #2a2a32;
+    border-radius: 4px;
+    background: #101018;
+  }
+
+  .milestone-unlock-block summary {
+    padding: 4px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    user-select: none;
+    list-style-position: inside;
+  }
+
+  .milestone-unlock-block[open] summary {
+    border-bottom: 1px solid #2a2a32;
+    margin-bottom: 4px;
+  }
+
+  .milestone-unlock-block .milestone-requires {
+    width: calc(100% - 12px);
+    box-sizing: border-box;
+    margin: 0 6px 4px;
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+
+  .milestone-hint {
+    font-size: 10px;
+    color: #666;
+    margin: 0 6px 6px;
+    line-height: 1.3;
+  }
+
+  .milestone-encounters-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .milestone-subtitle {
+    font-size: 11px;
+    font-weight: 700;
+    color: #b8c8e8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .milestone-encounters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .milestone-empty {
+    margin: 0;
+    color: #777;
+    font-size: 11px;
+    font-style: italic;
+  }
+
+  .milestone-encounter {
+    padding: 6px;
+    background: #12141a;
+    border: 1px solid #333;
+    border-radius: 5px;
+  }
+
+  .milestone-encounter-head {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .milestone-encounter-title {
+    grid-column: 1 / -1;
+    width: 100%;
+    box-sizing: border-box;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 3px 5px;
+    line-height: 1.35;
+  }
+
+  .milestone-encounter-read {
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #dde;
+    line-height: 1.35;
+  }
+
+  .milestone-encounter-kind-badge {
+    justify-self: start;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    color: #9ab;
+    background: #1a2438;
+    border: 1px solid #3a4a6a;
+    border-radius: 4px;
+  }
+
+  .milestone-reward-row.is-view-only {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0;
+    border-bottom: 1px solid #222;
+  }
+
+  .milestone-reward-row.is-view-only:last-child {
+    border-bottom: none;
+  }
+
+  .milestone-reward-row.is-view-only .milestone-reward-notes {
+    font-size: 10px;
+    color: #889;
+  }
+
+  .milestone-auto-grow {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    resize: none;
+    line-height: 1.35;
+    font-family: inherit;
+    background: #1a1a1a;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 4px;
+  }
+
+  .milestone-auto-grow:focus {
+    outline: none;
+    border-color: #5a8ab0;
+  }
+
+  .milestone-encounter-kind {
+    font-size: 11px;
+    padding: 3px 4px;
+  }
+
+  .milestone-encounter-done {
+    font-size: 11px;
+    margin: 0;
+  }
+
+  .milestone-encounter-remove {
+    padding: 2px 8px;
+    background: #3a2020;
+    color: #f88;
+    border: 1px solid #633;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .milestone-encounter-desc {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 4px;
+    font-size: 10px;
+    padding: 3px 5px;
+  }
+
+  .milestone-rewards-label {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .milestone-rewards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .milestone-reward-row {
+    display: flex;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  .milestone-reward-fields {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .milestone-reward-label {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 5px;
+  }
+
+  .milestone-reward-notes {
+    font-size: 10px;
+    padding: 3px 5px;
+    color: #ccc;
+  }
+
+  .milestone-reward-remove {
+    flex-shrink: 0;
+    padding: 2px 6px;
+    background: transparent;
+    color: #888;
+    border: 1px solid #444;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .milestone-add-encounter {
+    padding: 2px 8px;
+    font-size: 10px;
+    background: #1a2438;
+    color: #aac;
+    border: 1px solid #3a4a6a;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .milestone-add-reward {
+    width: 100%;
+    font-size: 10px;
+    margin-top: 4px;
+    padding: 3px 6px;
+  }
+
+  .milestone-encounter-done input:checked + span,
+  .milestone-encounter.is-done .milestone-encounter-title {
+    color: #7ee8a0;
+  }
+
+  body.is-play-mode #ui-wrapper .tab-panel :is(input, textarea, select, button) {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  body.is-play-mode #ui-wrapper .tab-panel button[data-play-allow] {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  body.is-play-mode #ui-wrapper .global-locale-bar :is(button, input, select) {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  body.is-play-mode .map-milestone-hud .milestone-hud-flags,
+  body.is-play-mode .map-milestone-hud .milestone-unlock-block,
+  body.is-play-mode .map-milestone-hud .milestone-encounters-head button,
+  body.is-play-mode .map-milestone-hud .milestone-encounter-remove,
+  body.is-play-mode .map-milestone-hud .milestone-add-reward,
+  body.is-play-mode .map-milestone-hud .milestone-reward-remove {
+    display: none !important;
+  }
+
+  body.is-play-mode .map-milestone-hud .milestone-auto-grow,
+  body.is-play-mode .map-milestone-hud .milestone-encounter-kind {
+    pointer-events: none;
+    opacity: 0.92;
+    border-color: transparent;
+    background: transparent;
+    resize: none;
+  }
+
+  body.is-play-mode .map-milestone-hud .milestone-encounter.is-view-only {
+    background: #10141c;
+    border-color: #2a3344;
+  }
+
+  body.is-play-mode .map-milestone-hud .milestone-encounter-done {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  body.is-play-mode .map-milestone-hud .milestone-complete-toggle {
+    pointer-events: auto;
+    opacity: 1;
   }
 
   .year-scrubber {
@@ -102,7 +710,13 @@
     color: #888;
     margin-left: 4px;
   }
-  canvas { display: block; }
+  canvas {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 0;
+  }
 
   #ui-wrapper {
     position: fixed;
@@ -371,6 +985,110 @@
     line-height: 1.5;
   }
 
+  .help-steps {
+    margin: 0 0 12px;
+    padding-left: 20px;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.55;
+  }
+
+  .help-steps li { margin-bottom: 4px; }
+
+  .help-profiles {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .help-profile-card {
+    padding: 10px 12px;
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.45;
+  }
+
+  .help-profile-card strong {
+    display: block;
+    color: #7eb8e8;
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+
+  .help-profile-card p { margin: 0 0 6px; }
+  .help-profile-card p:last-child { margin-bottom: 0; }
+
+  .help-profile-use {
+    font-size: 11px;
+    color: #888;
+  }
+
+  .help-profile-card code,
+  #tab-panel-help code {
+    font-size: 11px;
+    color: #c9a;
+    background: #1e1e1e;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  .global-locale-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px 10px 4px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  .global-locale-bar .locale-label {
+    font-size: 11px;
+    color: #888;
+  }
+
+  .help-lang-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .help-lang-title {
+    margin: 0;
+  }
+
+  .help-lang-toggle {
+    display: flex;
+    gap: 4px;
+  }
+
+  .help-lang-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #1a1a1a;
+    color: #aaa;
+    cursor: pointer;
+  }
+
+  .help-lang-btn:hover {
+    background: #252525;
+    color: #ddd;
+  }
+
+  .help-lang-btn.is-active {
+    background: #2a4a6a;
+    border-color: #5a8ab8;
+    color: #e8f4ff;
+  }
+
   .facility-grid {
     display: flex;
     flex-direction: column;
@@ -565,6 +1283,24 @@
     font-style: italic;
   }
 
+  .adventure-section {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #333;
+  }
+
+  .adventure-section.is-profile-adventure {
+    border-top-color: #5a7a9a;
+  }
+
+  .play-mode-row {
+    margin: 10px 0 14px;
+    padding: 8px 10px;
+    background: #1a2433;
+    border-radius: 6px;
+    border: 1px solid #3a5068;
+  }
+
   .owner-form-wrap { margin-top: 8px; padding-top: 8px; border-top: 1px solid #2a2a2a; }
 
   .owner-color-row {
@@ -580,4 +1316,4 @@
     flex-shrink: 0;
   }
 
-  .owner-color-row input[type="text"] { flex: 1; }</style>
+  .owner-color-row input[type="text"] { flex: 1; }</style><script defer="defer" src="bundle.js"></script></body></html>

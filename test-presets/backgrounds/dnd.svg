@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="2400" viewBox="0 0 2400 2400">
+  <defs>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#8b7355" stroke-width="1" opacity="0.18"/>
+    </pattern>
+    <radialGradient id="paper" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#e8dcc4"/>
+      <stop offset="100%" stop-color="#c4a882"/>
+    </radialGradient>
+  </defs>
+  <rect width="2400" height="2400" fill="url(#paper)"/>
+  <rect width="2400" height="2400" fill="url(#grid)"/>
+  <rect x="120" y="120" width="2160" height="2160" fill="none" stroke="#6b5340" stroke-width="6" opacity="0.25" rx="24"/>
+  <rect x="180" y="180" width="2040" height="2040" fill="none" stroke="#6b5340" stroke-width="2" opacity="0.15" rx="12"/>
+</svg>

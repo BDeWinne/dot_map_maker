@@ -1,0 +1,231 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdAt": 1740000000000,
+    "epoch": "Era Imperial",
+    "defaultYear": 2200,
+    "viewYear": 2200,
+    "profile": "galaxy",
+    "playMode": false
+  },
+  "owners": [
+    { "id": "none", "name": "Unclaimed", "short": "-", "color": "#666666" },
+    {
+      "id": "empire_csh",
+      "name": "Confederación Solar Humana",
+      "short": "CSH",
+      "color": "#2ecc78",
+      "leader": {
+        "name": "Elena Voss",
+        "age": 52,
+        "ageYear": 2200,
+        "personality": "Pragmática, expansionista moderada"
+      }
+    },
+    {
+      "id": "empire_veil",
+      "name": "Coalición del Velo",
+      "short": "Velo",
+      "color": "#9b59b6",
+      "leader": {
+        "name": "Keth Marrow",
+        "age": 61,
+        "ageYear": 2200,
+        "personality": "Cauteloso, maestro de inteligencia"
+      }
+    },
+    {
+      "id": "empire_threat",
+      "name": "Amenaza Desconocida",
+      "short": "???",
+      "color": "#e74c3c"
+    }
+  ],
+  "systems": [
+    {
+      "id": "sys_sol",
+      "name": "Sol",
+      "starType": "G2V",
+      "owner": "empire_csh",
+      "description": "Capital humana. Nodo logístico y político del sector interior.",
+      "population": 12000000000,
+      "isCapital": true,
+      "x": 0,
+      "y": 0,
+      "size": 2.2,
+      "facilities": ["bastion", "shipyard", "research", "gateway"],
+      "fleets": [{ "owner": "empire_csh", "count": 12 }],
+      "timeline": [
+        {
+          "id": "tl-sol-1",
+          "year": 2150,
+          "type": "colonized",
+          "title": "Consolidación del núcleo solar",
+          "actorId": "empire_csh",
+          "isCapital": true
+        },
+        {
+          "id": "tl-sol-2",
+          "year": 2190,
+          "type": "fleet_change",
+          "title": "Flota de defensa interior",
+          "actorId": "empire_csh",
+          "fleets": [{ "owner": "empire_csh", "count": 12 }]
+        }
+      ]
+    },
+    {
+      "id": "sys_wolf",
+      "name": "Wolf 359",
+      "starType": "M6V",
+      "owner": "empire_csh",
+      "description": "Colonia minera y puesto avanzado en el borde interior.",
+      "population": 45000000,
+      "x": 180,
+      "y": -60,
+      "size": 1.4,
+      "facilities": ["mining", "refinery", "logistics"],
+      "fleets": [{ "owner": "empire_csh", "count": 3 }],
+      "timeline": [
+        {
+          "id": "tl-wolf-1",
+          "year": 2180,
+          "type": "colonized",
+          "title": "Fundación de Wolf 359",
+          "actorId": "empire_csh"
+        }
+      ]
+    },
+    {
+      "id": "sys_nova",
+      "name": "Nova Centauri",
+      "starType": "F5V",
+      "owner": "empire_veil",
+      "description": "Mundo comercial disputado entre facciones del Velo.",
+      "population": 890000000,
+      "isCapital": true,
+      "x": -200,
+      "y": 120,
+      "size": 1.8,
+      "facilities": ["trade", "research", "observatory"],
+      "fleets": [{ "owner": "empire_veil", "count": 5 }],
+      "timeline": [
+        {
+          "id": "tl-nova-1",
+          "year": 2175,
+          "type": "colonized",
+          "title": "Asentamiento de Nova Centauri",
+          "actorId": "empire_veil",
+          "isCapital": true
+        }
+      ]
+    },
+    {
+      "id": "sys_rim",
+      "name": "Rim-7",
+      "starType": "K1V",
+      "owner": "none",
+      "description": "Sistema fronterizo sin reclamar. Sensores reportan actividad irregular.",
+      "population": 0,
+      "x": 320,
+      "y": 140,
+      "size": 1,
+      "facilities": ["ruins"],
+      "timeline": [
+        {
+          "id": "tl-rim-1",
+          "year": 2195,
+          "type": "event",
+          "title": "Señales fantasma en Rim-7",
+          "description": "Patrullas CSH detectan transmisiones encriptadas."
+        }
+      ]
+    },
+    {
+      "id": "sys_ash",
+      "name": "Ashfall",
+      "starType": "Red dwarf",
+      "owner": "empire_threat",
+      "occupiedBy": "empire_threat",
+      "description": "Mundo bajo control hostil. Zona de exclusión recomendada.",
+      "population": 1200000,
+      "x": 400,
+      "y": -100,
+      "size": 1.2,
+      "facilities": ["bastion", "energy"],
+      "fleets": [{ "owner": "empire_threat", "count": 8 }],
+      "timeline": [
+        {
+          "id": "tl-ash-1",
+          "year": 2198,
+          "type": "colonized",
+          "title": "Aparición de Ashfall",
+          "actorId": "empire_threat"
+        },
+        {
+          "id": "tl-ash-2",
+          "year": 2200,
+          "type": "owner_change",
+          "title": "Consolidación hostil",
+          "actorId": "empire_threat"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-sol-wolf",
+      "from": "sys_sol",
+      "to": "sys_wolf",
+      "name": "Corredor Solar — Wolf",
+      "routeType": "hyperlane",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-sol-wolf-1",
+          "year": 2185,
+          "type": "route_open",
+          "title": "Hipervía interior certificada"
+        }
+      ]
+    },
+    {
+      "id": "conn-sol-nova",
+      "from": "sys_sol",
+      "to": "sys_nova",
+      "name": "Ruta diplomática",
+      "routeType": "trade",
+      "status": "open"
+    },
+    {
+      "id": "conn-wolf-rim",
+      "from": "sys_wolf",
+      "to": "sys_rim",
+      "routeType": "hyperlane",
+      "status": "open"
+    },
+    {
+      "id": "conn-rim-ash",
+      "from": "sys_rim",
+      "to": "sys_ash",
+      "name": "Sector prohibido",
+      "routeType": "military",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-rim-ash-1",
+          "year": 2199,
+          "type": "route_open",
+          "title": "Corredor militar abierto bajo escolta"
+        }
+      ]
+    }
+  ],
+  "background": {
+    "src": "backgrounds/galaxy.svg",
+    "x": 0,
+    "y": 0,
+    "scale": 1,
+    "alpha": 0.95
+  }
+}

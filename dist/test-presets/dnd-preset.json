@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdAt": 1740000002000,
+    "epoch": "Año del Ciervo Plateado",
+    "defaultYear": 1492,
+    "viewYear": 1492,
+    "profile": "dnd",
+    "playMode": true
+  },
+  "owners": [
+    { "id": "none", "name": "Neutral", "short": "-", "color": "#666666" },
+    {
+      "id": "faction_aurum",
+      "name": "Orden del Aurum",
+      "short": "AUR",
+      "color": "#e8c07e",
+      "leader": {
+        "name": "Paladín Ser Aldric",
+        "age": 35,
+        "ageYear": 1492,
+        "personality": "Idealista, protege aldeas fronterizas"
+      }
+    },
+    {
+      "id": "faction_coven",
+      "name": "Coven de la Niebla",
+      "short": "COV",
+      "color": "#8e44ad",
+      "leader": {
+        "name": "Maga Thessaly",
+        "age": 102,
+        "ageYear": 1492,
+        "personality": "Arcana, pragmática, poco confiable"
+      }
+    },
+    {
+      "id": "faction_iron",
+      "name": "Compañía del Yunque",
+      "short": "YUN",
+      "color": "#95a5a6"
+    }
+  ],
+  "systems": [
+    {
+      "id": "loc_tavern",
+      "name": "Posada del Cuervo Rojo",
+      "starType": "Aldea / taberna",
+      "owner": "none",
+      "description": "Punto de partida típico. Rumores, contratos y la party.",
+      "population": 800,
+      "x": 0,
+      "y": 0,
+      "size": 1,
+      "facilities": ["trade"],
+      "fleets": [{ "owner": "faction_aurum", "count": 1 }],
+      "timeline": [
+        {
+          "id": "tl-tav-1",
+          "year": 1490,
+          "type": "event",
+          "title": "La party se reúne",
+          "description": "Misión: investigar desapariciones en el pantano."
+        }
+      ],
+      "adventure": {
+        "startNode": true,
+        "encounter": "Social: el posadero ofrece la misión. Investigación DC 12 para oír el rumor del pantano.",
+        "reward": "Contrato firmado — acceso a contactos locales."
+      }
+    },
+    {
+      "id": "loc_stronghold",
+      "name": "Fuerte Aurum",
+      "starType": "Fortaleza",
+      "owner": "faction_aurum",
+      "description": "Cuartel de la Orden. Entrenamiento y armería.",
+      "population": 2400,
+      "isCapital": true,
+      "x": -160,
+      "y": -40,
+      "size": 1.6,
+      "facilities": ["bastion", "shipyard"],
+      "fleets": [{ "owner": "faction_aurum", "count": 3 }],
+      "timeline": [
+        {
+          "id": "tl-aur-1",
+          "year": 1460,
+          "type": "colonized",
+          "title": "Fundación del fuerte",
+          "actorId": "faction_aurum",
+          "isCapital": true
+        }
+      ],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["loc_tavern"],
+        "encounter": "Roleplay con Ser Aldric: juramento o prueba de valor (Persuasión DC 11).",
+        "reward": "Sello de la Orden — ventaja en checks sagrados en el pantano."
+      }
+    },
+    {
+      "id": "loc_dungeon",
+      "name": "Criptas de Velmoth",
+      "starType": "Dungeon",
+      "owner": "none",
+      "description": "Niveles 1–3: no-muertos. Nivel 4: altar del lich (TBD).",
+      "population": 0,
+      "x": 140,
+      "y": 90,
+      "size": 1.3,
+      "facilities": ["ruins", "energy"],
+      "timeline": [
+        {
+          "id": "tl-dung-1",
+          "year": 1491,
+          "type": "event",
+          "title": "Puerta sellada rota",
+          "description": "Los guardias locales reportan luces en la noche."
+        }
+      ],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["loc_tavern"],
+        "encounter": "Nivel 1–2: esqueletos y trampas. Nivel 3: sala del altar (mini-boss wight).",
+        "reward": "Fragmento del sello del lich — necesario para el ritual final."
+      }
+    },
+    {
+      "id": "loc_swamp",
+      "name": "Pantano de Lúgubre",
+      "starType": "Pantano",
+      "owner": "faction_coven",
+      "description": "Círculo de hechiceras. No entrar sin protección arcana.",
+      "population": 600,
+      "isCapital": true,
+      "x": 220,
+      "y": -120,
+      "size": 1.1,
+      "facilities": ["research", "observatory"],
+      "fleets": [{ "owner": "faction_coven", "count": 2 }],
+      "timeline": [
+        {
+          "id": "tl-swamp-1",
+          "year": 1475,
+          "type": "colonized",
+          "title": "El coven reclama el pantano",
+          "actorId": "faction_coven",
+          "isCapital": true
+        }
+      ],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["loc_dungeon", "loc_shrine"],
+        "encounter": "Maga Thessaly + 2 brujas. Ritual interrumpible; destruir el foco arcano.",
+        "reward": "Acto II desbloqueado — pistas sobre el lich en Velmoth nivel 4."
+      }
+    },
+    {
+      "id": "loc_mine",
+      "name": "Mina Abandonada",
+      "starType": "Mina / cueva",
+      "owner": "faction_iron",
+      "description": "La Compañía retomó la extracción. Goblins en el nivel inferior.",
+      "population": 1500,
+      "isCapital": true,
+      "x": 80,
+      "y": 200,
+      "size": 1.2,
+      "facilities": ["mining", "logistics"],
+      "fleets": [{ "owner": "faction_iron", "count": 2 }],
+      "timeline": [
+        {
+          "id": "tl-mine-1",
+          "year": 1488,
+          "type": "owner_change",
+          "title": "La Compañía compra la concesión",
+          "actorId": "faction_iron"
+        }
+      ],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["loc_tavern"],
+        "encounter": "Combate opcional: 6 goblins + jefe hobgoblin. Percepción DC 13 para atajo sin combate.",
+        "reward": "Lingotes bendecidos — 150 po o arma +1 si el clérigo del santuario los consagra."
+      }
+    },
+    {
+      "id": "loc_shrine",
+      "name": "Santuario del Alba",
+      "starType": "Templo",
+      "owner": "faction_aurum",
+      "description": "Clérigos ofrecen curación. Pista sobre el sello del lich.",
+      "population": 400,
+      "x": -60,
+      "y": 160,
+      "size": 1,
+      "facilities": ["bastion", "agri"],
+      "timeline": [
+        {
+          "id": "tl-shrine-1",
+          "year": 1480,
+          "type": "colonized",
+          "title": "Santuario consagrado",
+          "actorId": "faction_aurum"
+        }
+      ],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["loc_stronghold"],
+        "encounter": "Descanso corto gratis. Religión DC 10: visión del sello roto en las criptas.",
+        "reward": "Instrucciones del ritual para usar el fragmento del lich."
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "path-tav-strong",
+      "from": "loc_tavern",
+      "to": "loc_stronghold",
+      "name": "Camino del escudo",
+      "routeType": "trade",
+      "status": "open"
+    },
+    {
+      "id": "path-tav-dung",
+      "from": "loc_tavern",
+      "to": "loc_dungeon",
+      "routeType": "clandestine",
+      "status": "open"
+    },
+    {
+      "id": "path-dung-swamp",
+      "from": "loc_dungeon",
+      "to": "loc_swamp",
+      "routeType": "military",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-ds-1",
+          "year": 1492,
+          "type": "route_open",
+          "title": "Sendero peligroso descubierto"
+        }
+      ]
+    },
+    {
+      "id": "path-tav-mine",
+      "from": "loc_tavern",
+      "to": "loc_mine",
+      "routeType": "trade",
+      "status": "open"
+    },
+    {
+      "id": "path-strong-shrine",
+      "from": "loc_stronghold",
+      "to": "loc_shrine",
+      "routeType": "hyperlane",
+      "status": "open"
+    }
+  ],
+  "background": {
+    "src": "backgrounds/dnd.svg",
+    "x": 0,
+    "y": 0,
+    "scale": 1,
+    "alpha": 0.9
+  }
+}

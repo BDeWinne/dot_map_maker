@@ -3,11 +3,9 @@ import { galaxyScene } from "../scene/GalaxyScene";
 import { ownerManager } from "../galaxy/OwnerManager";
 import { syncPresentFieldsFromTimeline } from "../data/timelineState";
 import { formatFleetsSummary, type FleetPresence } from "../data/FleetTypes";
-import {
-  TimelineEntry,
-  TimelineEntryType,
-  TIMELINE_ENTRY_LABELS,
-} from "../data/TimelineTypes";
+import { TimelineEntry, TimelineEntryType } from "../data/TimelineTypes";
+import { getTimelineEntryLabel } from "../i18n/timelineLabels";
+import { getLocale, t } from "../i18n/locale";
 import type { NodeSystem } from "../galaxy/NodeSystem";
 import { FleetRowEditor } from "./FleetRowEditor";
 
@@ -48,13 +46,6 @@ export class TimelinePanel {
       this.fleetRowEditor.addRow();
     });
 
-    this.epochInput.addEventListener("change", () => {
-      galaxyScene.setCalendar(this.epochInput.value, Number(this.defaultYearInput.value) || 2200);
-    });
-    this.defaultYearInput.addEventListener("change", () => {
-      galaxyScene.setCalendar(this.epochInput.value, Number(this.defaultYearInput.value) || 2200);
-    });
-
     document.getElementById("entry-add-btn")?.addEventListener("click", () => this.saveEntry());
     document.getElementById("entry-clear-btn")?.addEventListener("click", () => this.resetForm());
 
@@ -65,6 +56,14 @@ export class TimelinePanel {
       this.onNodeSelected(e.detail);
     }) as EventListener);
     document.addEventListener("node:deselected", () => this.onNodeCleared());
+    document.addEventListener("map:loaded", () => this.loadCalendarFields());
+    document.addEventListener("calendar:changed", () => this.loadCalendarFields());
+    document.addEventListener("locale:changed", () => {
+      this.populateEntryTypes();
+      this.loadCalendarFields();
+      const node = this.getSelectedNode();
+      if (node) this.renderList(node);
+    });
 
     this.loadCalendarFields();
     this.onNodeCleared();
@@ -72,10 +71,15 @@ export class TimelinePanel {
 
   private populateEntryTypes() {
     this.entryType.innerHTML = "";
-    (Object.keys(TIMELINE_ENTRY_LABELS) as TimelineEntryType[]).forEach((type) => {
+    const locale = getLocale();
+    const types: TimelineEntryType[] = [
+      "colonized", "owner_change", "occupied", "liberated", "abandoned",
+      "population", "fleet_change", "fleet_move", "economy", "minerals", "event", "custom",
+    ];
+    types.forEach((type) => {
       const opt = document.createElement("option");
       opt.value = type;
-      opt.textContent = TIMELINE_ENTRY_LABELS[type];
+      opt.textContent = getTimelineEntryLabel(type, locale);
       this.entryType.appendChild(opt);
     });
   }
@@ -144,7 +148,7 @@ export class TimelinePanel {
     const entries = [...(node.data.timeline ?? [])].sort((a, b) => a.year - b.year || a.title.localeCompare(b.title));
 
     if (entries.length === 0) {
-      this.listEl.innerHTML = `<p class="panel-empty">No events for this system yet.</p>`;
+      this.listEl.innerHTML = `<p class="panel-empty">${t("timeline.noEvents")}</p>`;
       return;
     }
 
@@ -170,7 +174,7 @@ export class TimelinePanel {
           <article class="timeline-entry" data-entry-id="${entry.id}">
             <div class="timeline-entry-head">
               <span class="timeline-year">Y${entry.year}${epoch}</span>
-              <span class="timeline-type">${TIMELINE_ENTRY_LABELS[entry.type]}</span>
+              <span class="timeline-type">${getTimelineEntryLabel(entry.type, getLocale())}</span>
             </div>
             <strong>${escapeHtml(entry.title)}</strong>
             ${entry.description ? `<p>${escapeHtml(entry.description)}</p>` : ""}

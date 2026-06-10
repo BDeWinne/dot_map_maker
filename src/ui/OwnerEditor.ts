@@ -9,6 +9,7 @@ import {
 import { nodeInspector } from "./NodeInspector";
 import { timelinePanel } from "./TimelinePanel";
 import { statsPanel } from "./StatsPanel";
+import { t } from "../i18n/locale";
 
 export class OwnerEditor {
   private listEl = document.getElementById("owner-list")!;
@@ -53,6 +54,7 @@ export class OwnerEditor {
     });
 
     document.addEventListener("owners:changed", () => this.renderList());
+    document.addEventListener("locale:changed", () => this.renderList());
     document.addEventListener("map:loaded", () => this.renderList());
     document.addEventListener("map:updated", () => {
       if (this.editingId) this.updateUsageHint(this.editingId);
@@ -85,7 +87,7 @@ export class OwnerEditor {
     const owners = ownerManager.getAll();
 
     if (owners.length === 0) {
-      this.listEl.innerHTML = `<p class="panel-empty">No owners defined.</p>`;
+      this.listEl.innerHTML = `<p class="panel-empty">${t("owners.empty")}</p>`;
       return;
     }
 

@@ -3,6 +3,7 @@ import { galaxyScene } from "../scene/GalaxyScene";
 const LS_ICONS = "mapShowFacilityIcons";
 const LS_LABELS = "mapShowNodeLabels";
 const LS_FLEETS = "mapShowFleets";
+const LS_PROGRESS = "mapShowAdventureProgress";
 
 function readBool(key: string, fallback: boolean): boolean {
   try {
@@ -32,17 +33,23 @@ export class MapViewToggles {
   private fleetsBtn = document.getElementById(
     "toggle-map-fleets",
   ) as HTMLButtonElement;
+  private progressBtn = document.getElementById(
+    "toggle-map-progress",
+  ) as HTMLButtonElement;
 
   constructor() {
     const iconsOn = readBool(LS_ICONS, true);
     const labelsOn = readBool(LS_LABELS, true);
     const fleetsOn = readBool(LS_FLEETS, true);
+    const progressOn = readBool(LS_PROGRESS, true);
     galaxyScene.setShowFacilityIcons(iconsOn);
     galaxyScene.setShowNodeLabels(labelsOn);
     galaxyScene.setShowFleets(fleetsOn);
+    galaxyScene.setShowAdventureOverlay(progressOn);
     this.syncButton(this.iconsBtn, iconsOn);
     this.syncButton(this.labelsBtn, labelsOn);
     this.syncButton(this.fleetsBtn, fleetsOn);
+    this.syncButton(this.progressBtn, progressOn);
 
     this.iconsBtn?.addEventListener("click", () => {
       const next = !galaxyScene.getShowFacilityIcons();
@@ -63,6 +70,13 @@ export class MapViewToggles {
       galaxyScene.setShowFleets(next);
       writeBool(LS_FLEETS, next);
       this.syncButton(this.fleetsBtn, next);
+    });
+
+    this.progressBtn?.addEventListener("click", () => {
+      const next = !galaxyScene.getShowAdventureOverlay();
+      galaxyScene.setShowAdventureOverlay(next);
+      writeBool(LS_PROGRESS, next);
+      this.syncButton(this.progressBtn, next);
     });
   }
 

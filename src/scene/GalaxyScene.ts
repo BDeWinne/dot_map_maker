@@ -6,7 +6,6 @@ import { getRouteStatusAtYear, syncPresentRouteStatus } from "../data/routeState
 import { selectionManager, SelectionManager } from "../editor/SelectionManager";
 import { ConnectionLine } from "../galaxy/ConnectionLine";
 import { TerritoryRenderer } from "../galaxy/TerritoryRenderer";
-import { nodeInspector } from "../ui/NodeInspector";
 import { normalizeFacilities } from "../data/FacilityTypes";
 import { normalizeFleets, type FleetPresence } from "../data/FleetTypes";
 import { parsePopulationToInt } from "../data/population";
@@ -19,6 +18,16 @@ import {
   type SystemBaseline,
 } from "../data/timelineState";
 import type { MapCalendar } from "../data/TimelineTypes";
+import {
+  normalizeMapProfile,
+  resolveImportedPlayMode,
+  type MapProfileId,
+} from "../data/MapProfile";
+import { normalizeAdventure } from "../data/AdventureTypes";
+import {
+  computeAdventureStates,
+  type AdventureNodeState,
+} from "../data/adventureState";
 
 interface NodePresentSnapshot {
   owner: string;
@@ -29,11 +38,33 @@ interface NodePresentSnapshot {
 }
 
 export interface GalaxyBackgroundData {
-  dataUrl: string;
+  /** Embedded image (export / upload). */
+  dataUrl?: string;
+  /** Relative path under `/test-presets/` or absolute URL. */
+  src?: string;
   x: number;
   y: number;
   scale: number;
   alpha: number;
+}
+
+export function resolveBackgroundSource(data: GalaxyBackgroundData): string {
+  const embedded = data.dataUrl?.trim();
+  if (embedded) return embedded;
+
+  const src = data.src?.trim();
+  if (!src) {
+    throw new Error("Background missing dataUrl and src");
+  }
+  if (
+    src.startsWith("http://") ||
+    src.startsWith("https://") ||
+    src.startsWith("data:") ||
+    src.startsWith("/")
+  ) {
+    return src;
+  }
+  return `/test-presets/${src.replace(/^\.\//, "")}`;
 }
 
 export type MapEditMode = "edit" | "moveBackground" | "moveNodes";
@@ -68,6 +99,10 @@ export class GalaxyScene extends Container {
   private showFacilityIcons = true;
   private showNodeLabels = true;
   private showFleets = true;
+  private mapProfile: MapProfileId = "galaxy";
+  private playMode = false;
+  private showAdventureOverlay = true;
+  private adventureStates = new Map<string, AdventureNodeState>();
   constructor() {
     super();
     this.cullable = false;
@@ -190,10 +225,15 @@ export class GalaxyScene extends Container {
 
   public setCalendar(epoch: string, defaultYear: number) {
     this.mapEpoch = epoch;
-    this.defaultYear = Number.isFinite(defaultYear) ? defaultYear : 2200;
+    this.defaultYear = Number.isFinite(defaultYear) ? Math.round(defaultYear) : 2200;
     if (this.viewYear < this.defaultYear) {
       this.setViewYear(this.defaultYear);
     }
+    document.dispatchEvent(
+      new CustomEvent("calendar:changed", {
+        detail: { epoch: this.mapEpoch, defaultYear: this.defaultYear },
+      }),
+    );
   }
 
   public getViewYear(): number {
@@ -286,7 +326,83 @@ export class GalaxyScene extends Container {
     }
 
     this.regenerateTerritories();
+    this.applyAdventureView();
     document.dispatchEvent(new CustomEvent("map:updated"));
+  }
+
+  public getMapProfile(): MapProfileId {
+    return this.mapProfile;
+  }
+
+  public setMapProfile(profile: MapProfileId) {
+    this.mapProfile = normalizeMapProfile(profile);
+    document.dispatchEvent(new CustomEvent("mapProfile:changed"));
+    this.applyAdventureView();
+  }
+
+  public getPlayMode(): boolean {
+    return this.playMode;
+  }
+
+  public setPlayMode(on: boolean) {
+    this.playMode = on;
+    this.applyAdventureView();
+    document.dispatchEvent(new CustomEvent("playMode:changed"));
+  }
+
+  public getShowAdventureOverlay(): boolean {
+    return this.showAdventureOverlay;
+  }
+
+  public setShowAdventureOverlay(on: boolean) {
+    this.showAdventureOverlay = on;
+    this.applyAdventureView();
+  }
+
+  public getAdventureState(nodeId: string): AdventureNodeState | undefined {
+    return this.adventureStates.get(nodeId);
+  }
+
+  public isNodeAdventureAccessible(nodeId: string): boolean {
+    const state = this.adventureStates.get(nodeId);
+    if (!this.playMode) return true;
+    return state?.unlocked ?? true;
+  }
+
+  private applyAdventureView() {
+    this.adventureStates = computeAdventureStates(
+      this.systems.map((n) => n.data),
+      this.connections,
+      this.playMode,
+    );
+
+    for (const node of this.systems) {
+      if (!node.visible) {
+        node.applyAdventureVisual(null);
+        continue;
+      }
+      const state = this.adventureStates.get(node.data.id);
+      if (!this.showAdventureOverlay && !this.playMode) {
+        node.applyAdventureVisual(null);
+      } else {
+        node.applyAdventureVisual(state ?? null);
+      }
+    }
+
+    for (const line of this.connectionLines) {
+      const fromOk =
+        line.fromNode.visible &&
+        (!this.playMode || this.isNodeAdventureAccessible(line.fromNode.data.id));
+      const toOk =
+        line.toNode.visible &&
+        (!this.playMode || this.isNodeAdventureAccessible(line.toNode.data.id));
+      line.visible = fromOk && toOk && line.isRouteOpenAtViewYear();
+      if (this.playMode) {
+        line.alpha = line.visible ? 1 : 0;
+      } else {
+        line.alpha = 1;
+      }
+    }
   }
 
   public getConnectionById(id: string): SystemConnection | undefined {
@@ -368,6 +484,8 @@ export class GalaxyScene extends Container {
   }
 
   public deleteSelectedConnection() {
+    if (this.playMode) return;
+
     const selectedLine = selectionManager.selectedConnection;
     if (!selectedLine) return;
 
@@ -433,7 +551,9 @@ export class GalaxyScene extends Container {
 
   private isUiTarget(event: FederatedPointerEvent): boolean {
     const htmlTarget = event.nativeEvent.target as HTMLElement;
-    return !!htmlTarget.closest("#ui-wrapper, #year-scrubber");
+    return !!htmlTarget.closest(
+      "#ui-wrapper, #year-scrubber, #map-viewport-hud, #map-view-toggles",
+    );
   }
 
   private setupBackgroundInteraction() {
@@ -443,6 +563,7 @@ export class GalaxyScene extends Container {
       if (this.spacePressed || this.panning) return;
 
       if (this.editMode === "edit") {
+        if (this.playMode) return;
         if ((event.target as any)?.isSystemNode) return;
 
         const pos = this.world.toLocal(event.global);
@@ -450,7 +571,7 @@ export class GalaxyScene extends Container {
           id: crypto.randomUUID(),
           name: "New System",
           starType: "G",
-          owner: "None",
+          owner: "none",
           x: pos.x,
           y: pos.y,
         });
@@ -487,6 +608,7 @@ export class GalaxyScene extends Container {
 
   public beginRepositionDrag(event: FederatedPointerEvent) {
     if (event.button !== 0) return;
+    if (this.playMode) return;
     if (this.spacePressed || this.panning) return;
     if (this.editMode === "edit") return;
     if (this.editMode === "moveBackground" && !this.hasBackground()) return;
@@ -535,7 +657,7 @@ export class GalaxyScene extends Container {
       id: systemData?.id || crypto.randomUUID(),
       name: systemData?.name || "New System",
       starType: systemData?.starType || "G",
-      owner: systemData?.owner || "None",
+      owner: systemData?.owner || "none",
       description: systemData?.description || "",
       population: parsePopulationToInt(systemData?.population as string | number | undefined),
       capital: systemData?.capital || "",
@@ -547,16 +669,48 @@ export class GalaxyScene extends Container {
       timeline: systemData?.timeline ? [...systemData.timeline] : undefined,
       facilities: normalizeFacilities(systemData?.facilities),
       fleets: normalizeFleets(systemData?.fleets),
+      adventure: normalizeAdventure(systemData?.adventure),
     });
     node.setOwner(node.data.owner);
     this.nodeLayer.addChild(node);
     this.systems.push(node);
     if (!this.bulkLoadingMap) {
       this.applyTimelineView();
+      document.dispatchEvent(
+        new CustomEvent("node:created", { detail: { nodeId: node.data.id } }),
+      );
+      document.dispatchEvent(new CustomEvent("map:updated"));
     }
+    return node;
   }
 
-  deleteNode(node: NodeSystem) {
+  public getNodeById(id: string): NodeSystem | undefined {
+    return this.systems.find((n) => n.data.id === id);
+  }
+
+  public restoreNode(data: SystemData, connections: SystemConnection[]) {
+    if (this.getNodeById(data.id)) return;
+    this.createNode(structuredClone(data));
+    for (const raw of connections) {
+      const conn = normalizeConnection(raw);
+      const fromNode = this.getNodeById(conn.from);
+      const toNode = this.getNodeById(conn.to);
+      if (fromNode && toNode) {
+        this.createConnection(fromNode, toNode, conn);
+      }
+    }
+    this.applyTimelineView();
+    document.dispatchEvent(new CustomEvent("map:updated"));
+  }
+
+  public deleteNode(node: NodeSystem) {
+    if (this.playMode) return;
+
+    const snapshot = structuredClone(node.data);
+    const relatedConnections = this.connections
+      .filter((conn) => conn.from === node.data.id || conn.to === node.data.id)
+      .map((conn) => structuredClone(conn));
+
     // 1️⃣ Borrar conexiones de DATA
     this.connections = this.connections.filter((conn) => conn.from !== node.data.id && conn.to !== node.data.id);
 
@@ -576,11 +730,18 @@ export class GalaxyScene extends Container {
     node.destroy();
 
     this.regenerateTerritories();
-    nodeInspector.clear();
+    document.dispatchEvent(
+      new CustomEvent("node:deleted", {
+        detail: { data: snapshot, connections: relatedConnections },
+      }),
+    );
+    document.dispatchEvent(new CustomEvent("node:deselected"));
     document.dispatchEvent(new CustomEvent("map:updated"));
   }
 
   public createConnection(nodeA: NodeSystem, nodeB: NodeSystem, data?: SystemConnection) {
+    if (this.playMode && !data) return;
+
     const exists = this.connections.some(
       (c) =>
         connectionKey(c.from, c.to) ===
@@ -633,7 +794,7 @@ export class GalaxyScene extends Container {
   public async setBackground(data: GalaxyBackgroundData): Promise<void> {
     this.removeBackgroundSprite();
 
-    const texture = await Assets.load(data.dataUrl);
+    const texture = await Assets.load(resolveBackgroundSource(data));
     if (texture.source) {
       texture.source.style.addressMode = "clamp-to-edge";
     }
@@ -734,6 +895,8 @@ export class GalaxyScene extends Container {
         epoch: this.mapEpoch || undefined,
         defaultYear: this.defaultYear,
         viewYear: this.viewYear,
+        profile: this.mapProfile,
+        playMode: this.playMode,
       },
     };
   }
@@ -751,7 +914,6 @@ export class GalaxyScene extends Container {
     this.presentSnapshots.clear();
     this.regenerateTerritories();
     selectionManager.clear();
-    nodeInspector.clear();
   }
 
   public async loadMapData(data: unknown): Promise<boolean> {
@@ -765,7 +927,13 @@ export class GalaxyScene extends Container {
       connections?: SystemConnection[];
       owners?: import("../galaxy/OwnerManager").OwnerJSON[];
       background?: GalaxyBackgroundData;
-      metadata?: { epoch?: string; defaultYear?: number; viewYear?: number };
+      metadata?: {
+        epoch?: string;
+        defaultYear?: number;
+        viewYear?: number;
+        profile?: MapProfileId;
+        playMode?: boolean;
+      };
     };
 
     if (!Array.isArray(map.systems)) {
@@ -777,11 +945,33 @@ export class GalaxyScene extends Container {
       this.clearMap();
 
       if (map.metadata) {
-        this.setCalendar(map.metadata.epoch ?? "", map.metadata.defaultYear ?? 2200);
-        this.viewYear = map.metadata.viewYear ?? this.defaultYear;
+        const epoch = map.metadata.epoch ?? "";
+        const importedDefault =
+          map.metadata.defaultYear !== undefined &&
+          map.metadata.defaultYear !== null &&
+          Number.isFinite(Number(map.metadata.defaultYear))
+            ? Math.round(Number(map.metadata.defaultYear))
+            : this.defaultYear;
+        this.setCalendar(epoch, importedDefault);
+
+        const importedView =
+          map.metadata.viewYear !== undefined &&
+          map.metadata.viewYear !== null &&
+          Number.isFinite(Number(map.metadata.viewYear))
+            ? Math.round(Number(map.metadata.viewYear))
+            : this.defaultYear;
+        this.setViewYear(importedView);
+
+        this.mapProfile = normalizeMapProfile(map.metadata.profile);
+        this.setPlayMode(
+          resolveImportedPlayMode(this.mapProfile, map.metadata.playMode),
+        );
       } else {
-        this.viewYear = this.defaultYear;
+        this.setViewYear(this.defaultYear);
+        this.mapProfile = "galaxy";
+        this.setPlayMode(false);
       }
+      document.dispatchEvent(new CustomEvent("mapProfile:changed"));
       this.presentSnapshots.clear();
 
       if (Array.isArray(map.owners) && map.owners.length > 0) {
@@ -793,6 +983,7 @@ export class GalaxyScene extends Container {
       this.bulkLoadingMap = true;
       for (const sys of map.systems) {
         syncPresentFieldsFromTimeline(sys, presentYear);
+        if (sys.adventure) sys.adventure = normalizeAdventure(sys.adventure);
         this.createNode(sys);
       }
       this.bulkLoadingMap = false;
@@ -810,7 +1001,7 @@ export class GalaxyScene extends Container {
 
       this.regenerateTerritories();
 
-      if (map.background?.dataUrl) {
+      if (map.background?.dataUrl || map.background?.src) {
         await this.setBackground(map.background);
       } else {
         this.removeBackground();

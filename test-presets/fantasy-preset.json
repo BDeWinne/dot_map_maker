@@ -1,0 +1,207 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdAt": 1740000001000,
+    "epoch": "Tercera Era",
+    "defaultYear": 1456,
+    "viewYear": 1456,
+    "profile": "fantasy",
+    "playMode": false
+  },
+  "owners": [
+    { "id": "none", "name": "Tierra de nadie", "short": "-", "color": "#666666" },
+    {
+      "id": "kingdom_ald",
+      "name": "Reino de Aldermarch",
+      "short": "ALD",
+      "color": "#3498db",
+      "leader": {
+        "name": "Reina Mira Alden",
+        "age": 38,
+        "ageYear": 1456,
+        "personality": "Diplomática, firme en la frontera norte"
+      }
+    },
+    {
+      "id": "clan_iron",
+      "name": "Clan del Hierro Rojo",
+      "short": "HIR",
+      "color": "#c0392b",
+      "leader": {
+        "name": "Jarl Torgrim",
+        "age": 44,
+        "ageYear": 1456,
+        "personality": "Guerrero honorable, desconfía de la corte"
+      }
+    },
+    {
+      "id": "league_free",
+      "name": "Liga de Ciudades Libres",
+      "short": "LCL",
+      "color": "#f1c40f"
+    }
+  ],
+  "systems": [
+    {
+      "id": "loc_capital",
+      "name": "Aldermarch",
+      "starType": "Llanuras fértiles",
+      "owner": "kingdom_ald",
+      "description": "Capital del reino. Mercados, catedral y la corte real.",
+      "population": 320000,
+      "isCapital": true,
+      "x": -40,
+      "y": 20,
+      "size": 2,
+      "facilities": ["bastion", "trade", "agri"],
+      "fleets": [{ "owner": "kingdom_ald", "count": 6 }],
+      "timeline": [
+        {
+          "id": "tl-cap-1",
+          "year": 1400,
+          "type": "colonized",
+          "title": "Coronación y fundación del reino",
+          "actorId": "kingdom_ald",
+          "isCapital": true
+        }
+      ]
+    },
+    {
+      "id": "loc_forest",
+      "name": "Bosque de Bruma",
+      "starType": "Bosque ancestral",
+      "owner": "kingdom_ald",
+      "description": "Bosque denso con ruinas élficas y caminos ocultos.",
+      "population": 12000,
+      "x": 120,
+      "y": -80,
+      "size": 1.2,
+      "facilities": ["ruins", "observatory"],
+      "timeline": [
+        {
+          "id": "tl-forest-1",
+          "year": 1430,
+          "type": "colonized",
+          "title": "Asentamiento en el borde del bosque",
+          "actorId": "kingdom_ald"
+        }
+      ]
+    },
+    {
+      "id": "loc_mine",
+      "name": "Canteras del Norte",
+      "starType": "Montaña rocosa",
+      "owner": "clan_iron",
+      "description": "Minas de hierro y forjas del clan.",
+      "population": 45000,
+      "isCapital": true,
+      "x": 200,
+      "y": 60,
+      "size": 1.5,
+      "facilities": ["mining", "refinery", "bastion"],
+      "fleets": [{ "owner": "clan_iron", "count": 4 }],
+      "timeline": [
+        {
+          "id": "tl-mine-1",
+          "year": 1388,
+          "type": "colonized",
+          "title": "El clan reclama las canteras",
+          "actorId": "clan_iron",
+          "isCapital": true
+        }
+      ]
+    },
+    {
+      "id": "loc_port",
+      "name": "Puerto de Sal",
+      "starType": "Costa",
+      "owner": "league_free",
+      "description": "Ciudad portuaria neutral. Contrabando y embajadores.",
+      "population": 98000,
+      "isCapital": true,
+      "x": -180,
+      "y": 150,
+      "size": 1.7,
+      "facilities": ["trade", "shipyard", "logistics"],
+      "fleets": [{ "owner": "league_free", "count": 2 }],
+      "timeline": [
+        {
+          "id": "tl-port-1",
+          "year": 1412,
+          "type": "colonized",
+          "title": "Carta de ciudad libre",
+          "actorId": "league_free",
+          "isCapital": true
+        }
+      ]
+    },
+    {
+      "id": "loc_ruins",
+      "name": "Ciudad Sumergida",
+      "starType": "Ruinas antiguas",
+      "owner": "none",
+      "description": "Restos de una civilización perdida. Nadie la controla oficialmente.",
+      "population": 0,
+      "x": 60,
+      "y": 200,
+      "size": 1,
+      "facilities": ["ruins", "gateway"],
+      "timeline": [
+        {
+          "id": "tl-ruins-1",
+          "year": 1450,
+          "type": "event",
+          "title": "Expedición desaparecida",
+          "description": "Cartógrafos de Aldermarch no regresaron."
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "path-cap-forest",
+      "from": "loc_capital",
+      "to": "loc_forest",
+      "name": "Camino Real del Bosque",
+      "routeType": "trade",
+      "status": "open"
+    },
+    {
+      "id": "path-forest-mine",
+      "from": "loc_forest",
+      "to": "loc_mine",
+      "routeType": "military",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-fm-1",
+          "year": 1448,
+          "type": "route_open",
+          "title": "Tregua: ruta comercial abierta"
+        }
+      ]
+    },
+    {
+      "id": "path-cap-port",
+      "from": "loc_capital",
+      "to": "loc_port",
+      "name": "Ruta del litoral",
+      "routeType": "trade",
+      "status": "open"
+    },
+    {
+      "id": "path-port-ruins",
+      "from": "loc_port",
+      "to": "loc_ruins",
+      "routeType": "clandestine",
+      "status": "open"
+    }
+  ],
+  "background": {
+    "src": "backgrounds/fantasy.svg",
+    "x": 0,
+    "y": 0,
+    "scale": 1,
+    "alpha": 0.88
+  }
+}

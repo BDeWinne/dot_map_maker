@@ -6,6 +6,7 @@ export class FleetRowEditor {
   constructor(
     private container: HTMLElement,
     private getDefaultOwnerId: () => string,
+    private onChange?: () => void,
   ) {}
 
   clear() {
@@ -66,10 +67,18 @@ export class FleetRowEditor {
     remove.className = "fleet-remove-btn";
     remove.textContent = "×";
     remove.title = "Quitar flota";
-    remove.addEventListener("click", () => row.remove());
+    remove.addEventListener("click", () => {
+      row.remove();
+      this.onChange?.();
+    });
+
+    select.addEventListener("change", () => this.onChange?.());
+    count.addEventListener("input", () => this.onChange?.());
+    count.addEventListener("change", () => this.onChange?.());
 
     row.append(select, count, remove);
     this.container.appendChild(row);
+    this.onChange?.();
   }
 
   private setOwnerSelect(select: HTMLSelectElement, ownerId: string) {

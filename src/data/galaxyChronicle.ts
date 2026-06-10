@@ -1,6 +1,9 @@
 import { routeLabel, type SystemConnection } from "./ConnectionTypes";
-import { ROUTE_TIMELINE_LABELS } from "./RouteTypes";
-import { TIMELINE_ENTRY_LABELS, type TimelineEntry } from "./TimelineTypes";
+import type { RouteTimelineEntryType } from "./RouteTypes";
+import type { TimelineEntry, TimelineEntryType } from "./TimelineTypes";
+import { getTimelineEntryLabel } from "../i18n/timelineLabels";
+import { getRouteTimelineLabel } from "../i18n/routeLabels";
+import { getLocale } from "../i18n/locale";
 import type { SystemData } from "../galaxy/NodeSystem";
 
 export type ChronicleSource = "system" | "route";
@@ -53,7 +56,7 @@ function systemEvents(
       year: entry.year,
       source: "system",
       type: entry.type,
-      typeLabel: TIMELINE_ENTRY_LABELS[entry.type],
+      typeLabel: getTimelineEntryLabel(entry.type as TimelineEntryType, getLocale()),
       title: entry.title,
       description: entry.description,
       actorId: entry.actorId,
@@ -79,7 +82,7 @@ function routeEvents(
       year: entry.year,
       source: "route",
       type: entry.type,
-      typeLabel: ROUTE_TIMELINE_LABELS[entry.type],
+      typeLabel: getRouteTimelineLabel(entry.type as RouteTimelineEntryType, getLocale()),
       title: entry.title,
       description: entry.description,
       connectionId: conn.id,

@@ -1,6 +1,9 @@
 import { buildGalaxyChronicle, type ChronicleItem } from "../data/galaxyChronicle";
-import { TIMELINE_ENTRY_LABELS } from "../data/TimelineTypes";
-import { ROUTE_TIMELINE_LABELS } from "../data/RouteTypes";
+import type { TimelineEntryType } from "../data/TimelineTypes";
+import type { RouteTimelineEntryType } from "../data/RouteTypes";
+import { getTimelineEntryLabel } from "../i18n/timelineLabels";
+import { getRouteTimelineLabel } from "../i18n/routeLabels";
+import { getLocale, t } from "../i18n/locale";
 import { selectionManager } from "../editor/SelectionManager";
 import { ownerManager } from "../galaxy/OwnerManager";
 import { galaxyScene } from "../scene/GalaxyScene";
@@ -26,11 +29,15 @@ export class ChroniclePanel {
       this.populateFilters();
       this.refresh();
     });
+    document.addEventListener("locale:changed", () => {
+      this.populateFilters();
+      this.refresh();
+    });
     this.refresh();
   }
 
   private populateFilters() {
-    this.ownerFilter.innerHTML = `<option value="">All actors</option>`;
+    this.ownerFilter.innerHTML = `<option value="">${t("chronicle.allActors")}</option>`;
     ownerManager.getAll().forEach((o) => {
       if (o.id === "none") return;
       const opt = document.createElement("option");
@@ -39,13 +46,19 @@ export class ChroniclePanel {
       this.ownerFilter.appendChild(opt);
     });
 
-    this.typeFilter.innerHTML = `<option value="">All types</option>`;
+    const locale = getLocale();
+    this.typeFilter.innerHTML = `<option value="">${t("chronicle.allTypes")}</option>`;
     const types = new Map<string, string>();
-    for (const [k, v] of Object.entries(TIMELINE_ENTRY_LABELS)) {
-      types.set(k, v);
+    const timelineTypes: TimelineEntryType[] = [
+      "colonized", "owner_change", "occupied", "liberated", "abandoned",
+      "population", "fleet_change", "fleet_move", "economy", "minerals", "event", "custom",
+    ];
+    for (const k of timelineTypes) {
+      types.set(k, getTimelineEntryLabel(k, locale));
     }
-    for (const [k, v] of Object.entries(ROUTE_TIMELINE_LABELS)) {
-      types.set(k, v);
+    const routeTypes: RouteTimelineEntryType[] = ["route_open", "route_close"];
+    for (const k of routeTypes) {
+      types.set(k, getRouteTimelineLabel(k, locale));
     }
     for (const [k, label] of types) {
       const opt = document.createElement("option");
@@ -70,7 +83,7 @@ export class ChroniclePanel {
     );
 
     if (items.length === 0) {
-      this.listEl.innerHTML = `<p class="panel-empty">No events match the filters.</p>`;
+      this.listEl.innerHTML = `<p class="panel-empty">${t("chronicle.empty")}</p>`;
       return;
     }
 

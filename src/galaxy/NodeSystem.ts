@@ -6,7 +6,6 @@ import {
   Text,
 } from "pixi.js";
 import { selectionManager } from "../editor/SelectionManager";
-import { nodeInspector } from "../ui/NodeInspector";
 import { ConnectionLine } from "./ConnectionLine";
 import { ownerManager } from "./OwnerManager";
 import {
@@ -28,6 +27,8 @@ import { parsePopulationToInt } from "../data/population";
 import { galaxyScene } from "../scene/GalaxyScene";
 import type { SystemBaseline } from "../data/timelineState";
 import type { TimelineEntry } from "../data/TimelineTypes";
+import type { NodeAdventure } from "../data/AdventureTypes";
+import type { AdventureNodeState } from "../data/adventureState";
 
 export class NodeSystem extends Container {
   public data: SystemData;
@@ -45,10 +46,12 @@ export class NodeSystem extends Container {
   private capitalRing: Graphics;
   private facilityLayer: Container;
   private fleetLayer: Container;
+  private adventureFog: Graphics;
   private visual: Container;
   private statusLabel: Text;
   /** Vista por año; no modifica `data` (export / inspector). */
   private viewState: SystemBaseline | null = null;
+  private adventureVisual: AdventureNodeState | null = null;
   private static readonly NODE_RADIUS = 10;
   private static readonly LABEL_GAP = 4;
   private static readonly FACILITY_ABOVE_GAP = 4;
@@ -88,11 +91,14 @@ export class NodeSystem extends Container {
     this.facilityLayer.eventMode = "none";
     this.fleetLayer = new Container();
     this.fleetLayer.eventMode = "none";
+    this.adventureFog = new Graphics();
+    this.adventureFog.eventMode = "none";
     this.visual.addChild(circle);
     this.visual.addChild(this.occupationRing);
     this.visual.addChild(this.occupationMask);
     this.visual.addChild(this.occupationOverlay);
     this.visual.addChild(this.capitalRing);
+    this.visual.addChild(this.adventureFog);
     this.addChild(this.visual);
     this.addChild(this.fleetLayer);
     this.addChild(this.facilityLayer);
@@ -124,7 +130,13 @@ export class NodeSystem extends Container {
         galaxyScene.beginRepositionDrag(e);
         return;
       }
-      selectionManager.selectNode(this, e.shiftKey);
+      if (
+        galaxyScene.getPlayMode() &&
+        !galaxyScene.isNodeAdventureAccessible(this.data.id)
+      ) {
+        return;
+      }
+      selectionManager.selectNode(this, e.shiftKey && !galaxyScene.getPlayMode());
     });
     this.updateOwnerVisual();
     this.updateOccupationVisual();
@@ -144,7 +156,6 @@ export class NodeSystem extends Container {
       this.capitalRing.visible = false;
       this.facilityLayer.visible = false;
       this.fleetLayer.visible = false;
-      nodeInspector.load(this.data);
     } else {
       const owner = ownerManager.get(this.getDisplayOwner());
       this.circle.circle(0, 0, 10).fill(owner.color);
@@ -154,7 +165,6 @@ export class NodeSystem extends Container {
       this.updateFacilityIcons();
       this.updateFleetMarkers();
       this.updateStatusLabel();
-      nodeInspector.clear();
     }
   }
 
@@ -266,7 +276,12 @@ export class NodeSystem extends Container {
     this.statusLabel.visible = true;
     const owner = ownerManager.get(this.getDisplayOwner());
     const name = this.data.name?.trim() || "System";
-    const prefix = this.getDisplayIsCapital() ? "★ " : "";
+    let prefix = this.getDisplayIsCapital() ? "★ " : "";
+    if (this.adventureVisual?.visibility === "completed") {
+      prefix = "✓ " + prefix;
+    } else if (this.adventureVisual?.visibility === "locked") {
+      prefix = "🔒 " + prefix;
+    }
     let text = `${prefix}${name} (${owner.short})`;
 
     if (this.isOccupied()) {
@@ -414,6 +429,49 @@ export class NodeSystem extends Container {
     }
   }
 
+  public applyAdventureVisual(state: AdventureNodeState | null) {
+    this.adventureVisual = state;
+    this.adventureFog.clear();
+
+    if (!state || state.visibility === "unlocked") {
+      this.visual.alpha = 1;
+      this.adventureFog.visible = false;
+      if (this.visible && galaxyScene.getPlayMode() && state?.unlocked) {
+        this.eventMode = "static";
+      }
+      this.updateStatusLabel();
+      return;
+    }
+
+    const size = Math.max(0.25, this.data.size ?? 1);
+    const r = NodeSystem.NODE_RADIUS * size + 4;
+
+    if (state.visibility === "completed") {
+      this.visual.alpha = 1;
+      this.adventureFog.visible = true;
+      this.adventureFog
+        .circle(0, 0, r + 2)
+        .stroke({ width: 2, color: 0x2ecc71, alpha: 0.9 });
+      this.eventMode = this.visible ? "static" : "none";
+    } else if (state.visibility === "locked") {
+      this.visual.alpha = galaxyScene.getPlayMode() ? 0.35 : 0.55;
+      this.adventureFog.visible = true;
+      this.adventureFog
+        .circle(0, 0, r + 1)
+        .fill({ color: 0x111122, alpha: 0.55 });
+      this.adventureFog
+        .circle(0, 0, r + 1)
+        .stroke({ width: 1.5, color: 0x888899, alpha: 0.7 });
+      if (galaxyScene.getPlayMode()) {
+        this.eventMode = "none";
+      } else {
+        this.eventMode = this.visible ? "static" : "none";
+      }
+    }
+
+    this.updateStatusLabel();
+  }
+
   public applyDisplayFromData() {
     this.viewState = null;
     this.visible = true;
@@ -466,6 +524,7 @@ export class NodeSystem extends Container {
 
   private onDragStart(event: FederatedPointerEvent) {
     if (event.button !== 0) return;
+    if (galaxyScene.getPlayMode()) return;
     if (galaxyScene.getEditMode() !== "edit") return;
 
     event.stopPropagation();
@@ -542,4 +601,6 @@ export interface SystemData {
   facilities?: FacilityId[];
   /** Flotas por imperio: `{ owner, count }[]` o `{ ownerId: count }`. */
   fleets?: FleetPresence[];
+  /** Progreso de aventura / campaña (opcional). */
+  adventure?: NodeAdventure;
 }

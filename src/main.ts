@@ -9,8 +9,17 @@ import { ownerEditor } from "./ui/OwnerEditor";
 import { chroniclePanel } from "./ui/ChroniclePanel";
 import { connectionInspector } from "./ui/ConnectionInspector";
 import { mapViewToggles } from "./ui/MapViewToggles";
+import { mapProfilePanel } from "./ui/MapProfilePanel";
+import { mapCalendarSettings } from "./ui/MapCalendarSettings";
 import { yearScrubber } from "./ui/YearScrubber";
+import { getActiveTerminology } from "./ui/MapProfilePanel";
+import { initLocaleController } from "./i18n/LocaleController";
+import { getLocale, t } from "./i18n/locale";
 import { exportMapAsPng } from "./ui/visualExport";
+import { mapStatusHud } from "./ui/MapStatusHud";
+import { milestoneHud } from "./ui/MilestoneHud";
+import { initPlayModeUi, syncPlayModeUi } from "./ui/playModeUi";
+import { undoManager } from "./editor/UndoManager";
 
 new Game();
 nodeInspector;
@@ -20,18 +29,27 @@ yearScrubber;
 chroniclePanel;
 connectionInspector;
 mapViewToggles;
+mapProfilePanel;
+mapCalendarSettings;
 
-const EDIT_MODE_HINTS: Record<MapEditMode, string> = {
-  edit: "Left-click empty space to add a system. Middle-click or Space+drag pans the view.",
-  moveBackground: "Left-click drag moves only the galaxy image (not the camera).",
-  moveNodes: "Left-click drag moves all systems together (not the camera).",
-};
+function syncEditModeHint() {
+  const hint = document.getElementById("map-edit-mode-hint");
+  if (!hint) return;
+  const mode = galaxyScene.getEditMode();
+  if (mode === "edit") {
+    hint.textContent = getActiveTerminology().placeNodesHint;
+  } else if (mode === "moveBackground") {
+    hint.textContent = t("editMode.moveBg");
+  } else {
+    hint.textContent = t("editMode.moveNodes");
+  }
+}
 
 function syncEditModeControls() {
-  const modeSelect = document.getElementById("map-edit-mode") as HTMLSelectElement | null;
+  const modeSelect = document.getElementById("hud-map-edit-mode") as HTMLSelectElement | null;
   const hint = document.getElementById("map-edit-mode-hint");
   const moveBackgroundOption = modeSelect?.querySelector(
-    'option[value="moveBackground"]'
+    'option[value="moveBackground"]',
   ) as HTMLOptionElement | null;
 
   if (moveBackgroundOption) {
@@ -43,8 +61,12 @@ function syncEditModeControls() {
     galaxyScene.setEditMode("edit");
   }
 
+  if (modeSelect && modeSelect.value !== galaxyScene.getEditMode()) {
+    modeSelect.value = galaxyScene.getEditMode();
+  }
+
   if (hint) {
-    hint.textContent = EDIT_MODE_HINTS[galaxyScene.getEditMode()];
+    syncEditModeHint();
   }
 }
 
@@ -77,15 +99,20 @@ function populateFacilityLegend() {
   ).join("");
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+function bootUi() {
+  sidebar.init();
+  nodeInspector.init();
+  mapStatusHud.init();
+  milestoneHud.init();
+  undoManager.init();
+  initLocaleController();
+  mapProfilePanel.init();
+  mapCalendarSettings.init();
+  initPlayModeUi();
   populateFacilityLegend();
 
-  const mapEditModeSelect = document.getElementById("map-edit-mode") as HTMLSelectElement | null;
-
-  mapEditModeSelect?.addEventListener("change", () => {
-    galaxyScene.setEditMode(mapEditModeSelect.value as MapEditMode);
-    syncEditModeControls();
-  });
+  document.addEventListener("editMode:changed", syncEditModeControls);
+  document.addEventListener("playMode:changed", syncEditModeControls);
 
   sidebar.onChange((tab) => {
     if (tab === "stats") statsPanel.refresh();
@@ -102,10 +129,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("map:updated", onMapUpdated);
   document.addEventListener("viewYear:changed", onMapUpdated);
+  document.addEventListener("terminology:changed", syncEditModeControls);
+  document.addEventListener("mapProfile:changed", syncEditModeControls);
+  document.addEventListener("locale:changed", syncEditModeControls);
   galaxyScene.setViewYear(galaxyScene.getCalendar().defaultYear ?? 2200);
 
   syncEditModeControls();
   syncBackgroundControls();
+  syncPlayModeUi();
 
   const importStatus = document.getElementById("import-status");
   const setImportStatus = (message: string, isError = false) => {
@@ -155,20 +186,20 @@ window.addEventListener("DOMContentLoaded", () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "galaxy-map.json";
+    a.download = getActiveTerminology().exportFilename;
     a.click();
     URL.revokeObjectURL(url);
   });
 
   exportPngBtn?.addEventListener("click", () => {
-    setImportStatus("Exporting PNG…");
+    setImportStatus(t("map.exportPngBusy"));
     void exportMapAsPng()
       .then((ok) => {
-        setImportStatus(ok ? "PNG exported." : "PNG export failed (see console).", !ok);
+        setImportStatus(ok ? t("map.exportPngOk") : t("map.exportPngFail"), !ok);
       })
       .catch((err) => {
         console.error("PNG export failed", err);
-        setImportStatus("PNG export failed.", true);
+        setImportStatus(t("map.exportPngFail"), true);
       });
   });
 
@@ -183,12 +214,12 @@ window.addEventListener("DOMContentLoaded", () => {
     const file = fileInput.files?.[0];
     if (!file) return;
 
-    setImportStatus("Loading…");
+    setImportStatus(t("map.importLoading"));
 
     const reader = new FileReader();
 
     reader.onerror = () => {
-      setImportStatus("Could not read file.", true);
+      setImportStatus(t("map.importReadFail"), true);
       fileInput.value = "";
     };
 
@@ -197,7 +228,7 @@ window.addEventListener("DOMContentLoaded", () => {
         try {
           const text = e.target?.result;
           if (typeof text !== "string") {
-            setImportStatus("Empty file.", true);
+            setImportStatus(t("map.importEmpty"), true);
             return;
           }
 
@@ -205,7 +236,7 @@ window.addEventListener("DOMContentLoaded", () => {
           const ok = await galaxyScene.loadMapData(json);
 
           if (!ok) {
-            setImportStatus("Invalid map JSON (see console).", true);
+            setImportStatus(t("map.importInvalid"), true);
             return;
           }
 
@@ -213,11 +244,11 @@ window.addEventListener("DOMContentLoaded", () => {
           syncEditModeControls();
           onMapUpdated();
           setImportStatus(
-            `Loaded ${galaxyScene.getSystems().length} systems.`
+            t("map.importOk", getLocale(), { n: galaxyScene.getSystems().length }),
           );
         } catch (err) {
           console.error("Invalid JSON file", err);
-          setImportStatus("Invalid JSON file.", true);
+          setImportStatus(t("map.importBadJson"), true);
         } finally {
           fileInput.value = "";
         }
@@ -226,4 +257,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     reader.readAsText(file);
   });
-});
+}
+
+bootUi();

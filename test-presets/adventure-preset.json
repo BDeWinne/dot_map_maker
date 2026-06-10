@@ -1,0 +1,193 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdAt": 1740000003000,
+    "epoch": "Acto I — La Isla Olvidada",
+    "defaultYear": 1,
+    "viewYear": 1,
+    "profile": "adventure",
+    "playMode": true
+  },
+  "owners": [
+    { "id": "none", "name": "Sin facción", "short": "-", "color": "#666666" },
+    {
+      "id": "faction_party",
+      "name": "Party del jugador",
+      "short": "PTY",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "faction_cult",
+      "name": "Culto de la Marea Negra",
+      "short": "CMN",
+      "color": "#1a5276"
+    }
+  ],
+  "systems": [
+    {
+      "id": "mile_beach",
+      "name": "Playa del naufragio",
+      "starType": "Inicio",
+      "owner": "none",
+      "description": "La party llega aquí. Campamento base y primeros suministros.",
+      "x": 0,
+      "y": 0,
+      "size": 1,
+      "facilities": ["logistics"],
+      "adventure": {
+        "startNode": true,
+        "completed": false,
+        "encounter": "Supervivencia: buscar agua y revisar restos del barco.",
+        "reward": "Mapa rasgado con la ruta al bosque."
+      }
+    },
+    {
+      "id": "mile_jungle",
+      "name": "Borde de la jungla",
+      "starType": "Exploración",
+      "owner": "none",
+      "description": "Sendero visible desde la playa. Trampas goblin opcionales.",
+      "x": 150,
+      "y": -30,
+      "size": 1.1,
+      "facilities": ["ruins"],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["mile_beach"],
+        "encounter": "Percepción DC 12: trampas de lazo. Combate menor (2 goblins).",
+        "reward": "Cabo de madera tallado — llave narrativa."
+      }
+    },
+    {
+      "id": "mile_ruins",
+      "name": "Templo hundido",
+      "starType": "Dungeon",
+      "owner": "none",
+      "description": "Puzzle de los tres símbolos. Acceso al santuario interior.",
+      "x": 280,
+      "y": 40,
+      "size": 1.3,
+      "facilities": ["ruins", "energy"],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["mile_jungle"],
+        "encounter": "Puzzle: alinear símbolos de sol, ola y serpiente.",
+        "reward": "Amuleto de respiración acuática."
+      }
+    },
+    {
+      "id": "mile_village",
+      "name": "Aldea de Pescadores",
+      "starType": "Social",
+      "owner": "faction_party",
+      "description": "NPCs: elder Mara, pescador Tom. Pista sobre la cueva.",
+      "population": 200,
+      "x": -120,
+      "y": 100,
+      "size": 1.2,
+      "facilities": ["trade", "agri"],
+      "adventure": {
+        "locked": true,
+        "encounter": "Social: persuadir a Mara (DC 10) para obtener la llave de la cueva.",
+        "reward": "Llave de la Cueva de las Mareas."
+      }
+    },
+    {
+      "id": "mile_cave",
+      "name": "Cueva de las Mareas",
+      "starType": "Combate",
+      "owner": "faction_cult",
+      "description": "Cultistas y ritual incompleto. Boss opcional al fondo.",
+      "x": 80,
+      "y": 200,
+      "size": 1.4,
+      "facilities": ["bastion"],
+      "fleets": [{ "owner": "faction_cult", "count": 2 }],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["mile_village", "mile_ruins"],
+        "encounter": "4 cultistas + sacerdote de la Marea. Ritual interrumpible.",
+        "reward": "Cristal de marea — desbloquea el muelle secreto."
+      }
+    },
+    {
+      "id": "mile_dock",
+      "name": "Muelle secreto",
+      "starType": "Final Acto I",
+      "owner": "none",
+      "description": "Salida de la isla. Requiere el cristal de marea.",
+      "x": 350,
+      "y": 180,
+      "size": 1,
+      "facilities": ["gateway", "shipyard"],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["mile_cave"],
+        "encounter": "Epílogo: huida en bote. Gancho para Acto II.",
+        "reward": "Acto I completado."
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "path-beach-jungle",
+      "from": "mile_beach",
+      "to": "mile_jungle",
+      "name": "Sendero costero",
+      "routeType": "trade",
+      "status": "open"
+    },
+    {
+      "id": "path-jungle-ruins",
+      "from": "mile_jungle",
+      "to": "mile_ruins",
+      "routeType": "clandestine",
+      "status": "open"
+    },
+    {
+      "id": "path-beach-village",
+      "from": "mile_beach",
+      "to": "mile_village",
+      "name": "Camino a la aldea",
+      "routeType": "trade",
+      "status": "open"
+    },
+    {
+      "id": "path-village-cave",
+      "from": "mile_village",
+      "to": "mile_cave",
+      "routeType": "military",
+      "status": "open"
+    },
+    {
+      "id": "path-ruins-cave",
+      "from": "mile_ruins",
+      "to": "mile_cave",
+      "routeType": "hyperlane",
+      "status": "open"
+    },
+    {
+      "id": "path-cave-dock",
+      "from": "mile_cave",
+      "to": "mile_dock",
+      "name": "Túnel inundado",
+      "routeType": "clandestine",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-dock-1",
+          "year": 1,
+          "type": "route_open",
+          "title": "Visible solo con cristal de marea"
+        }
+      ]
+    }
+  ],
+  "background": {
+    "src": "backgrounds/adventure.svg",
+    "x": 0,
+    "y": 0,
+    "scale": 1,
+    "alpha": 0.92
+  }
+}
