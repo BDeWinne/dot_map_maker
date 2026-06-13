@@ -8,6 +8,8 @@ import { getTimelineEntryLabel } from "../i18n/timelineLabels";
 import { getLocale, t } from "../i18n/locale";
 import type { NodeSystem } from "../galaxy/NodeSystem";
 import { FleetRowEditor } from "./FleetRowEditor";
+import { createAutoSave } from "./autoSave";
+import { isPlayMode } from "./playModeUi";
 
 export class TimelinePanel {
   private systemLabel = document.getElementById("timeline-system-label")!;
@@ -35,21 +37,27 @@ export class TimelinePanel {
       const node = this.getSelectedNode();
       return this.entryActor.value || node?.data.owner || "none";
     },
+    () => this.autoSave.schedule(() => this.saveEntry()),
   );
   private editingId: string | null = null;
+  private autoSave = createAutoSave();
 
   constructor() {
     this.populateEntryTypes();
     this.populateActors();
+    this.bindAutoSave();
 
     document.getElementById("entry-fleet-add")?.addEventListener("click", () => {
       this.fleetRowEditor.addRow();
+      this.autoSave.schedule(() => this.saveEntry());
     });
 
-    document.getElementById("entry-add-btn")?.addEventListener("click", () => this.saveEntry());
     document.getElementById("entry-clear-btn")?.addEventListener("click", () => this.resetForm());
 
-    this.entryType.addEventListener("change", () => this.syncFleetFieldVisibility());
+    this.entryType.addEventListener("change", () => {
+      this.syncFleetFieldVisibility();
+      this.autoSave.schedule(() => this.saveEntry());
+    });
 
     selectionManager.on("node:selected", (node: NodeSystem) => this.onNodeSelected(node));
     document.addEventListener("node:selected", ((e: CustomEvent<NodeSystem>) => {
@@ -67,6 +75,26 @@ export class TimelinePanel {
 
     this.loadCalendarFields();
     this.onNodeCleared();
+  }
+
+  private bindAutoSave() {
+    const schedule = () => this.autoSave.schedule(() => this.saveEntry());
+    const fields: (HTMLElement | null)[] = [
+      this.entryYear,
+      this.entryActor,
+      this.entryTitle,
+      this.entryDescription,
+      this.entryPopulation,
+      this.entryEconomy,
+      this.entryMinerals,
+      this.entryFlavor,
+      this.entryTargetSystem,
+      this.entryFleetCount,
+    ];
+    for (const el of fields) {
+      el?.addEventListener("input", schedule);
+      el?.addEventListener("change", () => this.saveEntry());
+    }
   }
 
   private populateEntryTypes() {
@@ -102,12 +130,14 @@ export class TimelinePanel {
   }
 
   private onNodeSelected(node: NodeSystem) {
-    this.emptyEl.hidden = true;
-    this.formWrap.hidden = false;
-    this.systemLabel.textContent = node.data.name;
-    this.populateTargetSystems(node);
-    this.resetForm();
-    this.renderList(node);
+    this.autoSave.runSuppressed(() => {
+      this.emptyEl.hidden = true;
+      this.formWrap.hidden = false;
+      this.systemLabel.textContent = node.data.name;
+      this.populateTargetSystems(node);
+      this.resetForm();
+      this.renderList(node);
+    });
   }
 
   private populateTargetSystems(current: NodeSystem) {
@@ -181,8 +211,8 @@ export class TimelinePanel {
             <p class="timeline-meta">${escapeHtml(actor)}${extras ? ` · ${escapeHtml(extras)}` : ""}</p>
             ${entry.flavor ? `<p class="timeline-flavor">${escapeHtml(entry.flavor)}</p>` : ""}
             <div class="timeline-entry-actions">
-              <button type="button" class="btn-small" data-edit="${entry.id}">Edit</button>
-              <button type="button" class="btn-small btn-danger" data-delete="${entry.id}">Delete</button>
+              <button type="button" class="btn-small" data-edit="${entry.id}">${t("common.edit")}</button>
+              <button type="button" class="btn-small btn-danger" data-delete="${entry.id}">${t("common.delete")}</button>
             </div>
           </article>
         `;
@@ -199,6 +229,7 @@ export class TimelinePanel {
 
     this.listEl.querySelectorAll("[data-delete]").forEach((btn) => {
       btn.addEventListener("click", () => {
+        if (isPlayMode()) return;
         const id = (btn as HTMLElement).dataset.delete!;
         node.data.timeline = (node.data.timeline ?? []).filter((e) => e.id !== id);
         delete node.data.baseline;
@@ -210,7 +241,8 @@ export class TimelinePanel {
   }
 
   private loadEntryToForm(entry: TimelineEntry) {
-    this.editingId = entry.id;
+    this.autoSave.runSuppressed(() => {
+      this.editingId = entry.id;
     this.entryYear.value = String(entry.year);
     this.entryType.value = entry.type;
     this.entryActor.value = entry.actorId ?? "";
@@ -224,10 +256,12 @@ export class TimelinePanel {
     this.entryFleetCount.value = entry.fleetCount ? String(entry.fleetCount) : "";
     this.fleetRowEditor.render(entry.fleets ?? []);
     this.syncFleetFieldVisibility();
+    });
   }
 
   private resetForm() {
-    this.editingId = null;
+    this.autoSave.runSuppressed(() => {
+      this.editingId = null;
     this.entryYear.value = String(galaxyScene.getViewYear());
     this.entryType.value = "event";
     this.entryActor.value = "";
@@ -241,6 +275,7 @@ export class TimelinePanel {
     this.entryFleetCount.value = "";
     this.fleetRowEditor.clear();
     this.syncFleetFieldVisibility();
+    });
   }
 
   /** Sin filas = no cambia flotas; tipo fleet_change sin filas = quitar todas. */
@@ -253,6 +288,7 @@ export class TimelinePanel {
   }
 
   private saveEntry() {
+    if (isPlayMode()) return;
     const node = this.getSelectedNode();
     if (!node) return;
 
@@ -290,7 +326,7 @@ export class TimelinePanel {
 
     delete node.data.baseline;
     syncPresentFieldsFromTimeline(node.data, galaxyScene.getPresentYear());
-    this.resetForm();
+    this.editingId = entry.id;
     this.renderList(node);
     galaxyScene.applyTimelineView();
     document.dispatchEvent(new CustomEvent("map:updated"));

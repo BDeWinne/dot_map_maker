@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdAt": 1740000005000,
+    "epoch": "Tercera Era",
+    "defaultYear": 1456,
+    "viewYear": 1462,
+    "profile": "fantasy",
+    "playMode": false
+  },
+  "owners": [
+    { "id": "none", "name": "Tierra de nadie", "short": "-", "color": "#666666" },
+    { "id": "kingdom_ald", "name": "Reino de Aldermarch", "short": "ALD", "color": "#3498db" },
+    { "id": "league_free", "name": "Liga de Ciudades Libres", "short": "LCL", "color": "#f1c40f" }
+  ],
+  "systems": [
+    {
+      "id": "tr_capital",
+      "name": "Puerto de Aldermarch",
+      "starType": "Ciudad portuaria",
+      "owner": "kingdom_ald",
+      "isCapital": true,
+      "population": 180000,
+      "x": 0,
+      "y": 0,
+      "size": 1.8,
+      "facilities": ["trade", "shipyard", "bastion"],
+      "fleets": [{ "owner": "kingdom_ald", "count": 3 }]
+    },
+    {
+      "id": "tr_mine",
+      "name": "Canteras del Este",
+      "starType": "Minas",
+      "owner": "kingdom_ald",
+      "population": 42000,
+      "x": 160,
+      "y": -50,
+      "size": 1.2,
+      "facilities": ["mining", "refinery"]
+    },
+    {
+      "id": "tr_league",
+      "name": "Mercado de las Siete Torres",
+      "starType": "Ciudad libre",
+      "owner": "league_free",
+      "isCapital": true,
+      "population": 95000,
+      "x": -140,
+      "y": 90,
+      "size": 1.6,
+      "facilities": ["trade", "agri"],
+      "fleets": [{ "owner": "league_free", "count": 2 }]
+    }
+  ],
+  "connections": [
+    {
+      "id": "tr_path-1",
+      "from": "tr_capital",
+      "to": "tr_mine",
+      "routeType": "trade",
+      "name": "Camino del mineral",
+      "timeline": [
+        { "id": "tr-ev-1", "year": 1458, "type": "route_open", "title": "Ruta comercial abierta" },
+        { "id": "tr-ev-2", "year": 1460, "type": "route_close", "title": "Bandidos bloquean el paso", "description": "Caravanas desviadas por el sur." },
+        { "id": "tr-ev-3", "year": 1464, "type": "route_open", "title": "Escolta real restablece el comercio" }
+      ]
+    },
+    {
+      "id": "tr_path-2",
+      "from": "tr_capital",
+      "to": "tr_league",
+      "routeType": "hyperlane",
+      "name": "Ruta de especias",
+      "timeline": [
+        { "id": "tr-ev-4", "year": 1455, "type": "route_open", "title": "Tratado de libre comercio" }
+      ]
+    }
+  ],
+  "background": { "src": "backgrounds/fantasy.svg", "opacity": 1 }
+}

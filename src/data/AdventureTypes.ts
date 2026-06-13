@@ -24,6 +24,8 @@ export interface AdventureEncounter {
   title: string;
   kind?: AdventureEncounterKind;
   description?: string;
+  /** GM-only notes; hidden in play mode. */
+  gmNotes?: string;
   completed?: boolean;
   rewards?: AdventureReward[];
 }
@@ -31,7 +33,9 @@ export interface AdventureEncounter {
 export interface NodeAdventure {
   /** Visible and unlocked at the start of play mode. */
   startNode?: boolean;
-  /** Hidden in play mode until unlock rules are met. */
+  /** Hidden on the map in play mode until discovery rules are met (fog of war). */
+  hidden?: boolean;
+  /** Requires unlock rules before the player can interact. */
   locked?: boolean;
   /** Node ids that must be marked completed before this unlocks. */
   unlockRequires?: string[];
@@ -77,6 +81,7 @@ function normalizeEncounter(raw: unknown): AdventureEncounter | null {
   const title = String(o.title ?? "").trim();
   if (!title) return null;
   const description = String(o.description ?? "").trim() || undefined;
+  const gmNotes = String(o.gmNotes ?? "").trim() || undefined;
   const rewards = Array.isArray(o.rewards)
     ? o.rewards.map(normalizeReward).filter((r): r is AdventureReward => r !== null)
     : undefined;
@@ -87,6 +92,7 @@ function normalizeEncounter(raw: unknown): AdventureEncounter | null {
   const kind = normalizeKind(o.kind);
   if (kind) enc.kind = kind;
   if (description) enc.description = description;
+  if (gmNotes) enc.gmNotes = gmNotes;
   if (o.completed) enc.completed = true;
   if (rewards && rewards.length > 0) enc.rewards = rewards;
   return enc;
@@ -126,6 +132,7 @@ export function normalizeAdventure(raw: unknown): NodeAdventure | undefined {
 
   const adv: NodeAdventure = {};
   if (o.startNode) adv.startNode = true;
+  if (o.hidden) adv.hidden = true;
   if (o.locked) adv.locked = true;
   if (o.completed) adv.completed = true;
   if (unlockRequires && unlockRequires.length > 0) adv.unlockRequires = unlockRequires;
@@ -133,6 +140,7 @@ export function normalizeAdventure(raw: unknown): NodeAdventure | undefined {
 
   if (
     !adv.startNode &&
+    !adv.hidden &&
     !adv.locked &&
     !adv.completed &&
     !adv.unlockRequires &&

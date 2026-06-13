@@ -165,14 +165,14 @@ export function normalizeMapProfile(raw: unknown): MapProfileId {
   return "galaxy";
 }
 
-/** Import: explicit `playMode` wins; otherwise adventure maps default to play mode on. */
+/** Import: explicit `playMode` wins; otherwise default to editor mode (false). */
 export function resolveImportedPlayMode(
-  profile: MapProfileId,
+  _profile: MapProfileId,
   raw: unknown,
 ): boolean {
   if (raw === true || raw === "true" || raw === 1 || raw === "1") return true;
   if (raw === false || raw === "false" || raw === 0 || raw === "0") return false;
-  return profile === "adventure";
+  return false;
 }
 
 export function getMapProfileDef(id: MapProfileId): MapProfileDef {

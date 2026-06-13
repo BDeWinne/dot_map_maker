@@ -20,6 +20,7 @@ export class ConnectionLine extends Graphics {
 
     this.on("pointerdown", (e) => {
       if (e.button === 0) {
+        e.stopPropagation();
         selectionManager.selectConnection(this);
       }
       if (e.button === 1) {

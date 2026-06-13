@@ -6,7 +6,7 @@
     "defaultYear": 1492,
     "viewYear": 1492,
     "profile": "dnd",
-    "playMode": true
+    "playMode": false
   },
   "owners": [
     { "id": "none", "name": "Neutral", "short": "-", "color": "#666666" },

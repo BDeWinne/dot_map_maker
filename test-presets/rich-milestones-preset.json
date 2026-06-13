@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdAt": 1740000006000,
+    "epoch": "Campoña del Abismo",
+    "defaultYear": 1,
+    "viewYear": 1,
+    "profile": "adventure",
+    "playMode": false
+  },
+  "owners": [
+    { "id": "none", "name": "Sin facción", "short": "-", "color": "#666666" },
+    { "id": "party", "name": "Compañía del Abismo", "short": "PTY", "color": "#2ecc71" }
+  ],
+  "systems": [
+    {
+      "id": "rm_camp",
+      "name": "Campamento base",
+      "starType": "Inicio",
+      "owner": "none",
+      "x": 0,
+      "y": 0,
+      "size": 1,
+      "facilities": ["logistics"],
+      "adventure": {
+        "startNode": true,
+        "encounters": [
+          {
+            "id": "enc-camp-1",
+            "title": "Briefing del capitán",
+            "kind": "social",
+            "description": "La compañía recibe el mapa del abismo y las reglas de expedición.",
+            "rewards": [{ "id": "rw-1", "label": "Mapa del nivel 1", "notes": "Muestra el primer descenso" }]
+          }
+        ]
+      }
+    },
+    {
+      "id": "rm_hall",
+      "name": "Sala de los ecos",
+      "starType": "Dungeon",
+      "owner": "none",
+      "x": 140,
+      "y": -20,
+      "size": 1.2,
+      "facilities": ["ruins"],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["rm_camp"],
+        "encounters": [
+          {
+            "id": "enc-hall-1",
+            "title": "Guardianes de piedra",
+            "kind": "combat",
+            "description": "Dos constructos activan si fallan sigilo DC 14.",
+            "rewards": [{ "id": "rw-2", "label": "Llave de resonancia" }]
+          },
+          {
+            "id": "enc-hall-2",
+            "title": "Puzzle de los ecos",
+            "kind": "puzzle",
+            "description": "Repetir la secuencia de tonos en los pilares.",
+            "rewards": [
+              { "id": "rw-3", "label": "Gema de eco", "notes": "Abre la puerta sur" },
+              { "id": "rw-4", "label": "50 XP", "notes": "Opcional por creatividad" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "rm_boss",
+      "name": "Corazón del abismo",
+      "starType": "Jefe",
+      "owner": "none",
+      "x": 280,
+      "y": 30,
+      "size": 1.4,
+      "facilities": ["energy", "ruins"],
+      "adventure": {
+        "locked": true,
+        "unlockRequires": ["rm_hall"],
+        "encounters": [
+          {
+            "id": "enc-boss-1",
+            "title": "El Vigía sumergido",
+            "kind": "combat",
+            "description": "Combate final con fases de inundación.",
+            "rewards": [
+              { "id": "rw-5", "label": "Núcleo del abismo" },
+              { "id": "rw-6", "label": "Título: Rompeabismos" }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "connections": [
+    { "id": "rm-link-1", "from": "rm_camp", "to": "rm_hall", "routeType": "hyperlane" },
+    { "id": "rm-link-2", "from": "rm_hall", "to": "rm_boss", "routeType": "hyperlane" }
+  ],
+  "background": { "src": "backgrounds/adventure.svg", "opacity": 1 }
+}

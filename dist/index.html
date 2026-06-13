@@ -1,8 +1,161 @@
-<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dot Map Maker</title></head><body><div id="map-view-toggles" class="map-view-toggles" role="group" data-i18n-aria="toggle.mapAria"><button type="button" id="toggle-map-icons" class="map-view-toggle is-on" aria-pressed="true" data-i18n="toggle.icons">Iconos</button> <button type="button" id="toggle-map-labels" class="map-view-toggle is-on" aria-pressed="true" data-i18n="toggle.labels">Textos</button> <button type="button" id="toggle-map-fleets" class="map-view-toggle is-on" aria-pressed="true">Flotas</button> <button type="button" id="toggle-map-progress" class="map-view-toggle is-on" aria-pressed="true" data-i18n="toggle.progress">Progreso</button></div><div id="map-viewport-hud" class="map-viewport-hud"><div id="map-status-hud" class="map-status-hud" aria-live="polite"><div class="map-hud-compact-row"><select id="hud-map-profile" class="map-hud-select" data-i18n-aria="hud.profile" aria-label="Map profile"></select> <label class="map-hud-play-toggle" data-i18n-title="hud.mode" title="Mode"><span class="map-hud-play-off" data-i18n="hud.modeEditor">Editor</span> <input type="checkbox" id="hud-play-mode"/> <span class="map-hud-play-track" aria-hidden="true"></span> <span class="map-hud-play-on" data-i18n="hud.modePlay">Play</span></label></div><div class="map-hud-row map-hud-row-compact" id="hud-edit-mode-row"><select id="hud-map-edit-mode" class="map-hud-select map-hud-select-full" data-i18n-aria="map.clickMode" aria-label="Click mode"><option value="edit" data-i18n="map.clickEdit">Place nodes</option><option value="moveBackground" data-i18n="map.clickMoveBg">Move background</option><option value="moveNodes" data-i18n="map.clickMoveNodes">Move all nodes</option></select></div></div><div id="map-milestone-hud" class="map-milestone-hud" hidden><div class="milestone-hud-header"><h3 id="milestone-hud-title" class="milestone-hud-title">—</h3><code id="milestone-hud-id" class="milestone-hud-id"></code></div><p id="milestone-play-hint" class="milestone-play-hint" data-i18n="milestone.playModeHint">Play mode — mark progress only. Switch to Editor to change setup.</p><label class="milestone-complete-toggle" for="milestone-completed"><input id="milestone-completed" type="checkbox"/> <span class="milestone-complete-icon" aria-hidden="true">✓</span> <span class="milestone-complete-copy"><span class="milestone-complete-title" data-i18n="milestone.completeTitle">Milestone completed</span> <span class="milestone-complete-hint" data-i18n="milestone.completeHint">Clears this node in play mode and unlocks neighbors</span></span></label><div class="milestone-hud-flags"><label class="milestone-flag"><input id="milestone-start" type="checkbox"/> <span data-i18n="adventure.start">Start</span></label> <label class="milestone-flag"><input id="milestone-locked" type="checkbox"/> <span data-i18n="adventure.locked">Locked</span></label></div><details class="milestone-unlock-block"><summary data-i18n="adventure.requires">Unlock requires</summary><input id="milestone-requires" class="milestone-requires" data-i18n-placeholder="adventure.requiresPh" placeholder="node_a, node_b" autocomplete="off"/><p class="milestone-hint" data-i18n="adventure.requiresHint">If empty and locked: unlocks when a connected neighbor is completed.</p></details><div class="milestone-encounters-head"><span class="milestone-subtitle" data-i18n="milestone.encountersTitle">Encounters</span> <button type="button" id="milestone-add-encounter" class="milestone-add-encounter" data-i18n="milestone.addEncounter">+ Add</button></div><div id="milestone-encounters-list" class="milestone-encounters-list"></div></div></div><div id="year-scrubber" class="year-scrubber" role="group" data-i18n-aria="year.scrubberAria"><button type="button" id="year-prev" class="year-nav" data-i18n-aria="year.prev">&lt;</button> <button type="button" id="year-display" class="year-display" data-i18n-aria="year.change">&lt;<span id="year-value">2200</span>&gt;<span id="year-epoch" class="year-epoch"></span></button> <button type="button" id="year-next" class="year-nav" data-i18n-aria="year.next">&gt;</button></div><div id="ui-wrapper"><div class="global-locale-bar"><span class="locale-label" data-i18n="locale.label">Idioma</span><div class="help-lang-toggle" role="group" data-i18n-aria="locale.label"><button type="button" data-locale-set="es" class="help-lang-btn is-active" aria-pressed="true" data-i18n="locale.es">Español</button> <button type="button" data-locale-set="en" class="help-lang-btn" aria-pressed="false" data-i18n="locale.en">English</button></div></div><nav class="sidebar-tabs" aria-label="Sidebar sections"><button type="button" class="sidebar-tab" data-sidebar-tab="system" aria-selected="false"><span id="term-node-tab">System</span></button> <button type="button" class="sidebar-tab is-active" data-sidebar-tab="map" aria-selected="true" data-i18n="tab.map">Map</button> <button type="button" class="sidebar-tab" data-sidebar-tab="owners" aria-selected="false" data-i18n="tab.owners">Owners</button> <button type="button" class="sidebar-tab" data-sidebar-tab="timeline" aria-selected="false" data-i18n="tab.timeline">Timeline</button> <button type="button" class="sidebar-tab" data-sidebar-tab="chronicle" aria-selected="false" data-i18n="tab.chronicle">Chronicle</button> <button type="button" class="sidebar-tab" data-sidebar-tab="routes" aria-selected="false" data-i18n="tab.routes">Routes</button> <button type="button" class="sidebar-tab" data-sidebar-tab="stats" aria-selected="false" data-i18n="tab.stats">Stats</button> <button type="button" class="sidebar-tab" data-sidebar-tab="help" aria-selected="false" data-i18n="tab.help">Help</button></nav><div class="sidebar-panels"><section id="tab-panel-system" class="tab-panel" data-sidebar-panel="system" hidden><p id="system-empty" class="panel-empty"><span id="term-select-node-empty">Select a system on the map to edit it.</span></p><div id="system-form" class="panel-scroll" hidden><h3 class="section-title"><span id="term-node-editor">Node Editor</span></h3><label><span id="term-node-name">Name</span></label> <input id="node-name"/> <label><span id="term-owned-by">Owned By</span></label> <select id="node-owned-by"></select> <label><span id="term-occupied-by">Occupied By</span></label> <select id="node-occupied-by"></select> <label><span id="term-star-type">Star Type</span></label> <input id="node-star-type"/> <label for="node-description"><span id="term-description">Description</span></label> <textarea id="node-description" rows="4" data-i18n-placeholder="system.descPlaceholder" placeholder="System description..."></textarea> <label class="checkbox-row"><input id="node-is-capital" type="checkbox"/> <span id="term-capital">Capital system (seat of government — one per owner)</span></label> <label><span id="term-population">Population</span></label> <input id="node-population" inputmode="decimal" placeholder="300.000 · 12M · 30 B"/><p id="node-population-preview" class="population-preview"></p><p class="mode-hint" data-i18n="system.popHint">Puntos = miles (300.000). También 12M, 30 B, ~30 mil millones al importar.</p><label><span id="term-size">Size (economy / population weight)</span></label> <input id="node-size" type="number" step="0.1" min="0.5" max="2.5"/> <label><span id="term-installations">Installations (map icons)</span></label><p class="mode-hint" data-i18n="system.facilitiesHint">Iconos sobre el sistema en el mapa. Abajo a la izquierda: mostrar/ocultar iconos y textos.</p><div id="node-facilities" class="facility-grid"></div><label><span id="term-fleets">Fleets (left of node)</span></label><p class="mode-hint" data-i18n="system.fleetsHint">Nave + número por imperio (color del dueño). «+ Add fleet» usa el dueño del sistema. El año de vista y la timeline también cambian las flotas visibles.</p><div id="node-fleets-editor" class="fleet-editor"></div><button id="node-fleet-add" type="button" class="btn-muted fleet-add-btn" data-i18n="system.addFleet">+ Add fleet</button><p class="mode-hint" data-i18n="system.occupiedHint">Occupied: legal owner stays; red stripes = military occupier.</p><div class="panel-actions"><button id="delete-node" type="button" class="btn-danger"><span id="term-delete-node">Delete</span></button></div></div></section><section id="tab-panel-owners" class="tab-panel panel-scroll" data-sidebar-panel="owners" hidden><h3 class="section-title" data-i18n="owners.title">Owner editor</h3><p class="mode-hint" data-i18n="owners.hint">Factions on the map: color, name, and short tag (labels &amp; stats).</p><div id="owner-list" class="owner-list"></div><div id="owner-form-wrap" class="owner-form-wrap"><h4 class="subsection-title" data-i18n="owners.edit">Edit owner</h4><p id="owner-usage-hint" class="mode-hint"></p><label data-i18n="owners.id">Id (unique key)</label> <input id="owner-id" placeholder="empire_01" autocomplete="off"/> <label data-i18n="owners.name">Name</label> <input id="owner-name" placeholder="Confederación Solar Humana"/> <label data-i18n="owners.short">Short tag</label> <input id="owner-short" maxlength="12" placeholder="CSH"/> <label data-i18n="owners.color">Color</label><div class="owner-color-row"><input id="owner-color" type="color" value="#2ecc78"/> <input id="owner-color-hex" placeholder="#2ecc78"/></div><h4 class="subsection-title" data-i18n="owners.leader">Leader</h4><p class="mode-hint" data-i18n="owners.leaderHint">Ruler or head of government for this faction (lore / narrative).</p><label data-i18n="owners.leaderName">Leader name</label> <input id="owner-leader-name" placeholder="e.g. Elena Voss"/> <label><span data-i18n="owners.leaderAge">Age</span> <span class="field-hint" data-i18n="owners.leaderAgeHint">(at view year)</span></label> <input id="owner-leader-age" type="number" min="0" max="9999" step="1" placeholder="—"/> <label data-i18n="owners.leaderPersonality">Personality</label> <textarea id="owner-leader-personality" rows="3" placeholder="Pragmatic, cautious, expansionist…"></textarea><div class="panel-actions row-actions"><button id="owner-save-btn" type="button" data-i18n="owners.save">Save owner</button> <button id="owner-add-btn" type="button" class="btn-muted" data-i18n="owners.new">New owner</button> <button id="owner-delete-btn" type="button" class="btn-danger" data-i18n="owners.delete">Delete owner</button></div></div><h4 class="subsection-title" data-i18n="owners.file">Owners file</h4><button id="owner-export-btn" type="button" data-i18n="owners.export">Export owners JSON</button> <button id="owner-import-btn" type="button" data-i18n="owners.import">Import owners JSON</button> <input type="file" id="owner-import-file" accept=".json,application/json" hidden/> <button id="owner-reset-btn" type="button" class="btn-muted" data-i18n="owners.reset">Reset to defaults</button><p id="owner-editor-status" class="mode-hint" role="status"></p></section><section id="tab-panel-map" class="tab-panel is-active panel-scroll" data-sidebar-panel="map"><h3 class="section-title" data-i18n="map.title">Map Controls</h3><h4 class="subsection-title" data-i18n="map.calendar">Calendar</h4><label data-i18n="map.epoch">Epoch / era name</label> <input id="map-epoch-map" data-i18n-placeholder="map.epochPh" placeholder="e.g. Imperial Era"/> <label data-i18n="map.defaultYear">Default year</label> <input id="map-default-year-map" type="number" value="2200" step="1"/><p class="mode-hint" data-i18n-html="map.defaultYearHint">Used for new timeline/route events and leader age reference. Saved in export JSON (<code>metadata.defaultYear</code>).</p><button id="map-set-view-default-year" type="button" class="btn-muted" data-i18n="map.setViewDefault">Set view year to default</button><details class="facility-legend-details"><summary class="subsection-title" data-i18n="map.legend">Installation icon legend</summary><div id="facility-legend-map" class="facility-legend"></div></details><label><span id="term-background">Galaxy background</span></label> <button id="set-background" type="button" data-i18n="map.chooseBg">Choose image...</button> <input type="file" id="background-file" accept="image/*" hidden/> <button id="clear-background" type="button" disabled="disabled" data-i18n="map.clearBg">Remove background</button> <label data-i18n="map.bgOpacity">Background opacity</label> <input type="range" id="background-opacity" min="5" max="100" value="100" disabled="disabled"/><p id="map-edit-mode-hint" class="mode-hint"></p><label data-i18n="map.export">Export</label> <button id="export-map" type="button" data-i18n="map.exportJson">Export JSON</button> <button id="export-png" type="button" data-play-allow data-i18n="map.exportPng">Export PNG (view)</button> <button id="import-map" type="button" data-i18n="map.importJson">Import JSON</button> <input type="file" id="import-file" accept=".json,application/json" hidden/><p id="import-status" class="mode-hint" role="status"></p></section><section id="tab-panel-timeline" class="tab-panel panel-scroll" data-sidebar-panel="timeline" hidden><h3 class="section-title"><span id="term-timeline-title">Galaxy calendar</span></h3><label data-i18n="map.epoch">Epoch / era name</label> <input id="map-epoch" data-i18n-placeholder="map.epochPh" placeholder="e.g. Imperial Era"/> <label data-i18n="map.defaultYear">Default year (new events)</label> <input id="map-default-year" type="number" value="2200" step="1"/><p class="mode-hint" data-i18n-html="timeline.defaultYearHint">Same as Map → Calendar. Import restores this from <code>metadata.defaultYear</code> when present.</p><h3 class="section-title" data-i18n="timeline.systemTitle">System timeline</h3><p class="mode-hint" data-i18n-html="timeline.hint">Events ≤ view year (top-left) change the map. <strong>Colonized</strong> = appears; <strong>Owner change</strong> = conquest; <strong>Abandoned</strong> = hidden.</p><p class="mode-hint"><span data-i18n="timeline.systemLabel">System:</span> <strong id="timeline-system-label">—</strong></p><p id="timeline-no-system" class="panel-empty" data-i18n="timeline.noSystem">Select a system to add historical events.</p><div id="timeline-form-wrap" hidden><div id="timeline-entries-list" class="timeline-list"></div><h4 class="subsection-title" data-i18n="timeline.addEvent">Add / edit event</h4><label data-i18n="timeline.year">Year</label> <input id="entry-year" type="number" step="1"/> <label data-i18n="timeline.eventType">Event type</label> <select id="entry-type"></select> <label data-i18n="timeline.actor">Actor (who)</label> <select id="entry-actor"></select> <label data-i18n="timeline.title">Title</label> <input id="entry-title" data-i18n-placeholder="timeline.titlePh" placeholder="Battle of ..."/> <label data-i18n="timeline.description">Description</label> <textarea id="entry-description" rows="3"></textarea> <label data-i18n="timeline.population">Population</label> <input id="entry-population" placeholder="12M, +500K..."/> <label data-i18n="timeline.fleets">Fleets</label><div id="entry-fleet-change-fields"><p class="mode-hint" data-i18n-html="timeline.fleetChangeHint">Tipo <strong>Fleet change</strong>: dueño + cantidad abajo.</p><div id="entry-fleets-editor" class="fleet-editor"></div><button id="entry-fleet-add" type="button" class="btn-muted fleet-add-btn" data-i18n="system.addFleet">+ Add fleet</button></div><div id="entry-fleet-move-fields" hidden><label data-i18n="timeline.destSystem">Destination system</label> <select id="entry-target-system"></select> <label data-i18n="timeline.fleetCount">Fleet count</label> <input id="entry-fleet-count" type="number" min="1" max="9999" step="1" value="1"/><p class="mode-hint" data-i18n-html="timeline.fleetMoveHint">Tipo <strong>Fleet movement</strong>: mueve flotas al destino. Actor = imperio.</p></div><label data-i18n="timeline.economy">Economy</label> <input id="entry-economy" data-i18n-placeholder="timeline.economyPh" placeholder="Trade hub, recession..."/> <label data-i18n="timeline.minerals">Minerals / resources</label> <input id="entry-minerals"/> <label data-i18n="timeline.flavor">Flavor / notes</label> <input id="entry-flavor"/><div class="panel-actions row-actions"><button id="entry-add-btn" type="button" data-i18n="timeline.saveEvent">Save event</button> <button id="entry-clear-btn" type="button" class="btn-muted" data-i18n="timeline.clearForm">Clear form</button></div></div></section><section id="tab-panel-chronicle" class="tab-panel panel-scroll" data-sidebar-panel="chronicle" hidden><h3 class="section-title"><span id="term-chronicle-title">Galaxy chronicle</span></h3><p class="mode-hint" data-i18n="chronicle.hint">All system and route events, sorted by year. Click an entry to jump to that year.</p><label class="checkbox-row"><input id="chronicle-limit-year" type="checkbox" checked="checked"/> <span data-i18n="chronicle.limitYear">Only events ≤ view year</span></label> <label data-i18n="chronicle.filterActor">Filter by actor</label> <select id="chronicle-filter-owner"></select> <label data-i18n="chronicle.filterType">Filter by type</label> <select id="chronicle-filter-type"></select> <label data-i18n="chronicle.search">Search</label> <input id="chronicle-search" type="search" data-i18n-placeholder="chronicle.searchPh" placeholder="Title, system, route..."/><div id="chronicle-list" class="timeline-list"></div></section><section id="tab-panel-routes" class="tab-panel panel-scroll" data-sidebar-panel="routes" hidden><h3 class="section-title"><span id="term-routes-title">Hyperlane editor</span></h3><p class="mode-hint"><span id="term-routes-hint">Shift+click two systems to create a lane. Click a line on the map to edit it.</span></p><p id="route-empty" class="panel-empty" data-i18n="routes.empty">Select a hyperlane on the map.</p><div id="route-form" hidden><p class="mode-hint"><span data-i18n="routes.routeLabel">Route:</span> <strong id="route-endpoints-label">—</strong></p><label data-i18n="routes.name">Name (optional)</label> <input id="route-name" data-i18n-placeholder="routes.namePh" placeholder="Solar — Wolf corridor"/> <label data-i18n="routes.type">Route type</label> <select id="route-type"></select> <button id="route-save-btn" type="button" data-i18n="routes.save">Save route</button><h4 class="subsection-title" data-i18n="routes.timeline">Route timeline</h4><p class="mode-hint" data-i18n="routes.timelineHint">Open / close the lane at a given year (affects map at view year).</p><div id="route-timeline-list" class="timeline-list"></div><h4 class="subsection-title" data-i18n="routes.addEvent">Add / edit route event</h4><label data-i18n="timeline.year">Year</label> <input id="route-event-year" type="number" step="1"/> <label data-i18n="timeline.eventType">Event type</label> <select id="route-event-type"></select> <label data-i18n="timeline.title">Title</label> <input id="route-event-title"/> <label data-i18n="timeline.description">Description</label> <textarea id="route-event-description" rows="2"></textarea><div class="panel-actions row-actions"><button id="route-event-save" type="button" data-i18n="routes.saveEvent">Save route event</button> <button id="route-event-clear" type="button" class="btn-muted" data-i18n="timeline.clearForm">Clear</button></div></div></section><section id="tab-panel-stats" class="tab-panel panel-scroll" data-sidebar-panel="stats" hidden><h3 class="section-title" data-i18n="stats.title">By owner</h3><p class="mode-hint" data-i18n="stats.hint">Live summary from all systems on the map.</p><div id="stats-by-owner"></div></section><section id="tab-panel-help" class="tab-panel panel-scroll" data-sidebar-panel="help" hidden><div class="help-lang-bar"><h3 class="section-title help-lang-title" data-i18n="help.title">Ayuda</h3><div class="help-lang-toggle" role="group" data-i18n-aria="locale.label"><button type="button" data-locale-set="es" class="help-lang-btn is-active" aria-pressed="true" data-i18n="locale.es">Español</button> <button type="button" data-locale-set="en" class="help-lang-btn" aria-pressed="false" data-i18n="locale.en">English</button></div></div><div id="help-content"></div></section></div></div><style>html, body {
+<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dot Map Maker</title></head><body><div id="startup-overlay" class="startup-overlay" hidden><div class="startup-panel" role="dialog" aria-labelledby="startup-title"><h1 id="startup-title" class="startup-title" data-i18n="startup.title">Dot Map Maker</h1><p class="startup-lead" data-i18n="startup.lead">Create galaxy maps, fantasy worlds, tabletop campaigns, or node-based adventures.</p><div class="startup-actions"><button type="button" id="startup-continue" class="startup-btn startup-btn-primary" data-i18n="startup.continue">Continue last map</button> <button type="button" id="startup-empty" class="startup-btn" data-i18n="startup.empty">Empty map</button> <button type="button" id="startup-close" class="startup-btn startup-btn-muted" data-i18n="startup.close">Close</button></div><h2 class="startup-subtitle" data-i18n="startup.presetsTitle">Example maps</h2><p class="startup-hint" data-i18n="startup.presetsHint">Load a preset to explore features — timeline, routes, play mode, milestones, and more.</p><div id="startup-presets" class="startup-presets"></div></div></div><div id="map-view-toggles" class="map-view-toggles" role="group" data-i18n-aria="toggle.mapAria"><button type="button" id="toggle-map-icons" class="map-view-toggle is-on" aria-pressed="true" data-i18n="toggle.icons">Iconos</button> <button type="button" id="toggle-map-labels" class="map-view-toggle is-on" aria-pressed="true" data-i18n="toggle.labels">Textos</button> <button type="button" id="toggle-map-fleets" class="map-view-toggle is-on" aria-pressed="true">Flotas</button> <button type="button" id="toggle-map-progress" class="map-view-toggle is-on" aria-pressed="true" data-i18n="toggle.progress">Progreso</button></div><div id="map-viewport-hud" class="map-viewport-hud"><div id="map-status-hud" class="map-status-hud" aria-live="polite"><div class="map-hud-compact-row"><select id="hud-map-profile" class="map-hud-select" data-i18n-aria="hud.profile" aria-label="Map profile"></select> <label class="map-hud-play-toggle" data-i18n-title="hud.mode" title="Mode"><span class="map-hud-play-off" data-i18n="hud.modeEditor">Editor</span> <input type="checkbox" id="hud-play-mode"/> <span class="map-hud-play-track" aria-hidden="true"></span> <span class="map-hud-play-on" data-i18n="hud.modePlay">Play</span></label></div><div class="map-hud-row map-hud-row-compact" id="hud-edit-mode-row"><select id="hud-map-edit-mode" class="map-hud-select map-hud-select-full" data-i18n-aria="map.clickMode" aria-label="Click mode"><option value="edit" data-i18n="map.clickEdit">Place nodes</option><option value="moveBackground" data-i18n="map.clickMoveBg">Move background</option><option value="moveNodes" data-i18n="map.clickMoveNodes">Move all nodes</option></select></div><div class="map-search-hud"><input id="map-node-search" type="search" class="map-node-search" data-i18n-placeholder="search.placeholder" placeholder="Search node…" autocomplete="off"/><div id="map-node-search-results" class="map-node-search-results" hidden></div></div></div><div id="map-milestone-hud" class="map-milestone-hud" hidden><div class="milestone-hud-header"><h3 id="milestone-hud-title" class="milestone-hud-title">—</h3><code id="milestone-hud-id" class="milestone-hud-id"></code></div><p id="milestone-play-hint" class="milestone-play-hint" data-i18n="milestone.playModeHint">Play mode — mark progress only. Switch to Editor to change setup.</p><label class="milestone-complete-toggle" for="milestone-completed"><input id="milestone-completed" type="checkbox"/> <span class="milestone-complete-icon" aria-hidden="true">✓</span> <span class="milestone-complete-copy"><span class="milestone-complete-title" data-i18n="milestone.completeTitle">Milestone completed</span> <span class="milestone-complete-hint" data-i18n="milestone.completeHint">Clears this node in play mode and unlocks neighbors</span></span></label><div class="milestone-hud-flags"><label class="milestone-flag"><input id="milestone-start" type="checkbox"/> <span data-i18n="adventure.start">Start</span></label> <label class="milestone-flag"><input id="milestone-locked" type="checkbox"/> <span data-i18n="adventure.locked">Locked</span></label> <label class="milestone-flag"><input id="milestone-hidden" type="checkbox"/> <span data-i18n="adventure.hidden">Hidden</span></label></div><details class="milestone-unlock-block"><summary data-i18n="adventure.requires">Unlock requires</summary><input id="milestone-requires" class="milestone-requires" data-i18n-placeholder="adventure.requiresPh" placeholder="node_a, node_b" autocomplete="off"/><p class="milestone-hint" data-i18n="adventure.requiresHint">If empty and locked: unlocks when a connected neighbor is completed.</p></details><div class="milestone-encounters-head"><span class="milestone-subtitle" data-i18n="milestone.encountersTitle">Encounters</span> <button type="button" id="milestone-add-encounter" class="milestone-add-encounter" data-i18n="milestone.addEncounter">+ Add</button></div><p id="milestone-encounters-feedback" class="milestone-encounters-feedback" hidden></p><div id="milestone-encounters-list" class="milestone-encounters-list"></div></div></div><div id="year-scrubber" class="year-scrubber" role="group" data-i18n-aria="year.scrubberAria"><button type="button" id="year-prev" class="year-nav" data-i18n-aria="year.prev">&lt;</button> <button type="button" id="year-display" class="year-display" data-i18n-aria="year.change">&lt;<span id="year-value">2200</span>&gt;<span id="year-epoch" class="year-epoch"></span></button> <button type="button" id="year-next" class="year-nav" data-i18n-aria="year.next">&gt;</button></div><div id="ui-wrapper"><div class="global-locale-bar"><span class="locale-label" data-i18n="locale.label">Idioma</span><div class="help-lang-toggle" role="group" data-i18n-aria="locale.label"><button type="button" data-locale-set="es" class="help-lang-btn is-active" aria-pressed="true" data-i18n="locale.es">Español</button> <button type="button" data-locale-set="en" class="help-lang-btn" aria-pressed="false" data-i18n="locale.en">English</button></div></div><nav class="sidebar-tabs" aria-label="Sidebar sections"><button type="button" class="sidebar-tab" data-sidebar-tab="system" aria-selected="false"><span id="term-node-tab">System</span></button> <button type="button" class="sidebar-tab is-active" data-sidebar-tab="map" aria-selected="true" data-i18n="tab.map">Map</button> <button type="button" class="sidebar-tab" data-sidebar-tab="owners" aria-selected="false" data-i18n="tab.owners">Owners</button> <button type="button" class="sidebar-tab" data-sidebar-tab="timeline" aria-selected="false" data-i18n="tab.timeline">Timeline</button> <button type="button" class="sidebar-tab" data-sidebar-tab="chronicle" aria-selected="false" data-i18n="tab.chronicle">Chronicle</button> <button type="button" class="sidebar-tab" data-sidebar-tab="routes" aria-selected="false" data-i18n="tab.routes">Routes</button> <button type="button" class="sidebar-tab" data-sidebar-tab="stats" aria-selected="false" data-i18n="tab.stats">Stats</button> <button type="button" class="sidebar-tab" data-sidebar-tab="help" aria-selected="false" data-i18n="tab.help">Help</button></nav><div class="sidebar-panels"><section id="tab-panel-system" class="tab-panel" data-sidebar-panel="system" hidden><p id="system-empty" class="panel-empty"><span id="term-select-node-empty">Select a system on the map to edit it.</span></p><div id="system-form" class="panel-scroll" hidden><h3 class="section-title"><span id="term-node-editor">Node Editor</span></h3><label data-i18n="system.nodeId">Id (unique key)</label> <input id="node-id" autocomplete="off" data-i18n-placeholder="system.nodeIdPh" placeholder="node_alpha"/><p class="mode-hint" data-i18n="system.nodeIdHint">F2 to rename. Updates routes and unlock refs.</p><label><span id="term-node-name">Name</span></label> <input id="node-name"/> <label><span id="term-owned-by">Owned By</span></label> <select id="node-owned-by"></select> <label><span id="term-occupied-by">Occupied By</span></label> <select id="node-occupied-by"></select> <label><span id="term-star-type">Star Type</span></label> <input id="node-star-type"/> <label for="node-description"><span id="term-description">Description</span></label> <textarea id="node-description" rows="4" data-i18n-placeholder="system.descPlaceholder" placeholder="System description..."></textarea> <label class="checkbox-row"><input id="node-is-capital" type="checkbox"/> <span id="term-capital">Capital system (seat of government — one per owner)</span></label> <label><span id="term-population">Population</span></label> <input id="node-population" inputmode="decimal" placeholder="300.000 · 12M · 30 B"/><p id="node-population-preview" class="population-preview"></p><p class="mode-hint" data-i18n="system.popHint">Puntos = miles (300.000). También 12M, 30 B, ~30 mil millones al importar.</p><label><span id="term-size">Size (economy / population weight)</span></label> <input id="node-size" type="number" step="0.1" min="0.5" max="2.5"/> <label><span id="term-installations">Installations (map icons)</span></label><p class="mode-hint" data-i18n="system.facilitiesHint">Iconos sobre el sistema en el mapa. Abajo a la izquierda: mostrar/ocultar iconos y textos.</p><div id="node-facilities" class="facility-grid"></div><label><span id="term-fleets">Fleets (left of node)</span></label><p class="mode-hint" data-i18n="system.fleetsHint">Nave + número por imperio (color del dueño). «+ Add fleet» usa el dueño del sistema. El año de vista y la timeline también cambian las flotas visibles.</p><div id="node-fleets-editor" class="fleet-editor"></div><button id="node-fleet-add" type="button" class="btn-muted fleet-add-btn" data-i18n="system.addFleet">+ Add fleet</button><p class="mode-hint" data-i18n="system.occupiedHint">Occupied: legal owner stays; red stripes = military occupier.</p><div class="panel-actions"><button id="delete-node" type="button" class="btn-danger"><span id="term-delete-node">Delete</span></button></div></div></section><section id="tab-panel-owners" class="tab-panel panel-scroll" data-sidebar-panel="owners" hidden><h3 class="section-title" data-i18n="owners.title">Owner editor</h3><p class="mode-hint" data-i18n="owners.hint">Factions on the map: color, name, and short tag (labels &amp; stats).</p><div id="owner-list" class="owner-list"></div><div id="owner-form-wrap" class="owner-form-wrap"><h4 class="subsection-title" data-i18n="owners.edit">Edit owner</h4><p id="owner-usage-hint" class="mode-hint"></p><label data-i18n="owners.id">Id (unique key)</label> <input id="owner-id" placeholder="empire_01" autocomplete="off"/> <label data-i18n="owners.name">Name</label> <input id="owner-name" placeholder="Confederación Solar Humana"/> <label data-i18n="owners.short">Short tag</label> <input id="owner-short" maxlength="12" placeholder="CSH"/> <label data-i18n="owners.color">Color</label><div class="owner-color-row"><input id="owner-color" type="color" value="#2ecc78"/> <input id="owner-color-hex" placeholder="#2ecc78"/></div><h4 class="subsection-title" data-i18n="owners.leader">Leader</h4><p class="mode-hint" data-i18n="owners.leaderHint">Ruler or head of government for this faction (lore / narrative).</p><label data-i18n="owners.leaderName">Leader name</label> <input id="owner-leader-name" placeholder="e.g. Elena Voss"/> <label><span data-i18n="owners.leaderAge">Age</span> <span class="field-hint" data-i18n="owners.leaderAgeHint">(at view year)</span></label> <input id="owner-leader-age" type="number" min="0" max="9999" step="1" placeholder="—"/> <label data-i18n="owners.leaderPersonality">Personality</label> <textarea id="owner-leader-personality" rows="3" placeholder="Pragmatic, cautious, expansionist…"></textarea><p class="mode-hint auto-save-hint" data-i18n="owners.autoSaveHint">Changes save automatically.</p><div class="panel-actions row-actions"><button id="owner-add-btn" type="button" class="btn-muted" data-i18n="owners.new">New owner</button> <button id="owner-delete-btn" type="button" class="btn-danger" data-i18n="owners.delete">Delete owner</button></div></div><h4 class="subsection-title" data-i18n="owners.file">Owners file</h4><button id="owner-export-btn" type="button" data-i18n="owners.export">Export owners JSON</button> <button id="owner-import-btn" type="button" data-i18n="owners.import">Import owners JSON</button> <input type="file" id="owner-import-file" accept=".json,application/json" hidden/> <button id="owner-reset-btn" type="button" class="btn-muted" data-i18n="owners.reset">Reset to defaults</button><p id="owner-editor-status" class="mode-hint" role="status"></p></section><section id="tab-panel-map" class="tab-panel is-active panel-scroll" data-sidebar-panel="map"><h3 class="section-title" data-i18n="map.title">Map Controls</h3><h4 class="subsection-title" data-i18n="map.calendar">Calendar</h4><label data-i18n="map.epoch">Epoch / era name</label> <input id="map-epoch-map" data-i18n-placeholder="map.epochPh" placeholder="e.g. Imperial Era"/> <label data-i18n="map.defaultYear">Default year</label> <input id="map-default-year-map" type="number" value="2200" step="1"/><p class="mode-hint" data-i18n-html="map.defaultYearHint">Used for new timeline/route events and leader age reference. Saved in export JSON (<code>metadata.defaultYear</code>).</p><button id="map-set-view-default-year" type="button" class="btn-muted" data-i18n="map.setViewDefault">Set view year to default</button><details class="facility-legend-details"><summary class="subsection-title" data-i18n="map.legend">Installation icon legend</summary><div id="facility-legend-map" class="facility-legend"></div></details><label><span id="term-background">Galaxy background</span></label> <button id="set-background" type="button" data-i18n="map.chooseBg">Choose image...</button> <input type="file" id="background-file" accept="image/*" hidden/> <button id="clear-background" type="button" disabled="disabled" data-i18n="map.clearBg">Remove background</button> <label data-i18n="map.bgOpacity">Background opacity</label> <input type="range" id="background-opacity" min="5" max="100" value="100" disabled="disabled"/><p id="map-edit-mode-hint" class="mode-hint"></p><p id="map-persist-status" class="mode-hint map-persist-status" data-i18n="map.persistHint">Changes auto-save in this browser.</p><h4 class="subsection-title" data-i18n="validation.title">Map validation</h4><p id="map-validation-summary" class="map-validation-summary" data-i18n="validation.hint">Checks IDs, routes, unlock refs, and capitals.</p><button type="button" id="map-validate-btn" class="btn-muted" data-i18n="validation.run">Validate map</button><ul id="map-validation-list" class="map-validation-list"></ul><button type="button" id="reset-play-progress" class="btn-muted" data-i18n="play.reset">Reset play progress</button> <button type="button" id="export-play-progress" class="btn-muted" data-i18n="play.export">Export play progress</button> <button type="button" id="import-play-progress" class="btn-muted" data-i18n="play.import">Import play progress</button> <input type="file" id="import-play-progress-file" accept=".json,application/json" hidden/><p id="play-progress-status" class="mode-hint" role="status"></p><button type="button" id="open-startup-gallery" class="btn-muted" data-i18n="startup.openGallery">Map gallery</button> <button type="button" id="map-new-empty" class="btn-muted" data-i18n="startup.empty">Empty map</button> <label data-i18n="map.export">Export</label> <button id="export-map" type="button" data-i18n="map.exportJson">Export JSON</button> <button id="export-png" type="button" data-play-allow data-i18n="map.exportPng">Export PNG (view)</button> <button id="import-map" type="button" data-i18n="map.importJson">Import JSON</button> <input type="file" id="import-file" accept=".json,application/json" hidden/><p id="import-status" class="mode-hint" role="status"></p></section><section id="tab-panel-timeline" class="tab-panel panel-scroll" data-sidebar-panel="timeline" hidden><h3 class="section-title"><span id="term-timeline-title">Galaxy calendar</span></h3><label data-i18n="map.epoch">Epoch / era name</label> <input id="map-epoch" data-i18n-placeholder="map.epochPh" placeholder="e.g. Imperial Era"/> <label data-i18n="map.defaultYear">Default year (new events)</label> <input id="map-default-year" type="number" value="2200" step="1"/><p class="mode-hint" data-i18n-html="timeline.defaultYearHint">Same as Map → Calendar. Import restores this from <code>metadata.defaultYear</code> when present.</p><h3 class="section-title" data-i18n="timeline.systemTitle">System timeline</h3><p class="mode-hint" data-i18n-html="timeline.hint">Events ≤ view year (top-left) change the map. <strong>Colonized</strong> = appears; <strong>Owner change</strong> = conquest; <strong>Abandoned</strong> = hidden.</p><p class="mode-hint"><span data-i18n="timeline.systemLabel">System:</span> <strong id="timeline-system-label">—</strong></p><p id="timeline-no-system" class="panel-empty" data-i18n="timeline.noSystem">Select a system to add historical events.</p><div id="timeline-form-wrap" hidden><div id="timeline-entries-list" class="timeline-list"></div><h4 class="subsection-title" data-i18n="timeline.addEvent">Add / edit event</h4><label data-i18n="timeline.year">Year</label> <input id="entry-year" type="number" step="1"/> <label data-i18n="timeline.eventType">Event type</label> <select id="entry-type"></select> <label data-i18n="timeline.actor">Actor (who)</label> <select id="entry-actor"></select> <label data-i18n="timeline.title">Title</label> <input id="entry-title" data-i18n-placeholder="timeline.titlePh" placeholder="Battle of ..."/> <label data-i18n="timeline.description">Description</label> <textarea id="entry-description" rows="3"></textarea> <label data-i18n="timeline.population">Population</label> <input id="entry-population" placeholder="12M, +500K..."/> <label data-i18n="timeline.fleets">Fleets</label><div id="entry-fleet-change-fields"><p class="mode-hint" data-i18n-html="timeline.fleetChangeHint">Tipo <strong>Fleet change</strong>: dueño + cantidad abajo.</p><div id="entry-fleets-editor" class="fleet-editor"></div><button id="entry-fleet-add" type="button" class="btn-muted fleet-add-btn" data-i18n="system.addFleet">+ Add fleet</button></div><div id="entry-fleet-move-fields" hidden><label data-i18n="timeline.destSystem">Destination system</label> <select id="entry-target-system"></select> <label data-i18n="timeline.fleetCount">Fleet count</label> <input id="entry-fleet-count" type="number" min="1" max="9999" step="1" value="1"/><p class="mode-hint" data-i18n-html="timeline.fleetMoveHint">Tipo <strong>Fleet movement</strong>: mueve flotas al destino. Actor = imperio.</p></div><label data-i18n="timeline.economy">Economy</label> <input id="entry-economy" data-i18n-placeholder="timeline.economyPh" placeholder="Trade hub, recession..."/> <label data-i18n="timeline.minerals">Minerals / resources</label> <input id="entry-minerals"/> <label data-i18n="timeline.flavor">Flavor / notes</label> <input id="entry-flavor"/><p class="mode-hint auto-save-hint" data-i18n="timeline.autoSaveHint">Events save automatically when the title is filled in.</p><div class="panel-actions row-actions"><button id="entry-clear-btn" type="button" class="btn-muted" data-i18n="timeline.clearForm">Clear form</button></div></div></section><section id="tab-panel-chronicle" class="tab-panel panel-scroll" data-sidebar-panel="chronicle" hidden><h3 class="section-title"><span id="term-chronicle-title">Galaxy chronicle</span></h3><p class="mode-hint" data-i18n="chronicle.hint">All system and route events, sorted by year. Click an entry to jump to that year.</p><label class="checkbox-row"><input id="chronicle-limit-year" type="checkbox" checked="checked"/> <span data-i18n="chronicle.limitYear">Only events ≤ view year</span></label> <label data-i18n="chronicle.filterActor">Filter by actor</label> <select id="chronicle-filter-owner"></select> <label data-i18n="chronicle.filterType">Filter by type</label> <select id="chronicle-filter-type"></select> <label data-i18n="chronicle.search">Search</label> <input id="chronicle-search" type="search" data-i18n-placeholder="chronicle.searchPh" placeholder="Title, system, route..."/><div id="chronicle-list" class="timeline-list"></div></section><section id="tab-panel-routes" class="tab-panel panel-scroll" data-sidebar-panel="routes" hidden><h3 class="section-title"><span id="term-routes-title">Hyperlane editor</span></h3><p class="mode-hint"><span id="term-routes-hint">Shift+click two systems to create a lane. Click a line on the map to edit it.</span></p><p id="route-empty" class="panel-empty" data-i18n="routes.empty">Select a hyperlane on the map.</p><div id="route-form" hidden><p class="mode-hint"><span data-i18n="routes.routeLabel">Route:</span> <strong id="route-endpoints-label">—</strong></p><label data-i18n="routes.name">Name (optional)</label> <input id="route-name" data-i18n-placeholder="routes.namePh" placeholder="Solar — Wolf corridor"/> <label data-i18n="routes.type">Route type</label> <select id="route-type"></select> <button id="route-delete-btn" type="button" class="btn-danger" data-i18n="routes.delete">Delete route</button><p class="mode-hint auto-save-hint" data-i18n="routes.autoSaveHint">Route data saves automatically.</p><h4 class="subsection-title" data-i18n="routes.timeline">Route timeline</h4><p class="mode-hint" data-i18n="routes.timelineHint">Open / close the lane at a given year (affects map at view year).</p><div id="route-timeline-list" class="timeline-list"></div><h4 class="subsection-title" data-i18n="routes.addEvent">Add / edit route event</h4><label data-i18n="timeline.year">Year</label> <input id="route-event-year" type="number" step="1"/> <label data-i18n="timeline.eventType">Event type</label> <select id="route-event-type"></select> <label data-i18n="timeline.title">Title</label> <input id="route-event-title"/> <label data-i18n="timeline.description">Description</label> <textarea id="route-event-description" rows="2"></textarea><p class="mode-hint auto-save-hint" data-i18n="routes.eventAutoSaveHint">Route events save automatically when the title is filled in.</p><div class="panel-actions row-actions"><button id="route-event-clear" type="button" class="btn-muted" data-i18n="timeline.clearForm">Clear</button></div></div></section><section id="tab-panel-stats" class="tab-panel panel-scroll" data-sidebar-panel="stats" hidden><h3 class="section-title" data-i18n="stats.title">By owner</h3><p class="mode-hint" data-i18n="stats.hint">Live summary from all systems on the map.</p><div id="stats-by-owner"></div></section><section id="tab-panel-help" class="tab-panel panel-scroll" data-sidebar-panel="help" hidden><div class="help-lang-bar"><h3 class="section-title help-lang-title" data-i18n="help.title">Ayuda</h3><div class="help-lang-toggle" role="group" data-i18n-aria="locale.label"><button type="button" data-locale-set="es" class="help-lang-btn is-active" aria-pressed="true" data-i18n="locale.es">Español</button> <button type="button" data-locale-set="en" class="help-lang-btn" aria-pressed="false" data-i18n="locale.en">English</button></div></div><div id="help-content"></div></section></div></div><style>html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
     background: #000;
+  }
+
+  .startup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(4px);
+    overflow-y: auto;
+  }
+
+  .startup-overlay[hidden] {
+    display: none !important;
+  }
+
+  .startup-panel {
+    width: min(720px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding: 24px;
+    background: #141414;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    font-family: system-ui, sans-serif;
+    color: #ddd;
+  }
+
+  .startup-title {
+    margin: 0 0 8px;
+    font-size: 24px;
+    color: #eee;
+  }
+
+  .startup-lead {
+    margin: 0 0 16px;
+    color: #999;
+    line-height: 1.45;
+  }
+
+  .startup-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .startup-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    background: #2a2a2a;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .startup-btn-primary {
+    background: #2e4a62;
+    border-color: #5a9fd4;
+  }
+
+  .startup-btn-muted {
+    color: #aaa;
+  }
+
+  .startup-btn:disabled,
+  .startup-btn.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .startup-subtitle {
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: #ccc;
+  }
+
+  .startup-hint {
+    margin: 0 0 12px;
+    font-size: 12px;
+    color: #777;
+  }
+
+  .startup-presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  .startup-preset-card {
+    padding: 12px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .startup-preset-title {
+    margin: 0;
+    font-size: 14px;
+    color: #eee;
+  }
+
+  .startup-preset-desc {
+    margin: 0;
+    font-size: 11px;
+    color: #888;
+    line-height: 1.35;
+    flex: 1;
+  }
+
+  .startup-preset-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .startup-preset-tag {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    color: #8ab;
+    background: #1a2438;
+    border: 1px solid #3a4a6a;
+    border-radius: 4px;
+  }
+
+  .startup-preset-load {
+    padding: 6px 10px;
+    font-size: 12px;
+    background: #243040;
+    color: #cde;
+    border: 1px solid #4a6a8a;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .auto-save-hint {
+    color: #6a8a6a !important;
+    font-size: 11px;
+  }
+
+  .map-persist-status {
+    color: #7a9a7a !important;
   }
 
   .map-view-toggles {
@@ -244,6 +397,141 @@
 
   .map-milestone-hud.is-play-mode .milestone-play-hint {
     display: block;
+  }
+
+  .map-milestone-hud:not(.is-play-mode) .milestone-complete-toggle {
+    display: none;
+  }
+
+  .map-search-hud {
+    position: relative;
+  }
+
+  .map-node-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 6px;
+    font-size: 11px;
+    background: #1a1a1a;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+
+  .map-node-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    max-height: 180px;
+    overflow-y: auto;
+    background: rgba(14, 16, 22, 0.98);
+    border: 1px solid #4a5a7a;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+    z-index: 40;
+  }
+
+  .map-search-hit {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+    padding: 6px 8px;
+    border: none;
+    border-bottom: 1px solid #2a3344;
+    background: transparent;
+    color: #ddd;
+    font-size: 11px;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .map-search-hit:hover {
+    background: #1a2434;
+  }
+
+  .map-search-hit.is-hidden {
+    opacity: 0.55;
+  }
+
+  .map-search-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .map-search-id {
+    font-size: 9px;
+    color: #9ab;
+    flex-shrink: 0;
+  }
+
+  .map-search-empty {
+    margin: 0;
+    padding: 8px;
+    font-size: 10px;
+    color: #888;
+  }
+
+  .map-validation-summary {
+    margin: 0 0 6px;
+    font-size: 11px;
+    color: #aaa;
+  }
+
+  .map-validation-summary.is-ok {
+    color: #6c8;
+  }
+
+  .map-validation-summary.has-errors {
+    color: #f88;
+  }
+
+  .map-validation-list {
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+    font-size: 11px;
+  }
+
+  .map-validation-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid #2a2a2a;
+    line-height: 1.35;
+  }
+
+  .map-validation-item.is-error {
+    color: #f99;
+  }
+
+  .map-validation-item.is-warning {
+    color: #db8;
+  }
+
+  .map-validation-item.is-ok {
+    color: #8c8;
+  }
+
+  .map-validation-jump {
+    flex-shrink: 0;
+    padding: 2px 6px;
+    font-size: 10px;
+    background: #1a2434;
+    color: #9cf;
+    border: 1px solid #3a5a7a;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
   }
 
   .milestone-complete-toggle {
@@ -643,9 +931,87 @@
     border-color: #2a3344;
   }
 
-  body.is-play-mode .map-milestone-hud .milestone-encounter-done {
+  body.is-play-mode .map-milestone-hud .milestone-encounter-done,
+  body.is-play-mode .map-milestone-hud .milestone-encounter-play-toggle {
     pointer-events: auto;
     opacity: 1;
+  }
+
+  .milestone-encounters-feedback {
+    margin: 0 0 8px;
+    padding: 6px 8px;
+    font-size: 10px;
+    line-height: 1.35;
+    color: #9ab;
+    background: #121820;
+    border: 1px solid #2a3a4a;
+    border-radius: 6px;
+  }
+
+  .milestone-encounters-feedback.is-complete {
+    color: #8ee8a0;
+    border-color: #3a7a4a;
+    background: #152418;
+  }
+
+  .milestone-encounter-play {
+    margin-bottom: 8px;
+    border: 1px solid #3a4558;
+    border-radius: 8px;
+    background: #141820;
+    overflow: hidden;
+  }
+
+  .milestone-encounter-play.is-done {
+    border-color: #3a7a4a;
+  }
+
+  .milestone-encounter-play-summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 600;
+    color: #ddd;
+  }
+
+  .milestone-encounter-play-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .milestone-encounter-play-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .milestone-encounter-play-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 8px 8px;
+    padding: 8px 10px;
+    background: #141820;
+    border: 2px solid #3a4558;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .milestone-encounter-play-toggle:has(input:checked) {
+    border-color: #3ecf7a;
+    background: linear-gradient(135deg, #152418 0%, #1a3020 100%);
+  }
+
+  .milestone-encounter-play-body {
+    padding: 0 8px 8px;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #bbb;
   }
 
   body.is-play-mode .map-milestone-hud .milestone-complete-toggle {

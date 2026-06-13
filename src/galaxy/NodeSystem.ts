@@ -37,6 +37,7 @@ export class NodeSystem extends Container {
   public isSystemNode = true;
 
   private dragging = false;
+  private dragOrigin = { x: 0, y: 0 };
   private dragOffset = new Point();
   private activePointerId: number | null = null;
   private dragRoot: Container;
@@ -136,6 +137,7 @@ export class NodeSystem extends Container {
       ) {
         return;
       }
+      e.stopPropagation();
       selectionManager.selectNode(this, e.shiftKey && !galaxyScene.getPlayMode());
     });
     this.updateOwnerVisual();
@@ -467,6 +469,16 @@ export class NodeSystem extends Container {
       } else {
         this.eventMode = this.visible ? "static" : "none";
       }
+    } else if (state.visibility === "hidden") {
+      this.visual.alpha = 0.42;
+      this.adventureFog.visible = true;
+      this.adventureFog
+        .circle(0, 0, r + 1)
+        .fill({ color: 0x1a1a2a, alpha: 0.35 });
+      this.adventureFog
+        .circle(0, 0, r + 1)
+        .stroke({ width: 1.5, color: 0x6688aa, alpha: 0.75 });
+      this.eventMode = this.visible ? "static" : "none";
     }
 
     this.updateStatusLabel();
@@ -533,6 +545,7 @@ export class NodeSystem extends Container {
 
     this.dragging = true;
     this.activePointerId = event.pointerId;
+    this.dragOrigin = { x: this.x, y: this.y };
 
     const local = event.getLocalPosition(this.parent);
 
@@ -576,6 +589,21 @@ export class NodeSystem extends Container {
 
     this.data.x = this.x;
     this.data.y = this.y;
+
+    if (
+      Math.hypot(this.x - this.dragOrigin.x, this.y - this.dragOrigin.y) > 0.5
+    ) {
+      document.dispatchEvent(
+        new CustomEvent("node:moved", {
+          detail: {
+            nodeId: this.data.id,
+            from: { ...this.dragOrigin },
+            to: { x: this.x, y: this.y },
+          },
+        }),
+      );
+      document.dispatchEvent(new CustomEvent("map:updated"));
+    }
   }
 }
 

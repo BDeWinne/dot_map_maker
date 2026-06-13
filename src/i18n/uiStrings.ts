@@ -61,6 +61,7 @@ export const UI_STRINGS = {
     en: "Optional unlock rules. Use <strong>Play mode</strong> (Map tab) to test.",
   },
   "adventure.start": { es: "Inicio", en: "Start" },
+  "adventure.hidden": { es: "Oculto", en: "Hidden" },
   "adventure.locked": { es: "Bloq.", en: "Locked" },
   "adventure.completed": { es: "Hecho", en: "Done" },
   "adventure.requires": {
@@ -129,6 +130,79 @@ export const UI_STRINGS = {
   "hud.modePlay": { es: "Play", en: "Play" },
   "hud.modeEditor": { es: "Editor", en: "Editor" },
 
+  "search.placeholder": {
+    es: "Buscar nodo por nombre o id…",
+    en: "Search node by name or id…",
+  },
+  "search.noResults": {
+    es: "Sin coincidencias",
+    en: "No matches",
+  },
+
+  "validation.title": { es: "Validación del mapa", en: "Map validation" },
+  "validation.hint": {
+    es: "Comprueba ids, rutas, referencias de desbloqueo y capitales.",
+    en: "Checks IDs, routes, unlock refs, and capitals.",
+  },
+  "validation.run": { es: "Validar mapa", en: "Validate map" },
+  "validation.ok": { es: "Sin problemas detectados", en: "No issues found" },
+  "validation.summary": {
+    es: "{errors} errores · {warnings} avisos",
+    en: "{errors} errors · {warnings} warnings",
+  },
+  "validation.jump": { es: "Ir", en: "Go" },
+  "validation.duplicateId": {
+    es: "Id duplicado: {id} ({count}×)",
+    en: "Duplicate id: {id} ({count}×)",
+  },
+  "validation.emptyName": {
+    es: "Nodo sin nombre: {id}",
+    en: "Node without name: {id}",
+  },
+  "validation.missingFrom": {
+    es: "Ruta {conn}: origen inexistente ({id})",
+    en: "Route {conn}: missing from node ({id})",
+  },
+  "validation.missingTo": {
+    es: "Ruta {conn}: destino inexistente ({id})",
+    en: "Route {conn}: missing to node ({id})",
+  },
+  "validation.duplicateConn": {
+    es: "Id de ruta duplicado: {id} ({count}×)",
+    en: "Duplicate route id: {id} ({count}×)",
+  },
+  "validation.badUnlockRef": {
+    es: "Nodo {node}: unlockRequires apunta a {ref} (no existe)",
+    en: "Node {node}: unlockRequires references {ref} (missing)",
+  },
+  "validation.multiCapital": {
+    es: "Facción {owner}: varias capitales ({ids})",
+    en: "Owner {owner}: multiple capitals ({ids})",
+  },
+  "validation.orphanNode": {
+    es: "Nodo sin conexiones: {id}",
+    en: "Node with no connections: {id}",
+  },
+
+  "play.reset": { es: "Resetear progreso de play", en: "Reset play progress" },
+  "play.resetConfirm": {
+    es: "¿Borrar todo el progreso de play mode? El diseño del mapa no cambia.",
+    en: "Clear all play mode progress? Map design is unchanged.",
+  },
+  "play.export": { es: "Exportar progreso de play", en: "Export play progress" },
+  "play.import": { es: "Importar progreso de play", en: "Import play progress" },
+  "play.importOk": {
+    es: "Progreso de play importado.",
+    en: "Play progress imported.",
+  },
+
+  "system.nodeId": { es: "Id (clave única)", en: "Id (unique key)" },
+  "system.nodeIdPh": { es: "nodo_alpha", en: "node_alpha" },
+  "system.nodeIdHint": {
+    es: "F2 para renombrar. Actualiza rutas y referencias de desbloqueo.",
+    en: "F2 to rename. Updates routes and unlock references.",
+  },
+
   "milestone.playModeHint": {
     es: "Modo play — solo marcar progreso. Cambia a Editor para editar el mapa.",
     en: "Play mode — mark progress only. Switch to Editor to change the map.",
@@ -154,6 +228,22 @@ export const UI_STRINGS = {
     en: "Combat, puzzle, social, DM notes…",
   },
   "milestone.encounterDone": { es: "Hecho", en: "Done" },
+  "milestone.encounterDoneHint": {
+    es: "Marca este encuentro como superado en play mode",
+    en: "Mark this encounter cleared in play mode",
+  },
+  "milestone.gmNotesPh": {
+    es: "Notas de GM (ocultas en play mode)…",
+    en: "GM notes (hidden in play mode)…",
+  },
+  "milestone.encountersProgress": {
+    es: "Encuentros: {done} / {total}",
+    en: "Encounters: {done} / {total}",
+  },
+  "milestone.allEncountersDone": {
+    es: "Todos los encuentros completados — el hito se marca automáticamente.",
+    en: "All encounters done — milestone auto-completes.",
+  },
   "milestone.removeEncounter": { es: "Quitar encuentro", en: "Remove encounter" },
   "milestone.kindAny": { es: "Tipo…", en: "Kind…" },
   "milestone.kind.combat": { es: "Combate", en: "Combat" },
@@ -309,4 +399,118 @@ export const UI_STRINGS = {
     es: "Grafo de hitos con progresión, niebla y desbloqueos.",
     en: "Milestone graph with progression, fog, and unlocks.",
   },
+
+  "common.edit": { es: "Editar", en: "Edit" },
+  "common.delete": { es: "Borrar", en: "Delete" },
+
+  "map.persistHint": {
+    es: "Los cambios se guardan automáticamente en este navegador.",
+    en: "Changes auto-save in this browser.",
+  },
+  "map.persisted": {
+    es: "Mapa guardado automáticamente en este navegador.",
+    en: "Map auto-saved in this browser.",
+  },
+
+  "startup.title": { es: "Dot Map Maker", en: "Dot Map Maker" },
+  "startup.lead": {
+    es: "Crea mapas de galaxia, mundos fantasy, campañas de mesa o aventuras por nodos.",
+    en: "Create galaxy maps, fantasy worlds, tabletop campaigns, or node-based adventures.",
+  },
+  "startup.continue": { es: "Continuar último mapa", en: "Continue last map" },
+  "startup.empty": { es: "Mapa vacío", en: "Empty map" },
+  "startup.close": { es: "Cerrar", en: "Close" },
+  "startup.emptyConfirm": {
+    es: "¿Empezar un mapa vacío? Se borrará el guardado automático.",
+    en: "Start an empty map? This clears the auto-saved map.",
+  },
+  "startup.openGallery": { es: "Galería de mapas", en: "Map gallery" },
+  "startup.presetsTitle": { es: "Mapas de ejemplo", en: "Example maps" },
+  "startup.presetsHint": {
+    es: "Carga un preset para explorar funciones — timeline, rutas, play mode, hitos y más.",
+    en: "Load a preset to explore features — timeline, routes, play mode, milestones, and more.",
+  },
+  "startup.loadPreset": { es: "Cargar", en: "Load" },
+
+  "preset.galaxy.title": { es: "Guerra galáctica", en: "Galactic war" },
+  "preset.galaxy.desc": {
+    es: "4X sci-fi: imperios, flotas, hipervías y timeline histórica.",
+    en: "Sci-fi 4X: empires, fleets, hyperlanes, and historical timeline.",
+  },
+  "preset.fantasy.title": { es: "Mundo fantasy", en: "Fantasy world" },
+  "preset.fantasy.desc": {
+    es: "Reinos, ejércitos y caminos con vocabulario de región.",
+    en: "Kingdoms, armies, and paths with region vocabulary.",
+  },
+  "preset.dnd.title": { es: "Campaña D&D", en: "D&D campaign" },
+  "preset.dnd.desc": {
+    es: "Overworld de mesa con ubicaciones, facciones y hitos.",
+    en: "Tabletop overworld with locations, factions, and milestones.",
+  },
+  "preset.adventure.title": { es: "Aventura por isla", en: "Island adventure" },
+  "preset.adventure.desc": {
+    es: "Grafo lineal de hitos con desbloqueos y encuentros.",
+    en: "Linear milestone graph with unlocks and encounters.",
+  },
+  "preset.timelineWars.title": { es: "Guerra cronológica", en: "Timeline wars" },
+  "preset.timelineWars.desc": {
+    es: "Conquistas por año — prueba el scrubber y la crónica.",
+    en: "Conquests by year — try the year scrubber and chronicle.",
+  },
+  "preset.tradeRoutes.title": { es: "Rutas comerciales", en: "Trade routes" },
+  "preset.tradeRoutes.desc": {
+    es: "Caminos que se abren y cierran según eventos de ruta.",
+    en: "Paths that open and close via route timeline events.",
+  },
+  "preset.richMilestones.title": { es: "Hitos avanzados", en: "Rich milestones" },
+  "preset.richMilestones.desc": {
+    es: "Varios encuentros y recompensas por nodo — ideal para el HUD de hitos.",
+    en: "Multiple encounters and rewards per node — great for the milestone HUD.",
+  },
+  "preset.fogOfWar.title": { es: "Niebla de guerra", en: "Fog of war" },
+  "preset.fogOfWar.desc": {
+    es: "Nodos ocultos hasta descubrirlos — prueba play mode y la búsqueda.",
+    en: "Hidden nodes until discovered — try play mode and search.",
+  },
+
+  "preset.feat.timeline": { es: "Timeline", en: "Timeline" },
+  "preset.feat.fleets": { es: "Flotas", en: "Fleets" },
+  "preset.feat.owners": { es: "Facciones", en: "Factions" },
+  "preset.feat.regions": { es: "Regiones", en: "Regions" },
+  "preset.feat.armies": { es: "Ejércitos", en: "Armies" },
+  "preset.feat.paths": { es: "Caminos", en: "Paths" },
+  "preset.feat.locations": { es: "Ubicaciones", en: "Locations" },
+  "preset.feat.play": { es: "Play mode", en: "Play mode" },
+  "preset.feat.milestones": { es: "Hitos", en: "Milestones" },
+  "preset.feat.unlock": { es: "Desbloqueo", en: "Unlock" },
+  "preset.feat.encounters": { es: "Encuentros", en: "Encounters" },
+  "preset.feat.yearScrub": { es: "Año de vista", en: "View year" },
+  "preset.feat.chronicle": { es: "Crónica", en: "Chronicle" },
+  "preset.feat.conquest": { es: "Conquista", en: "Conquest" },
+  "preset.feat.routeEvents": { es: "Eventos de ruta", en: "Route events" },
+  "preset.feat.routeTypes": { es: "Tipos de ruta", en: "Route types" },
+  "preset.feat.stats": { es: "Estadísticas", en: "Stats" },
+  "preset.feat.multiEncounter": { es: "Multi-encuentro", en: "Multi-encounter" },
+  "preset.feat.rewards": { es: "Recompensas", en: "Rewards" },
+  "preset.feat.milestoneHud": { es: "HUD de hitos", en: "Milestone HUD" },
+  "preset.feat.fogOfWar": { es: "Niebla de guerra", en: "Fog of war" },
+  "preset.feat.hiddenNodes": { es: "Nodos ocultos", en: "Hidden nodes" },
+
+  "owners.autoSaveHint": {
+    es: "Los cambios se guardan automáticamente.",
+    en: "Changes save automatically.",
+  },
+  "timeline.autoSaveHint": {
+    es: "Los eventos se guardan solos al rellenar el título.",
+    en: "Events save automatically when the title is filled in.",
+  },
+  "routes.autoSaveHint": {
+    es: "Los datos de la ruta se guardan automáticamente.",
+    en: "Route data saves automatically.",
+  },
+  "routes.eventAutoSaveHint": {
+    es: "Los eventos de ruta se guardan solos al rellenar el título.",
+    en: "Route events save automatically when the title is filled in.",
+  },
+  "routes.delete": { es: "Borrar ruta", en: "Delete route" },
 } as const satisfies Record<string, L10n>;

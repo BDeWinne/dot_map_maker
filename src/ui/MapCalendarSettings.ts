@@ -44,7 +44,9 @@ export class MapCalendarSettings {
       galaxyScene.setCalendar(epoch.value, Number.isFinite(y) ? y : 2200);
     };
 
+    epoch.addEventListener("input", apply);
     epoch.addEventListener("change", apply);
+    defaultYear.addEventListener("input", apply);
     defaultYear.addEventListener("change", apply);
   }
 

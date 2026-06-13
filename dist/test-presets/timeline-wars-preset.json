@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdAt": 1740000004000,
+    "epoch": "Guerra de los Tres Soles",
+    "defaultYear": 2200,
+    "viewYear": 2205,
+    "profile": "galaxy",
+    "playMode": false
+  },
+  "owners": [
+    { "id": "none", "name": "Unclaimed", "short": "-", "color": "#666666" },
+    {
+      "id": "empire_sun",
+      "name": "Dominio Solar",
+      "short": "SOL",
+      "color": "#f39c12",
+      "leader": { "name": "Archon Lyra", "age": 47, "ageYear": 2200, "personality": "Estratega fría" }
+    },
+    {
+      "id": "empire_ash",
+      "name": "Coalición de Ceniza",
+      "short": "ASH",
+      "color": "#95a5a6",
+      "leader": { "name": "Marshal Korr", "age": 55, "ageYear": 2200, "personality": "Veterano implacable" }
+    }
+  ],
+  "systems": [
+    {
+      "id": "tw_sol",
+      "name": "Helios Prime",
+      "starType": "G2V",
+      "owner": "empire_sun",
+      "isCapital": true,
+      "population": 8000000000,
+      "x": 0,
+      "y": 0,
+      "size": 2,
+      "facilities": ["bastion", "shipyard", "research"],
+      "fleets": [{ "owner": "empire_sun", "count": 10 }],
+      "timeline": [
+        { "id": "tw-sol-1", "year": 2180, "type": "colonized", "title": "Fundación del Dominio", "actorId": "empire_sun" },
+        { "id": "tw-sol-2", "year": 2200, "type": "fleet_change", "title": "Flota de reserva interior", "actorId": "empire_sun", "fleets": [{ "owner": "empire_sun", "count": 10 }] }
+      ]
+    },
+    {
+      "id": "tw_border",
+      "name": "Frontera K-12",
+      "starType": "K1V",
+      "owner": "empire_sun",
+      "population": 120000000,
+      "x": 200,
+      "y": -40,
+      "size": 1.3,
+      "facilities": ["mining", "refinery"],
+      "fleets": [{ "owner": "empire_sun", "count": 4 }],
+      "timeline": [
+        { "id": "tw-b-1", "year": 2195, "type": "colonized", "title": "Puesto minero avanzado", "actorId": "empire_sun" },
+        { "id": "tw-b-2", "year": 2210, "type": "owner_change", "title": "Caída de K-12", "actorId": "empire_ash", "description": "Asalto orbital sorpresa." }
+      ]
+    },
+    {
+      "id": "tw_ash_home",
+      "name": "Ceniza-IV",
+      "starType": "M4V",
+      "owner": "empire_ash",
+      "isCapital": true,
+      "population": 2100000000,
+      "x": -220,
+      "y": 80,
+      "size": 1.8,
+      "facilities": ["bastion", "mining", "trade"],
+      "fleets": [{ "owner": "empire_ash", "count": 7 }],
+      "timeline": [
+        { "id": "tw-a-1", "year": 2170, "type": "colonized", "title": "Unificación de Ceniza", "actorId": "empire_ash" }
+      ]
+    },
+    {
+      "id": "tw_contested",
+      "name": "Nexo Disputado",
+      "starType": "F8V",
+      "owner": "none",
+      "population": 0,
+      "x": 60,
+      "y": 160,
+      "size": 1.1,
+      "facilities": ["gateway"],
+      "timeline": [
+        { "id": "tw-c-1", "year": 2203, "type": "event", "title": "Batalla del Nexo", "description": "Zona neutral tras el primer intercambio de fuego." },
+        { "id": "tw-c-2", "year": 2215, "type": "colonized", "title": "Corredor reabierto", "actorId": "empire_sun" }
+      ]
+    }
+  ],
+  "connections": [
+    { "id": "tw-lane-1", "from": "tw_sol", "to": "tw_border", "routeType": "hyperlane", "name": "Ruta interior" },
+    { "id": "tw-lane-2", "from": "tw_border", "to": "tw_contested", "routeType": "military", "name": "Frente K-12" },
+    { "id": "tw-lane-3", "from": "tw_ash_home", "to": "tw_contested", "routeType": "hyperlane", "name": "Incursión de Ceniza" }
+  ],
+  "background": { "src": "backgrounds/galaxy.svg", "opacity": 1 }
+}

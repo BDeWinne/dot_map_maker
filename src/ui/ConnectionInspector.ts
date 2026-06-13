@@ -7,6 +7,8 @@ import { getRouteTimelineLabel, getRouteTypeLabel } from "../i18n/routeLabels";
 import { getLocale, t } from "../i18n/locale";
 import { ensureRouteTimelineEntry, syncPresentRouteStatus } from "../data/routeState";
 import { sidebar } from "./Sidebar";
+import { createAutoSave } from "./autoSave";
+import { isPlayMode } from "./playModeUi";
 
 export class ConnectionInspector {
   private emptyEl = document.getElementById("route-empty")!;
@@ -23,17 +25,19 @@ export class ConnectionInspector {
   ) as HTMLTextAreaElement;
   private editingEventId: string | null = null;
   private activeLine: ConnectionLine | null = null;
+  private autoSave = createAutoSave();
 
   constructor() {
     this.populateRouteTypes();
     this.populateEventTypes();
+    this.bindAutoSave();
 
-    document.getElementById("route-save-btn")?.addEventListener("click", () => {
-      this.saveRouteMeta();
+    document.getElementById("route-delete-btn")?.addEventListener("click", () => {
+      if (isPlayMode()) return;
+      galaxyScene.deleteSelectedConnection();
+      this.clear();
     });
-    document.getElementById("route-event-save")?.addEventListener("click", () => {
-      this.saveRouteEvent();
-    });
+
     document.getElementById("route-event-clear")?.addEventListener("click", () => {
       this.resetEventForm();
     });
@@ -50,9 +54,23 @@ export class ConnectionInspector {
     });
   }
 
+  private bindAutoSave() {
+    const scheduleMeta = () => this.autoSave.schedule(() => this.saveRouteMeta());
+    const scheduleEvent = () => this.autoSave.schedule(() => this.saveRouteEvent());
+
+    this.nameInput?.addEventListener("input", scheduleMeta);
+    this.nameInput?.addEventListener("change", () => this.saveRouteMeta());
+    this.typeSelect?.addEventListener("change", () => this.saveRouteMeta());
+
+    for (const el of [this.eventYear, this.eventType, this.eventTitle, this.eventDescription]) {
+      el?.addEventListener("input", scheduleEvent);
+      el?.addEventListener("change", () => this.saveRouteEvent());
+    }
+  }
+
   private populateRouteTypes() {
-    const locale = getLocale();
     this.typeSelect.innerHTML = "";
+    const locale = getLocale();
     const types: RouteType[] = ["hyperlane", "trade", "military", "clandestine"];
     types.forEach((type) => {
       const opt = document.createElement("option");
@@ -63,41 +81,37 @@ export class ConnectionInspector {
   }
 
   private populateEventTypes() {
-    const locale = getLocale();
     this.eventType.innerHTML = "";
-    (["route_open", "route_close"] as RouteTimelineEntryType[]).forEach(
-      (type) => {
-        const opt = document.createElement("option");
-        opt.value = type;
-        opt.textContent = getRouteTimelineLabel(type, locale);
-        this.eventType.appendChild(opt);
-      },
-    );
+    const locale = getLocale();
+    const types: RouteTimelineEntryType[] = ["route_open", "route_close"];
+    types.forEach((type) => {
+      const opt = document.createElement("option");
+      opt.value = type;
+      opt.textContent = getRouteTimelineLabel(type, locale);
+      this.eventType.appendChild(opt);
+    });
   }
 
-  private getConn(): SystemConnection | null {
-    if (!this.activeLine) return null;
-    return galaxyScene.getConnectionById(this.activeLine.connectionId) ?? null;
+  private getConn(): SystemConnection | undefined {
+    if (!this.activeLine) return undefined;
+    return galaxyScene.getConnectionById(this.activeLine.connectionId);
   }
 
-  public load(line: ConnectionLine) {
-    const conn = galaxyScene.getConnectionById(line.connectionId);
+  private load(line: ConnectionLine) {
+    this.activeLine = line;
+    sidebar.activate("routes");
+    const conn = this.getConn();
     if (!conn) return;
 
-    this.activeLine = line;
-    this.emptyEl.hidden = true;
-    this.formEl.hidden = false;
-    sidebar.activate("routes");
-
-    this.labelEl.textContent = routeLabel(
-      conn,
-      line.fromNode.data.name,
-      line.toNode.data.name,
-    );
-    this.nameInput.value = conn.name ?? "";
-    this.typeSelect.value = conn.routeType ?? "hyperlane";
-    this.renderEventList(conn);
-    this.resetEventForm();
+    this.autoSave.runSuppressed(() => {
+      this.emptyEl.hidden = true;
+      this.formEl.hidden = false;
+      this.labelEl.textContent = routeLabel(conn, line.fromNode.data.name, line.toNode.data.name);
+      this.nameInput.value = conn.name ?? "";
+      this.typeSelect.value = conn.routeType ?? "hyperlane";
+      this.renderEventList(conn);
+      this.resetEventForm();
+    });
   }
 
   public clear() {
@@ -109,6 +123,7 @@ export class ConnectionInspector {
   }
 
   private saveRouteMeta() {
+    if (isPlayMode()) return;
     const conn = this.getConn();
     if (!conn) return;
     conn.name = this.nameInput.value.trim() || undefined;
@@ -137,8 +152,8 @@ export class ConnectionInspector {
           <strong>${escapeHtml(e.title)}</strong>
           ${e.description ? `<p>${escapeHtml(e.description)}</p>` : ""}
           <div class="timeline-entry-actions">
-            <button type="button" class="btn-small" data-route-edit="${e.id}">Edit</button>
-            <button type="button" class="btn-small btn-danger" data-route-del="${e.id}">Delete</button>
+            <button type="button" class="btn-small" data-route-edit="${e.id}">${t("common.edit")}</button>
+            <button type="button" class="btn-small btn-danger" data-route-del="${e.id}">${t("common.delete")}</button>
           </div>
         </article>`,
       )
@@ -154,6 +169,7 @@ export class ConnectionInspector {
 
     this.listEl.querySelectorAll("[data-route-del]").forEach((btn) => {
       btn.addEventListener("click", () => {
+        if (isPlayMode()) return;
         const id = (btn as HTMLElement).dataset.routeDel!;
         conn.timeline = (conn.timeline ?? []).filter((e) => e.id !== id);
         syncPresentRouteStatus(conn, galaxyScene.getPresentYear());
@@ -166,22 +182,27 @@ export class ConnectionInspector {
   }
 
   private loadEventToForm(entry: import("../data/RouteTypes").RouteTimelineEntry) {
-    this.editingEventId = entry.id;
-    this.eventYear.value = String(entry.year);
-    this.eventType.value = entry.type;
-    this.eventTitle.value = entry.title;
-    this.eventDescription.value = entry.description ?? "";
+    this.autoSave.runSuppressed(() => {
+      this.editingEventId = entry.id;
+      this.eventYear.value = String(entry.year);
+      this.eventType.value = entry.type;
+      this.eventTitle.value = entry.title;
+      this.eventDescription.value = entry.description ?? "";
+    });
   }
 
   private resetEventForm() {
-    this.editingEventId = null;
-    this.eventYear.value = String(galaxyScene.getViewYear());
-    this.eventType.value = "route_close";
-    this.eventTitle.value = "";
-    this.eventDescription.value = "";
+    this.autoSave.runSuppressed(() => {
+      this.editingEventId = null;
+      this.eventYear.value = String(galaxyScene.getViewYear());
+      this.eventType.value = "route_close";
+      this.eventTitle.value = "";
+      this.eventDescription.value = "";
+    });
   }
 
   private saveRouteEvent() {
+    if (isPlayMode()) return;
     const conn = this.getConn();
     if (!conn) return;
     const title = this.eventTitle.value.trim();
@@ -202,7 +223,7 @@ export class ConnectionInspector {
 
     syncPresentRouteStatus(conn, galaxyScene.getPresentYear());
     galaxyScene.updateConnection({ ...conn });
-    this.resetEventForm();
+    this.editingEventId = entry.id;
     this.renderEventList(conn);
     galaxyScene.applyTimelineView();
     document.dispatchEvent(new CustomEvent("map:updated"));

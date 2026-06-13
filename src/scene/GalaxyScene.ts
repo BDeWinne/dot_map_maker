@@ -28,6 +28,14 @@ import {
   computeAdventureStates,
   type AdventureNodeState,
 } from "../data/adventureState";
+import {
+  emptyPlayProgress,
+  mergeAdventureWithProgress,
+  migrateProgressFromDesign,
+  type PlayMilestoneProgress,
+  type PlayProgress,
+} from "../data/playProgress";
+import type { NodeAdventure } from "../data/AdventureTypes";
 
 interface NodePresentSnapshot {
   owner: string;
@@ -103,6 +111,7 @@ export class GalaxyScene extends Container {
   private playMode = false;
   private showAdventureOverlay = true;
   private adventureStates = new Map<string, AdventureNodeState>();
+  private playProgress: PlayProgress = emptyPlayProgress();
   constructor() {
     super();
     this.cullable = false;
@@ -346,7 +355,7 @@ export class GalaxyScene extends Container {
 
   public setPlayMode(on: boolean) {
     this.playMode = on;
-    this.applyAdventureView();
+    this.applyTimelineView();
     document.dispatchEvent(new CustomEvent("playMode:changed"));
   }
 
@@ -366,7 +375,53 @@ export class GalaxyScene extends Container {
   public isNodeAdventureAccessible(nodeId: string): boolean {
     const state = this.adventureStates.get(nodeId);
     if (!this.playMode) return true;
+    if (state?.visibility === "hidden") return false;
     return state?.unlocked ?? true;
+  }
+
+  public getPlayProgress(): PlayProgress {
+    return this.playProgress;
+  }
+
+  public getMergedAdventure(nodeId: string): NodeAdventure | undefined {
+    const node = this.systems.find((n) => n.data.id === nodeId);
+    if (!node?.data.adventure) return undefined;
+    if (!this.playMode) return node.data.adventure;
+    return mergeAdventureWithProgress(
+      node.data.adventure,
+      this.playProgress,
+      nodeId,
+    );
+  }
+
+  public setNodePlayProgress(
+    nodeId: string,
+    progress: PlayMilestoneProgress | undefined,
+  ) {
+    const milestones = { ...this.playProgress.milestones };
+    if (!progress) {
+      delete milestones[nodeId];
+    } else {
+      milestones[nodeId] = progress;
+    }
+    this.playProgress = { ...this.playProgress, milestones };
+    this.applyTimelineView();
+  }
+
+  public clearPlayProgress() {
+    this.playProgress = emptyPlayProgress();
+    this.applyTimelineView();
+    document.dispatchEvent(new CustomEvent("playProgress:cleared"));
+  }
+
+  public importPlayProgress(progress: PlayProgress) {
+    this.playProgress = {
+      version: 1,
+      milestones: { ...progress.milestones },
+    };
+    this.applyTimelineView();
+    document.dispatchEvent(new CustomEvent("map:updated"));
+    document.dispatchEvent(new CustomEvent("playProgress:imported"));
   }
 
   private applyAdventureView() {
@@ -374,18 +429,32 @@ export class GalaxyScene extends Container {
       this.systems.map((n) => n.data),
       this.connections,
       this.playMode,
+      this.playProgress,
     );
 
     for (const node of this.systems) {
+      const state = this.adventureStates.get(node.data.id);
+
+      if (this.playMode && state?.visibility === "hidden") {
+        node.visible = false;
+        node.eventMode = "none";
+        node.applyAdventureVisual(null);
+        continue;
+      }
+
       if (!node.visible) {
         node.applyAdventureVisual(null);
         continue;
       }
-      const state = this.adventureStates.get(node.data.id);
-      if (!this.showAdventureOverlay && !this.playMode) {
+      const designHidden = !this.playMode && !!node.data.adventure?.hidden;
+      if (!this.showAdventureOverlay && !this.playMode && !designHidden) {
         node.applyAdventureVisual(null);
       } else {
-        node.applyAdventureVisual(state ?? null);
+        let visualState = state ?? null;
+        if (designHidden) {
+          visualState = { visibility: "hidden", unlocked: true };
+        }
+        node.applyAdventureVisual(visualState);
       }
     }
 
@@ -489,6 +558,11 @@ export class GalaxyScene extends Container {
     const selectedLine = selectionManager.selectedConnection;
     if (!selectedLine) return;
 
+    const snapshot = this.connections.find(
+      (conn) => conn.id === selectedLine.connectionId,
+    );
+    if (!snapshot) return;
+
     this.connections = this.connections.filter(
       (conn) => conn.id !== selectedLine.connectionId,
     );
@@ -503,6 +577,11 @@ export class GalaxyScene extends Container {
     });
 
     selectionManager.clearConnection();
+    document.dispatchEvent(
+      new CustomEvent("connection:deleted", {
+        detail: { connection: structuredClone(snapshot) },
+      }),
+    );
     document.dispatchEvent(new CustomEvent("map:updated"));
   }
 
@@ -552,8 +631,17 @@ export class GalaxyScene extends Container {
   private isUiTarget(event: FederatedPointerEvent): boolean {
     const htmlTarget = event.nativeEvent.target as HTMLElement;
     return !!htmlTarget.closest(
-      "#ui-wrapper, #year-scrubber, #map-viewport-hud, #map-view-toggles",
+      "#ui-wrapper, #year-scrubber, #map-viewport-hud, #map-view-toggles, #startup-overlay",
     );
+  }
+
+  private isMapEntityTarget(target: unknown): boolean {
+    let node = target as { parent?: unknown; isSystemNode?: boolean } | null;
+    while (node) {
+      if (node.isSystemNode || node instanceof ConnectionLine) return true;
+      node = node.parent as typeof node;
+    }
+    return false;
   }
 
   private setupBackgroundInteraction() {
@@ -564,7 +652,7 @@ export class GalaxyScene extends Container {
 
       if (this.editMode === "edit") {
         if (this.playMode) return;
-        if ((event.target as any)?.isSystemNode) return;
+        if (this.isMapEntityTarget(event.target)) return;
 
         const pos = this.world.toLocal(event.global);
         this.createNode({
@@ -688,6 +776,79 @@ export class GalaxyScene extends Container {
     return this.systems.find((n) => n.data.id === id);
   }
 
+  public focusOnNode(node: NodeSystem, targetZoom?: number) {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const zoom = targetZoom ?? Math.min(this.maxZoom, Math.max(this.getZoom(), 1.1));
+    this.zoom = zoom;
+    this.world.scale.set(zoom);
+    this.world.position.x = w / 2 - node.x * zoom;
+    this.world.position.y = h / 2 - node.y * zoom;
+    this.refreshLabelResolution();
+  }
+
+  public duplicateNodeFromData(
+    data: SystemData,
+    offset = { x: 0, y: 0 },
+  ): NodeSystem | undefined {
+    if (this.playMode) return undefined;
+    const copy = structuredClone(data);
+    copy.id = crypto.randomUUID();
+    copy.x = (copy.x ?? 0) + offset.x;
+    copy.y = (copy.y ?? 0) + offset.y;
+    const adv = copy.adventure ? normalizeAdventure(copy.adventure) : undefined;
+    if (adv) {
+      delete adv.completed;
+      adv.encounters?.forEach((enc) => {
+        delete enc.completed;
+      });
+      copy.adventure = adv;
+    }
+    return this.createNode(copy);
+  }
+
+  public duplicateNode(
+    source: NodeSystem,
+    offset = { x: 24, y: 24 },
+  ): NodeSystem | undefined {
+    if (this.playMode) return undefined;
+    const data = structuredClone(source.data);
+    data.name = `${data.name} copy`;
+    return this.duplicateNodeFromData(data, offset);
+  }
+
+  public renameNodeId(oldId: string, newId: string): boolean {
+    if (this.playMode) return false;
+    const trimmed = newId.trim();
+    if (!trimmed || trimmed === oldId) return false;
+    if (this.getNodeById(trimmed)) return false;
+
+    const node = this.getNodeById(oldId);
+    if (!node) return false;
+
+    node.data.id = trimmed;
+    for (const conn of this.connections) {
+      if (conn.from === oldId) conn.from = trimmed;
+      if (conn.to === oldId) conn.to = trimmed;
+    }
+    for (const sys of this.systems) {
+      const requires = sys.data.adventure?.unlockRequires;
+      if (!requires?.length) continue;
+      sys.data.adventure!.unlockRequires = requires.map((id) =>
+        id === oldId ? trimmed : id,
+      );
+    }
+    if (this.playProgress.milestones[oldId]) {
+      const milestones = { ...this.playProgress.milestones };
+      milestones[trimmed] = milestones[oldId];
+      delete milestones[oldId];
+      this.playProgress = { ...this.playProgress, milestones };
+    }
+    this.applyTimelineView();
+    document.dispatchEvent(new CustomEvent("map:updated"));
+    return true;
+  }
+
   public restoreNode(data: SystemData, connections: SystemConnection[]) {
     if (this.getNodeById(data.id)) return;
     this.createNode(structuredClone(data));
@@ -770,6 +931,13 @@ export class GalaxyScene extends Container {
     this.connectionLayer.addChild(line);
     this.connectionLines.push(line);
     this.refreshConnectionVisuals();
+    if (!this.bulkLoadingMap) {
+      document.dispatchEvent(
+        new CustomEvent("connection:created", {
+          detail: { connection: structuredClone(conn) },
+        }),
+      );
+    }
   }
 
   public hasBackground(): boolean {
@@ -897,6 +1065,7 @@ export class GalaxyScene extends Container {
         viewYear: this.viewYear,
         profile: this.mapProfile,
         playMode: this.playMode,
+        playProgress: this.playProgress,
       },
     };
   }
@@ -912,6 +1081,7 @@ export class GalaxyScene extends Container {
     this.connections = [];
 
     this.presentSnapshots.clear();
+    this.playProgress = emptyPlayProgress();
     this.regenerateTerritories();
     selectionManager.clear();
   }
@@ -933,6 +1103,7 @@ export class GalaxyScene extends Container {
         viewYear?: number;
         profile?: MapProfileId;
         playMode?: boolean;
+        playProgress?: PlayProgress;
       };
     };
 
@@ -978,14 +1149,33 @@ export class GalaxyScene extends Container {
         ownerManager.loadFromJSON({ owners: map.owners });
       }
 
+      let playProgress =
+        map.metadata?.playProgress?.version === 1 &&
+        map.metadata.playProgress.milestones
+          ? {
+              version: 1 as const,
+              milestones: { ...map.metadata.playProgress.milestones },
+            }
+          : emptyPlayProgress();
+
       const presentYear = getMaxTimelineYear(map.systems, this.defaultYear);
       recomputeOwnerCapitalOrigins(map.systems);
       this.bulkLoadingMap = true;
       for (const sys of map.systems) {
         syncPresentFieldsFromTimeline(sys, presentYear);
-        if (sys.adventure) sys.adventure = normalizeAdventure(sys.adventure);
+        if (sys.adventure) {
+          sys.adventure = normalizeAdventure(sys.adventure);
+          const migrated = migrateProgressFromDesign(
+            playProgress,
+            sys.id,
+            sys.adventure,
+          );
+          playProgress = migrated.progress;
+          sys.adventure = migrated.design;
+        }
         this.createNode(sys);
       }
+      this.playProgress = playProgress;
       this.bulkLoadingMap = false;
 
       const connections = Array.isArray(map.connections) ? map.connections : [];

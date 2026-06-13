@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdAt": 1740000007000,
+    "epoch": "Expedición Niebla",
+    "defaultYear": 1,
+    "viewYear": 1,
+    "profile": "adventure",
+    "playMode": false
+  },
+  "owners": [
+    { "id": "none", "name": "Sin facción", "short": "-", "color": "#666666" },
+    { "id": "party", "name": "Expedición", "short": "EXP", "color": "#2ecc71" }
+  ],
+  "systems": [
+    {
+      "id": "fog_camp",
+      "name": "Campamento visible",
+      "starType": "Inicio",
+      "owner": "none",
+      "description": "Único punto conocido al empezar. Desde aquí se exploran los senderos.",
+      "x": 0,
+      "y": 0,
+      "size": 1.1,
+      "facilities": ["logistics"],
+      "adventure": {
+        "startNode": true,
+        "encounters": [
+          {
+            "id": "enc-fog-1",
+            "title": "Preparar la marcha",
+            "kind": "exploration",
+            "description": "Revisar equipo y elegir rumbo.",
+            "gmNotes": "DC 10 supervivencia para bonus en el primer encuentro del bosque."
+          }
+        ]
+      }
+    },
+    {
+      "id": "fog_trail",
+      "name": "Sendero del norte",
+      "starType": "Exploración",
+      "owner": "none",
+      "description": "Se oye el viento entre los árboles. No está en el mapa hasta explorar.",
+      "x": 130,
+      "y": -40,
+      "size": 1,
+      "facilities": ["ruins"],
+      "adventure": {
+        "hidden": true,
+        "locked": true,
+        "unlockRequires": ["fog_camp"],
+        "encounters": [
+          {
+            "id": "enc-fog-2",
+            "title": "Huellas frescas",
+            "kind": "exploration",
+            "description": "Rastros recientes llevan hacia la torre.",
+            "gmNotes": "Percepción DC 12 revela trampa de lazo."
+          }
+        ]
+      }
+    },
+    {
+      "id": "fog_tower",
+      "name": "Torre en ruinas",
+      "starType": "Dungeon",
+      "owner": "none",
+      "description": "Silueta lejana entre la niebla. Requiere completar el sendero.",
+      "x": 260,
+      "y": -80,
+      "size": 1.2,
+      "facilities": ["ruins", "energy"],
+      "adventure": {
+        "hidden": true,
+        "locked": true,
+        "unlockRequires": ["fog_trail"],
+        "encounters": [
+          {
+            "id": "enc-fog-3",
+            "title": "Guardianes de la puerta",
+            "kind": "combat",
+            "description": "Dos constructos bloquean la entrada.",
+            "rewards": [{ "id": "rw-fog-1", "label": "Llave de la torre", "notes": "Abre la cripta (GM)" }]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fog_crypt",
+      "name": "Cripta sellada",
+      "starType": "Final",
+      "owner": "none",
+      "description": "Solo accesible con la llave. Oculta hasta que la torre caiga.",
+      "x": 380,
+      "y": 20,
+      "size": 1.3,
+      "facilities": ["energy"],
+      "adventure": {
+        "hidden": true,
+        "locked": true,
+        "unlockRequires": ["fog_tower"],
+        "encounters": [
+          {
+            "id": "enc-fog-4",
+            "title": "El sello antiguo",
+            "kind": "puzzle",
+            "description": "Tres runas deben alinearse con la luz del amanecer.",
+            "gmNotes": "Arcana DC 14 o la llave de la torre auto-pasa."
+          }
+        ]
+      }
+    }
+  ],
+  "connections": [
+    { "id": "fog_conn_1", "from": "fog_camp", "to": "fog_trail", "routeType": "trade" },
+    { "id": "fog_conn_2", "from": "fog_trail", "to": "fog_tower", "routeType": "hyperlane" },
+    { "id": "fog_conn_3", "from": "fog_tower", "to": "fog_crypt", "routeType": "clandestine" }
+  ]
+}

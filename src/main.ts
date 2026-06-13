@@ -18,10 +18,16 @@ import { getLocale, t } from "./i18n/locale";
 import { exportMapAsPng } from "./ui/visualExport";
 import { mapStatusHud } from "./ui/MapStatusHud";
 import { milestoneHud } from "./ui/MilestoneHud";
+import { nodeSearch } from "./ui/NodeSearch";
+import { mapValidationPanel } from "./ui/MapValidationPanel";
+import { exportPlayProgressFile, importPlayProgressFile } from "./ui/playProgressExport";
 import { initPlayModeUi, syncPlayModeUi } from "./ui/playModeUi";
+import { initMapPersistence } from "./data/mapPersistence";
+import { startupScreen } from "./ui/StartupScreen";
 import { undoManager } from "./editor/UndoManager";
 
 new Game();
+initMapPersistence();
 nodeInspector;
 timelinePanel;
 ownerEditor;
@@ -104,12 +110,20 @@ function bootUi() {
   nodeInspector.init();
   mapStatusHud.init();
   milestoneHud.init();
+  nodeSearch.init();
+  mapValidationPanel.init();
   undoManager.init();
   initLocaleController();
   mapProfilePanel.init();
   mapCalendarSettings.init();
   initPlayModeUi();
+  startupScreen.init();
   populateFacilityLegend();
+
+  document.addEventListener("map:persisted", () => {
+    const el = document.getElementById("map-persist-status");
+    if (el) el.textContent = t("map.persisted");
+  });
 
   document.addEventListener("editMode:changed", syncEditModeControls);
   document.addEventListener("playMode:changed", syncEditModeControls);
@@ -144,6 +158,36 @@ function bootUi() {
     importStatus.textContent = message;
     importStatus.style.color = isError ? "#f88" : "#8c8";
   };
+
+  const exportPlayBtn = document.getElementById("export-play-progress");
+  const importPlayBtn = document.getElementById("import-play-progress");
+  const importPlayFile = document.getElementById("import-play-progress-file") as HTMLInputElement | null;
+  const playProgressStatus = document.getElementById("play-progress-status");
+
+  exportPlayBtn?.addEventListener("click", () => {
+    exportPlayProgressFile();
+    if (playProgressStatus) playProgressStatus.textContent = t("play.export");
+  });
+
+  importPlayBtn?.addEventListener("click", () => importPlayFile?.click());
+
+  importPlayFile?.addEventListener("change", () => {
+    const file = importPlayFile.files?.[0];
+    if (!file) return;
+    void importPlayProgressFile(file)
+      .then((msg) => {
+        if (playProgressStatus) playProgressStatus.textContent = msg;
+      })
+      .catch(() => {
+        if (playProgressStatus) {
+          playProgressStatus.textContent = t("map.importBadJson");
+          playProgressStatus.style.color = "#f88";
+        }
+      })
+      .finally(() => {
+        importPlayFile.value = "";
+      });
+  });
 
   const exportMapBtn = document.getElementById("export-map");
   const exportPngBtn = document.getElementById("export-png");
@@ -240,6 +284,7 @@ function bootUi() {
             return;
           }
 
+          startupScreen.hide();
           syncBackgroundControls();
           syncEditModeControls();
           onMapUpdated();
@@ -260,3 +305,7 @@ function bootUi() {
 }
 
 bootUi();
+
+void Game.whenReady().then(() => {
+  startupScreen.show();
+});

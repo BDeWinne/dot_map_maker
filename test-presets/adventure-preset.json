@@ -6,7 +6,7 @@
     "defaultYear": 1,
     "viewYear": 1,
     "profile": "adventure",
-    "playMode": true
+    "playMode": false
   },
   "owners": [
     { "id": "none", "name": "Sin facción", "short": "-", "color": "#666666" },

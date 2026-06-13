@@ -1,15 +1,15 @@
 import {
   ADVENTURE_ENCOUNTER_KINDS,
   normalizeAdventure,
-  syncMilestoneCompletedFromEncounters,
   type AdventureEncounter,
   type AdventureEncounterKind,
   type AdventureReward,
   type NodeAdventure,
 } from "../data/AdventureTypes";
+import { buildPlayProgressUpdate, stripCompletionFromDesign } from "../data/playProgress";
 import { selectionManager } from "../editor/SelectionManager";
 import { galaxyScene } from "../scene/GalaxyScene";
-import { t } from "../i18n/locale";
+import { getLocale, t } from "../i18n/locale";
 import { attachAutoGrowTextarea, fitAutoGrowFields } from "./autoGrowTextarea";
 import { isPlayMode } from "./playModeUi";
 
@@ -18,10 +18,12 @@ export class MilestoneHud {
   private titleEl = document.getElementById("milestone-hud-title");
   private idEl = document.getElementById("milestone-hud-id");
   private startInput = document.getElementById("milestone-start") as HTMLInputElement | null;
+  private hiddenInput = document.getElementById("milestone-hidden") as HTMLInputElement | null;
   private lockedInput = document.getElementById("milestone-locked") as HTMLInputElement | null;
   private completedInput = document.getElementById("milestone-completed") as HTMLInputElement | null;
   private requiresInput = document.getElementById("milestone-requires") as HTMLInputElement | null;
   private encountersEl = document.getElementById("milestone-encounters-list");
+  private encountersFeedback = document.getElementById("milestone-encounters-feedback");
   private addEncounterBtn = document.getElementById("milestone-add-encounter");
   private suppressAutoSave = false;
   private autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -39,6 +41,7 @@ export class MilestoneHud {
     const saveNow = () => this.save();
 
     this.startInput?.addEventListener("change", saveNow);
+    this.hiddenInput?.addEventListener("change", saveNow);
     this.lockedInput?.addEventListener("change", saveNow);
     this.completedInput?.addEventListener("change", saveNow);
     this.requiresInput?.addEventListener("input", schedule);
@@ -52,9 +55,22 @@ export class MilestoneHud {
       const node = selectionManager.getSelected();
       if (node) this.loadFromSelection();
     });
+    document.addEventListener("playProgress:cleared", () => {
+      const node = selectionManager.getSelected();
+      if (node) this.loadFromSelection();
+    });
+    document.addEventListener("playProgress:imported", () => {
+      const node = selectionManager.getSelected();
+      if (node) this.loadFromSelection();
+    });
     document.addEventListener("locale:changed", () => {
       const node = selectionManager.getSelected();
-      if (node) this.renderEncounters(node.data.adventure);
+      if (node) {
+        const adv = isPlayMode()
+          ? galaxyScene.getMergedAdventure(node.data.id)
+          : node.data.adventure;
+        this.renderEncounters(adv);
+      }
     });
   }
 
@@ -79,14 +95,19 @@ export class MilestoneHud {
     if (this.titleEl) this.titleEl.textContent = node.data.name;
     if (this.idEl) this.idEl.textContent = node.data.id;
 
-    const adv = normalizeAdventure(node.data.adventure) ?? {};
-    if (this.startInput) this.startInput.checked = !!adv.startNode;
-    if (this.lockedInput) this.lockedInput.checked = !!adv.locked;
-    if (this.completedInput) this.completedInput.checked = !!adv.completed;
+    const design = normalizeAdventure(node.data.adventure) ?? {};
+    const displayAdv = isPlayMode()
+      ? galaxyScene.getMergedAdventure(node.data.id) ?? design
+      : design;
+
+    if (this.startInput) this.startInput.checked = !!design.startNode;
+    if (this.hiddenInput) this.hiddenInput.checked = !!design.hidden;
+    if (this.lockedInput) this.lockedInput.checked = !!design.locked;
+    if (this.completedInput) this.completedInput.checked = !!displayAdv.completed;
     if (this.requiresInput) {
-      this.requiresInput.value = adv.unlockRequires?.join(", ") ?? "";
+      this.requiresInput.value = design.unlockRequires?.join(", ") ?? "";
     }
-    this.renderEncounters(adv);
+    this.renderEncounters(displayAdv);
     this.suppressAutoSave = false;
   }
 
@@ -108,6 +129,33 @@ export class MilestoneHud {
       );
     }
     if (!play) fitAutoGrowFields(this.encountersEl);
+    this.updateEncountersFeedback(adv);
+  }
+
+  private updateEncountersFeedback(adv?: NodeAdventure) {
+    if (!this.encountersFeedback) return;
+    if (!isPlayMode()) {
+      this.encountersFeedback.hidden = true;
+      return;
+    }
+    const encounters = adv?.encounters ?? [];
+    if (encounters.length === 0) {
+      this.encountersFeedback.hidden = true;
+      return;
+    }
+    const done = encounters.filter((e) => e.completed).length;
+    if (done === encounters.length) {
+      this.encountersFeedback.hidden = false;
+      this.encountersFeedback.className = "milestone-encounters-feedback is-complete";
+      this.encountersFeedback.textContent = t("milestone.allEncountersDone");
+      return;
+    }
+    this.encountersFeedback.hidden = false;
+    this.encountersFeedback.className = "milestone-encounters-feedback";
+    this.encountersFeedback.textContent = t("milestone.encountersProgress", getLocale(), {
+      done: String(done),
+      total: String(encounters.length),
+    });
   }
 
   private createAutoGrowField(className: string, value: string, placeholder: string): HTMLTextAreaElement {
@@ -123,17 +171,18 @@ export class MilestoneHud {
   }
 
   private buildEncounterCardView(enc: AdventureEncounter): HTMLElement {
-    const card = document.createElement("div");
-    card.className = "milestone-encounter is-view-only";
-    card.dataset.encounterId = enc.id;
-    if (enc.completed) card.classList.add("is-done");
+    const details = document.createElement("details");
+    details.className = "milestone-encounter-play";
+    details.dataset.encounterId = enc.id;
+    if (enc.completed) details.classList.add("is-done");
+    details.open = !enc.completed;
 
-    const head = document.createElement("div");
-    head.className = "milestone-encounter-head";
-
-    const title = document.createElement("div");
-    title.className = "milestone-encounter-title milestone-encounter-read";
+    const summary = document.createElement("summary");
+    summary.className = "milestone-encounter-play-summary";
+    const title = document.createElement("span");
+    title.className = "milestone-encounter-play-title";
     title.textContent = enc.title;
+    summary.appendChild(title);
 
     const kindLabel =
       enc.kind && ADVENTURE_ENCOUNTER_KINDS.includes(enc.kind)
@@ -143,26 +192,43 @@ export class MilestoneHud {
       const kind = document.createElement("span");
       kind.className = "milestone-encounter-kind-badge";
       kind.textContent = kindLabel;
-      head.appendChild(kind);
+      summary.appendChild(kind);
     }
+    details.appendChild(summary);
 
-    const doneLabel = document.createElement("label");
-    doneLabel.className = "milestone-encounter-done checkbox-row";
+    const toggle = document.createElement("label");
+    toggle.className = "milestone-encounter-play-toggle";
     const doneCheck = document.createElement("input");
     doneCheck.type = "checkbox";
+    doneCheck.className = "milestone-encounter-done-input";
     doneCheck.checked = !!enc.completed;
     doneCheck.addEventListener("change", () => this.save());
-    doneLabel.append(doneCheck, document.createTextNode(t("milestone.encounterDone")));
-    head.prepend(title);
-    head.append(doneLabel);
 
-    card.appendChild(head);
+    const icon = document.createElement("span");
+    icon.className = "milestone-complete-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = "✓";
+
+    const copy = document.createElement("span");
+    copy.className = "milestone-complete-copy";
+    const copyTitle = document.createElement("span");
+    copyTitle.className = "milestone-complete-title";
+    copyTitle.textContent = t("milestone.encounterDone");
+    const copyHint = document.createElement("span");
+    copyHint.className = "milestone-complete-hint";
+    copyHint.textContent = t("milestone.encounterDoneHint");
+    copy.append(copyTitle, copyHint);
+    toggle.append(doneCheck, icon, copy);
+    details.appendChild(toggle);
+
+    const body = document.createElement("div");
+    body.className = "milestone-encounter-play-body";
 
     if (enc.description?.trim()) {
       const desc = document.createElement("div");
       desc.className = "milestone-encounter-desc milestone-encounter-read";
       desc.textContent = enc.description;
-      card.appendChild(desc);
+      body.appendChild(desc);
     }
 
     const rewards = enc.rewards ?? [];
@@ -180,10 +246,11 @@ export class MilestoneHud {
         rewardsList.appendChild(this.buildRewardRowView(reward));
       }
       rewardsWrap.appendChild(rewardsList);
-      card.appendChild(rewardsWrap);
+      body.appendChild(rewardsWrap);
     }
 
-    return card;
+    details.appendChild(body);
+    return details;
   }
 
   private buildRewardRowView(reward: AdventureReward): HTMLElement {
@@ -194,14 +261,7 @@ export class MilestoneHud {
     const label = document.createElement("div");
     label.className = "milestone-reward-label milestone-encounter-read";
     label.textContent = reward.label;
-
     row.appendChild(label);
-    if (reward.notes?.trim()) {
-      const notes = document.createElement("div");
-      notes.className = "milestone-reward-notes milestone-encounter-read";
-      notes.textContent = reward.notes;
-      row.appendChild(notes);
-    }
     return row;
   }
 
@@ -234,14 +294,6 @@ export class MilestoneHud {
     kind.value = enc.kind ?? "";
     kind.addEventListener("change", () => this.save());
 
-    const doneLabel = document.createElement("label");
-    doneLabel.className = "milestone-encounter-done checkbox-row";
-    const doneCheck = document.createElement("input");
-    doneCheck.type = "checkbox";
-    doneCheck.checked = !!enc.completed;
-    doneCheck.addEventListener("change", () => this.save());
-    doneLabel.append(doneCheck, document.createTextNode(t("milestone.encounterDone")));
-
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
     removeBtn.className = "milestone-encounter-remove";
@@ -252,12 +304,18 @@ export class MilestoneHud {
       this.save();
     });
 
-    head.append(title, kind, doneLabel, removeBtn);
+    head.append(title, kind, removeBtn);
 
     const desc = this.createAutoGrowField(
       "milestone-encounter-desc",
       enc.description ?? "",
       t("milestone.encounterDescPh"),
+    );
+
+    const gmNotes = this.createAutoGrowField(
+      "milestone-encounter-gm",
+      enc.gmNotes ?? "",
+      t("milestone.gmNotesPh"),
     );
 
     const rewardsWrap = document.createElement("div");
@@ -286,7 +344,7 @@ export class MilestoneHud {
     });
     rewardsWrap.appendChild(addRewardBtn);
 
-    card.append(head, desc, rewardsWrap);
+    card.append(head, desc, gmNotes, rewardsWrap);
     return card;
   }
 
@@ -348,9 +406,8 @@ export class MilestoneHud {
       const kind = kindRaw as AdventureEncounterKind | "";
       const description =
         card.querySelector<HTMLTextAreaElement>(".milestone-encounter-desc")?.value.trim() || undefined;
-      const completed = !!card.querySelector<HTMLInputElement>(
-        ".milestone-encounter-done input",
-      )?.checked;
+      const gmNotes =
+        card.querySelector<HTMLTextAreaElement>(".milestone-encounter-gm")?.value.trim() || undefined;
 
       const rewards: AdventureReward[] = [];
       card.querySelectorAll<HTMLElement>(".milestone-reward-row").forEach((row) => {
@@ -371,63 +428,56 @@ export class MilestoneHud {
       };
       if (kind) enc.kind = kind;
       if (description) enc.description = description;
-      if (completed) enc.completed = true;
+      if (gmNotes) enc.gmNotes = gmNotes;
       if (rewards.length > 0) enc.rewards = rewards;
       out.push(enc);
     });
     return out;
   }
 
-  private readPlayProgress(existing?: NodeAdventure): NodeAdventure | undefined {
-    const base = existing ? { ...existing } : {};
-    const encounters = (base.encounters ?? []).map((enc) => {
+  private readPlayProgressSave(design?: NodeAdventure) {
+    const milestoneCompleted = !!this.completedInput?.checked;
+    const encounterCompleted = new Map<string, boolean>();
+
+    for (const enc of design?.encounters ?? []) {
       const card = this.encountersEl?.querySelector<HTMLElement>(
-        `.milestone-encounter[data-encounter-id="${enc.id}"]`,
+        `[data-encounter-id="${enc.id}"]`,
       );
-      const completed = !!card?.querySelector<HTMLInputElement>(
-        ".milestone-encounter-done input",
-      )?.checked;
-      return { ...enc, completed };
-    });
-
-    let adv: NodeAdventure = {
-      ...base,
-      completed: this.completedInput?.checked,
-      encounters: encounters.length > 0 ? encounters : base.encounters,
-    };
-    adv = syncMilestoneCompletedFromEncounters(adv) ?? adv;
-    return adv;
-  }
-
-  private readAdventure(): NodeAdventure | undefined {
-    const node = selectionManager.getSelected();
-    const existing = normalizeAdventure(node?.data.adventure);
-
-    if (isPlayMode()) {
-      return this.readPlayProgress(existing);
+      encounterCompleted.set(
+        enc.id,
+        !!card?.querySelector<HTMLInputElement>(".milestone-encounter-done-input")?.checked,
+      );
     }
 
-    let adv = normalizeAdventure({
+    return buildPlayProgressUpdate(design, milestoneCompleted, encounterCompleted);
+  }
+
+  private readAdventureDesign(): NodeAdventure | undefined {
+    const adv = normalizeAdventure({
       startNode: this.startInput?.checked,
+      hidden: this.hiddenInput?.checked,
       locked: this.lockedInput?.checked,
-      completed: this.completedInput?.checked,
       unlockRequires: this.requiresInput?.value
         .split(/[,;\s]+/)
         .map((s) => s.trim())
         .filter(Boolean),
       encounters: this.readEncountersFromDom(),
     });
-    if (adv) adv = syncMilestoneCompletedFromEncounters(adv);
-    return adv;
+    return stripCompletionFromDesign(adv);
   }
 
   private scheduleSave() {
-    if (this.suppressAutoSave || isPlayMode()) return;
+    if (this.suppressAutoSave) return;
     if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+    const delay = isPlayMode() ? 0 : 400;
+    if (delay === 0) {
+      this.save();
+      return;
+    }
     this.autoSaveTimer = setTimeout(() => {
       this.autoSaveTimer = null;
       this.save();
-    }, 400);
+    }, delay);
   }
 
   private save() {
@@ -435,10 +485,18 @@ export class MilestoneHud {
     const node = selectionManager.getSelected();
     if (!node) return;
 
-    node.data.adventure = this.readAdventure();
-    if (this.completedInput) {
-      this.completedInput.checked = !!node.data.adventure?.completed;
+    if (isPlayMode()) {
+      const design = normalizeAdventure(node.data.adventure);
+      const progress = this.readPlayProgressSave(design);
+      galaxyScene.setNodePlayProgress(node.data.id, progress);
+      const merged = galaxyScene.getMergedAdventure(node.data.id);
+      if (this.completedInput) this.completedInput.checked = !!merged?.completed;
+      this.renderEncounters(merged);
+      this.updateEncountersFeedback(merged);
+      return;
     }
+
+    node.data.adventure = this.readAdventureDesign();
     node.updateNodes();
     galaxyScene.applyTimelineView();
     document.dispatchEvent(new CustomEvent("map:updated"));

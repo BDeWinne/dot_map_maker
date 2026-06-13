@@ -18,7 +18,9 @@ import { FleetRowEditor } from "./FleetRowEditor";
 import { sidebar } from "./Sidebar";
 
 export class NodeInspector {
+  private idInput = document.getElementById("node-id") as HTMLInputElement | null;
   private nameInput = document.getElementById("node-name") as HTMLInputElement;
+  private patchSnapshot: SystemData | null = null;
   private sizeInput = document.getElementById("node-size") as HTMLInputElement;
   private starTypeInput = document.getElementById("node-star-type") as HTMLInputElement;
   private ownerSelect = document.getElementById("node-owned-by") as HTMLSelectElement;
@@ -72,6 +74,7 @@ export class NodeInspector {
     const saveNow = () => this.saveChanges();
 
     const textFields: (HTMLInputElement | HTMLTextAreaElement | null)[] = [
+      this.idInput,
       this.nameInput,
       this.starTypeInput,
       this.descriptionInput,
@@ -146,6 +149,8 @@ export class NodeInspector {
 
     this.systemEmpty.hidden = true;
     this.systemForm.hidden = false;
+    if (this.idInput) this.idInput.value = data.id;
+    this.patchSnapshot = structuredClone(data);
     this.nameInput.value = data.name;
     this.sizeInput.value = data.size?.toString() || "1";
     this.starTypeInput.value = data.starType;
@@ -242,6 +247,19 @@ export class NodeInspector {
     const selectedNode: NodeSystem | null = selectionManager.getSelected();
     if (!selectedNode) return;
 
+    const before = this.patchSnapshot
+      ? structuredClone(this.patchSnapshot)
+      : structuredClone(selectedNode.data);
+
+    if (this.idInput) {
+      const nextId = this.idInput.value.trim();
+      if (nextId && nextId !== selectedNode.data.id) {
+        if (!galaxyScene.renameNodeId(selectedNode.data.id, nextId)) {
+          this.idInput.value = selectedNode.data.id;
+        }
+      }
+    }
+
     if (!galaxyScene.isViewingPresent()) {
       galaxyScene.setViewYear(galaxyScene.getPresentYear());
     }
@@ -274,6 +292,15 @@ export class NodeInspector {
     selectedNode.setSelected(true);
 
     galaxyScene.applyTimelineView();
+    const after = structuredClone(selectedNode.data);
+    if (JSON.stringify(before) !== JSON.stringify(after)) {
+      document.dispatchEvent(
+        new CustomEvent("node:patched", {
+          detail: { nodeId: after.id, before, after },
+        }),
+      );
+    }
+    this.patchSnapshot = after;
     document.dispatchEvent(new CustomEvent("map:updated"));
     document.dispatchEvent(new CustomEvent("node:saved"));
   }

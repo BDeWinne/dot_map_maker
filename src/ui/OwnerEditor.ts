@@ -10,6 +10,8 @@ import { nodeInspector } from "./NodeInspector";
 import { timelinePanel } from "./TimelinePanel";
 import { statsPanel } from "./StatsPanel";
 import { t } from "../i18n/locale";
+import { createAutoSave } from "./autoSave";
+import { isPlayMode } from "./playModeUi";
 
 export class OwnerEditor {
   private listEl = document.getElementById("owner-list")!;
@@ -29,10 +31,11 @@ export class OwnerEditor {
 
   private editingId: string | null = null;
   private originalId: string | null = null;
+  private autoSave = createAutoSave();
 
   constructor() {
+    this.bindAutoSave();
     document.getElementById("owner-add-btn")?.addEventListener("click", () => this.startNew());
-    document.getElementById("owner-save-btn")?.addEventListener("click", () => this.save());
     document.getElementById("owner-delete-btn")?.addEventListener("click", () => this.remove());
     document.getElementById("owner-export-btn")?.addEventListener("click", () => this.exportOwners());
     document.getElementById("owner-import-btn")?.addEventListener("click", () => {
@@ -45,12 +48,14 @@ export class OwnerEditor {
 
     this.colorInput.addEventListener("input", () => {
       this.colorHexInput.value = this.colorInput.value;
+      this.autoSave.schedule(() => this.save());
     });
     this.colorHexInput.addEventListener("change", () => {
       const parsed = ownerManager.parseColor(this.colorHexInput.value);
       if (parsed !== null) {
         this.colorInput.value = ownerManager.numberToHex(parsed);
       }
+      this.save();
     });
 
     document.addEventListener("owners:changed", () => this.renderList());
@@ -68,6 +73,22 @@ export class OwnerEditor {
 
     this.renderList();
     this.startNew();
+  }
+
+  private bindAutoSave() {
+    const schedule = () => this.autoSave.schedule(() => this.save());
+    const fields = [
+      this.idInput,
+      this.nameInput,
+      this.shortInput,
+      this.leaderNameInput,
+      this.leaderAgeInput,
+      this.leaderPersonalityInput,
+    ];
+    for (const el of fields) {
+      el.addEventListener("input", schedule);
+      el.addEventListener("change", () => this.save());
+    }
   }
 
   public refresh() {
@@ -134,8 +155,9 @@ export class OwnerEditor {
   }
 
   private startNew() {
-    this.editingId = null;
-    this.originalId = null;
+    this.autoSave.runSuppressed(() => {
+      this.editingId = null;
+      this.originalId = null;
     this.idInput.disabled = false;
     this.idInput.value = `empire_${Date.now().toString(36).slice(-4)}`;
     this.nameInput.value = "New faction";
@@ -146,12 +168,14 @@ export class OwnerEditor {
     this.formWrap.hidden = false;
     document.getElementById("owner-delete-btn")!.setAttribute("disabled", "true");
     this.updateUsageHint(null);
-    this.setStatus("New owner — set id, name, short, color, then Save.");
+    this.setStatus(t("owners.autoSaveHint"));
     this.renderList();
+    });
   }
 
   private selectOwner(id: string) {
     const owner = ownerManager.get(id);
+    this.autoSave.runSuppressed(() => {
     this.editingId = id;
     this.originalId = id;
     this.idInput.disabled = id === ownerManager.defaultOwnerId;
@@ -167,8 +191,9 @@ export class OwnerEditor {
     deleteBtn.disabled = id === ownerManager.defaultOwnerId;
 
     this.updateUsageHint(id);
-    this.setStatus(`Editing ${owner.short}.`);
+    this.setStatus(t("owners.autoSaveHint"));
     this.renderList();
+    });
   }
 
   private updateUsageHint(id: string | null) {
@@ -184,6 +209,7 @@ export class OwnerEditor {
   }
 
   private save() {
+    if (isPlayMode()) return;
     const id = this.idInput.value.trim();
     const name = this.nameInput.value.trim();
     const short = this.shortInput.value.trim();
@@ -245,7 +271,7 @@ export class OwnerEditor {
     galaxyScene.refreshAllOwnerVisuals();
     this.afterOwnersChanged();
     this.updateUsageHint(id);
-    this.setStatus(`Saved ${short}.`);
+    this.setStatus(t("owners.autoSaveHint"));
     this.renderList();
   }
 
