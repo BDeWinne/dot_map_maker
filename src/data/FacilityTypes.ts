@@ -1,4 +1,5 @@
 import { Container, Graphics, Text } from "pixi.js";
+import type { FacilityAtlasIconId } from "../galaxy/nodesAtlas";
 
 export const FACILITY_IDS = [
   "bastion",
@@ -25,28 +26,34 @@ export interface FacilityDef {
   checkboxLabel: string;
   /** Símbolo en el badge del mapa */
   symbol: string;
+  /** Frame del atlas nodesAtlas.png */
+  atlasIcon: FacilityAtlasIconId;
   color: number;
 }
 
 export const FACILITY_DEFS: FacilityDef[] = [
-  { id: "bastion", label: "Bastión / fortaleza", checkboxLabel: "Bastión", symbol: "🛡", color: 0xc0392b },
-  { id: "shipyard", label: "Astillero naval", checkboxLabel: "Astillero", symbol: "⚓", color: 0x3498db },
-  { id: "mining", label: "Minería", checkboxLabel: "Minería", symbol: "⛏", color: 0xf39c12 },
-  { id: "research", label: "Investigación", checkboxLabel: "Investigación", symbol: "🔬", color: 0x9b59b6 },
-  { id: "refinery", label: "Refinería", checkboxLabel: "Refinería", symbol: "🏭", color: 0xe67e22 },
-  { id: "trade", label: "Comercio", checkboxLabel: "Comercio", symbol: "💱", color: 0x1abc9c },
-  { id: "agri", label: "Agro / alimentos", checkboxLabel: "Agro", symbol: "🌾", color: 0x27ae60 },
-  { id: "observatory", label: "Observatorio", checkboxLabel: "Observatorio", symbol: "🔭", color: 0x5dade2 },
-  { id: "gateway", label: "Portal / hipervía", checkboxLabel: "Portal", symbol: "🌀", color: 0xbb8fce },
-  { id: "ruins", label: "Ruinas", checkboxLabel: "Ruinas", symbol: "🏛", color: 0x95a5a6 },
-  { id: "logistics", label: "Logística", checkboxLabel: "Logística", symbol: "📦", color: 0xd4ac6e },
-  { id: "energy", label: "Energía", checkboxLabel: "Energía", symbol: "⚡", color: 0xf4d03f },
+  { id: "bastion", label: "Bastión / fortaleza", checkboxLabel: "Bastión", symbol: "🛡", atlasIcon: "iconShield", color: 0xc0392b },
+  { id: "shipyard", label: "Astillero naval", checkboxLabel: "Astillero", symbol: "⚓", atlasIcon: "iconAnchor", color: 0x3498db },
+  { id: "mining", label: "Minería", checkboxLabel: "Minería", symbol: "⛏", atlasIcon: "iconCube", color: 0xf39c12 },
+  { id: "research", label: "Investigación", checkboxLabel: "Investigación", symbol: "🔬", atlasIcon: "iconFlask", color: 0x9b59b6 },
+  { id: "refinery", label: "Refinería", checkboxLabel: "Refinería", symbol: "🏭", atlasIcon: "iconFactory", color: 0xe67e22 },
+  { id: "trade", label: "Comercio", checkboxLabel: "Comercio", symbol: "💱", atlasIcon: "iconPeople", color: 0x1abc9c },
+  { id: "agri", label: "Agro / alimentos", checkboxLabel: "Agro", symbol: "🌾", atlasIcon: "iconGear", color: 0x27ae60 },
+  { id: "observatory", label: "Observatorio", checkboxLabel: "Observatorio", symbol: "🔭", atlasIcon: "iconRadar", color: 0x5dade2 },
+  { id: "gateway", label: "Portal / hipervía", checkboxLabel: "Portal", symbol: "🌀", atlasIcon: "iconStar", color: 0xbb8fce },
+  { id: "ruins", label: "Ruinas", checkboxLabel: "Ruinas", symbol: "🏛", atlasIcon: "iconSwords", color: 0x95a5a6 },
+  { id: "logistics", label: "Logística", checkboxLabel: "Logística", symbol: "📦", atlasIcon: "iconCube", color: 0xd4ac6e },
+  { id: "energy", label: "Energía", checkboxLabel: "Energía", symbol: "⚡", atlasIcon: "iconGear", color: 0xf4d03f },
 ];
 
 const FACILITY_BY_ID = new Map(FACILITY_DEFS.map((d) => [d.id, d]));
 
 export function getFacilityDef(id: FacilityId): FacilityDef {
   return FACILITY_BY_ID.get(id)!;
+}
+
+export function getFacilityAtlasIcon(id: FacilityId): FacilityAtlasIconId {
+  return getFacilityDef(id).atlasIcon;
 }
 
 export function isFacilityId(value: string): value is FacilityId {

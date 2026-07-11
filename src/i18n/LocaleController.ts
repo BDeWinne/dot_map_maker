@@ -1,4 +1,5 @@
 import { getHelpHtml } from "../ui/helpContent";
+import { welcomeScreen } from "../ui/WelcomeScreen";
 import { mapProfilePanel } from "../ui/MapProfilePanel";
 import { applyLocaleToDom, getLocale, setLocale, type Locale } from "./locale";
 
@@ -28,6 +29,7 @@ function bindLocaleButtons() {
 
 function onLocaleApplied() {
   renderHelpContent();
+  welcomeScreen.renderContent();
   mapProfilePanel.buildProfileOptions();
   mapProfilePanel.applyTerminology();
 }

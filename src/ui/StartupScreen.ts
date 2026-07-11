@@ -1,7 +1,8 @@
-import { PRESET_CATALOG, presetUrl } from "../data/presetCatalog";
+import { getPresetsForAppMode, presetUrl } from "../data/presetCatalog";
 import { clearSavedMap, hasSavedMap, loadSavedMap } from "../data/mapPersistence";
+import { isDemoMode } from "../config/demoMode";
 import { galaxyScene } from "../scene/GalaxyScene";
-import { getLocale, t } from "../i18n/locale";
+import { t } from "../i18n/locale";
 
 export class StartupScreen {
   private root = document.getElementById("startup-overlay");
@@ -9,6 +10,8 @@ export class StartupScreen {
   private continueBtn = document.getElementById("startup-continue") as HTMLButtonElement | null;
   private emptyBtn = document.getElementById("startup-empty");
   private closeBtn = document.getElementById("startup-close");
+  private titleEl = document.getElementById("startup-title");
+  private leadEl = document.querySelector(".startup-lead");
 
   public init() {
     if (!this.root) return;
@@ -31,32 +34,53 @@ export class StartupScreen {
     });
 
     document.addEventListener("locale:changed", () => this.renderPresets());
+    if (!isDemoMode()) {
+      document.addEventListener("map:persisted", () => this.syncContinueButton());
+      document.addEventListener("map:persist-cleared", () => this.syncContinueButton());
+    }
     this.renderPresets();
     this.syncContinueButton();
   }
 
   public show() {
     if (!this.root) return;
+    this.applyDemoCopy();
     this.syncContinueButton();
     this.root.hidden = false;
+  }
+
+  /** Demo entry: limited gallery, no continue / empty map. */
+  public showDemo() {
+    this.applyDemoCopy();
+    this.show();
   }
 
   public hide() {
     if (this.root) this.root.hidden = true;
   }
 
+  private applyDemoCopy() {
+    if (!isDemoMode()) return;
+    if (this.titleEl) this.titleEl.textContent = t("demo.startupTitle");
+    if (this.leadEl) this.leadEl.textContent = t("demo.startupLead");
+  }
+
   private syncContinueButton() {
-    if (!this.continueBtn) return;
+    if (!this.continueBtn || isDemoMode()) return;
     const canContinue = hasSavedMap();
     this.continueBtn.disabled = !canContinue;
     this.continueBtn.classList.toggle("is-disabled", !canContinue);
+    this.continueBtn.title = canContinue
+      ? t("startup.continueHint")
+      : t("startup.continueUnavailable");
   }
 
   private renderPresets() {
     if (!this.presetsEl) return;
     this.presetsEl.innerHTML = "";
 
-    for (const preset of PRESET_CATALOG) {
+    const presets = getPresetsForAppMode(isDemoMode());
+    for (const preset of presets) {
       const card = document.createElement("article");
       card.className = "startup-preset-card";
 
@@ -80,7 +104,7 @@ export class StartupScreen {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "startup-preset-load";
-      btn.textContent = t("startup.loadPreset");
+      btn.textContent = isDemoMode() ? t("demo.loadExplore") : t("startup.loadPreset");
       btn.addEventListener("click", () => {
         void this.loadPreset(preset.file);
       });
@@ -91,11 +115,21 @@ export class StartupScreen {
   }
 
   private async continueLast() {
+    if (isDemoMode() || !hasSavedMap()) {
+      this.syncContinueButton();
+      return;
+    }
     const ok = await loadSavedMap();
-    if (ok) this.hide();
+    if (ok) {
+      this.hide();
+      return;
+    }
+    window.alert(t("startup.continueFailed"));
+    this.syncContinueButton();
   }
 
   private async startEmpty() {
+    if (isDemoMode()) return;
     galaxyScene.clearMap();
     clearSavedMap();
     galaxyScene.setPlayMode(false);
@@ -105,7 +139,7 @@ export class StartupScreen {
     this.hide();
   }
 
-  private async loadPreset(file: string) {
+  public async loadPreset(file: string) {
     try {
       const res = await fetch(presetUrl(file));
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

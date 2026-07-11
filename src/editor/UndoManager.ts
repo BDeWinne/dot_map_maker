@@ -3,6 +3,7 @@ import type { SystemData } from "../galaxy/NodeSystem";
 import { selectionManager } from "./SelectionManager";
 import { galaxyScene } from "../scene/GalaxyScene";
 import { normalizeConnection } from "../data/ConnectionTypes";
+import { isDemoMode } from "../config/demoMode";
 
 type UndoAction =
   | { type: "create_node"; nodeId: string; data: SystemData }
@@ -32,6 +33,8 @@ export class UndoManager {
   private readonly maxStack = 60;
 
   public init() {
+    if (isDemoMode()) return;
+
     document.addEventListener("node:created", ((e: CustomEvent<{ nodeId: string }>) => {
       if (this.applying) return;
       const node = galaxyScene.getNodeById(e.detail.nodeId);
@@ -115,7 +118,7 @@ export class UndoManager {
 
     window.addEventListener("keydown", (e) => {
       if (isTextInputTarget(e.target)) return;
-      if (galaxyScene.getPlayMode()) return;
+      if (galaxyScene.isEditorLocked()) return;
 
       const mod = e.ctrlKey || e.metaKey;
       const key = e.key.toLowerCase();

@@ -432,6 +432,72 @@ export const UI_STRINGS = {
   },
   "startup.loadPreset": { es: "Cargar", en: "Load" },
 
+  "welcome.title": { es: "Bienvenido a Dot Map Maker", en: "Welcome to Dot Map Maker" },
+  "welcome.subtitle": {
+    es: "Guía rápida antes de elegir tu mapa",
+    en: "Quick guide before you pick a map",
+  },
+  "welcome.continue": {
+    es: "Entendido, elegir mapa",
+    en: "Got it, choose a map",
+  },
+
+  "exitGuard.title": { es: "¿Salir del mapa?", en: "Leave the map?" },
+  "exitGuard.lead": {
+    es: "Si cerrás la pestaña podés perder cambios. El auto-guardado en este navegador no es 100% fiable (modo privado, borrar datos, otro dispositivo).",
+    en: "If you close the tab you may lose changes. Browser auto-save is not 100% reliable (private mode, cleared data, another device).",
+  },
+  "exitGuard.tip": {
+    es: "Recomendado: exportá el JSON antes de irte.",
+    en: "Recommended: export the JSON before you leave.",
+  },
+  "exitGuard.export": { es: "Exportar JSON", en: "Export JSON" },
+  "exitGuard.stay": { es: "Seguir editando", en: "Keep editing" },
+  "exitGuard.leave": { es: "Salir igual", en: "Leave anyway" },
+
+  "startup.continueHint": {
+    es: "Restaura el último JSON guardado en localStorage de este navegador.",
+    en: "Restores the last JSON saved in this browser's localStorage.",
+  },
+  "startup.continueUnavailable": {
+    es: "No hay guardado en este navegador todavía.",
+    en: "No save in this browser yet.",
+  },
+  "startup.continueFailed": {
+    es: "No se pudo cargar el guardado (JSON dañado o incompleto). Probá cargar un preset o importar un export.",
+    en: "Could not load the save (corrupt or incomplete JSON). Try a preset or import an export.",
+  },
+
+  "demo.banner": {
+    es: "Modo demo — solo exploración",
+    en: "Demo mode — explore only",
+  },
+  "demo.fullEditor": {
+    es: "Editor completo",
+    en: "Full editor",
+  },
+  "demo.switchMap": {
+    es: "Cambiar mapa",
+    en: "Switch map",
+  },
+  "demo.startupTitle": {
+    es: "Dot Map Maker — Demo",
+    en: "Dot Map Maker — Demo",
+  },
+  "demo.startupLead": {
+    es: "Elegí un mapa de ejemplo para explorar timeline, flotas, rutas y más. Sin edición ni export — para crear mapas usá el editor completo.",
+    en: "Pick a sample map to explore timeline, fleets, routes, and more. No editing or export — use the full editor to create maps.",
+  },
+  "demo.loadExplore": {
+    es: "Explorar",
+    en: "Explore",
+  },
+
+  "preset.csh.title": { es: "Confederación Solar Humana", en: "Human Solar Confederation" },
+  "preset.csh.desc": {
+    es: "2200–2213: la humanidad unificada frente a los K'thrak. 8 sistemas, timeline completa y la caída de Wolf 359.",
+    en: "2200–2213: unified humanity against the K'thrak. 8 systems, full timeline, and the fall of Wolf 359.",
+  },
   "preset.galaxy.title": { es: "Guerra galáctica", en: "Galactic war" },
   "preset.galaxy.desc": {
     es: "4X sci-fi: imperios, flotas, hipervías y timeline histórica.",

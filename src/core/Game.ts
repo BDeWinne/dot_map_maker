@@ -1,5 +1,7 @@
 import { Application } from "pixi.js";
 import { galaxyScene, GalaxyScene } from "../scene/GalaxyScene";
+import { isAtlasNodeVisualEnabled } from "../galaxy/nodeVisualMode";
+import { loadNodesAtlas } from "../galaxy/nodesAtlas";
 
 let gameInstance: Game | null = null;
 
@@ -42,7 +44,17 @@ export class Game {
     });
     (globalThis as any).__PIXI_APP__ = this.app;
     document.body.appendChild(this.app.canvas);
+
+    if (isAtlasNodeVisualEnabled()) {
+      await loadNodesAtlas();
+    }
+
     this.app.stage.addChild(galaxyScene);
+
+    if (isAtlasNodeVisualEnabled()) {
+      await galaxyScene.onAtlasReady();
+    }
+
     galaxyScene.enableZoom(this.app.view);
     this.app.view.addEventListener("contextmenu", (e) => e.preventDefault());
     galaxyScene.refreshLabelResolution();

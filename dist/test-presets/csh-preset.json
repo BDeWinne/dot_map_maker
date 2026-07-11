@@ -1,0 +1,927 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdAt": 1740000000000,
+    "epoch": "Era de la Confederación",
+    "defaultYear": 2200,
+    "viewYear": 2213,
+    "profile": "galaxy",
+    "playMode": false
+  },
+  "owners": [
+    {
+      "id": "none",
+      "name": "Sin reclamar",
+      "short": "-",
+      "color": "#666666"
+    },
+    {
+      "id": "empire_csh",
+      "name": "Confederación Solar Humana",
+      "short": "CSH",
+      "color": "#2ecc78",
+      "leader": {
+        "name": "Sujeto 2",
+        "age": 33,
+        "ageYear": 2200,
+        "personality": "Extremadamente pragmático y expansionista, obsesionado con la supervivencia de la humanidad. Tras las guerras K'thrak se vuelve autoritario y paranoico."
+      }
+    },
+    {
+      "id": "empire_kthrak",
+      "name": "K'thrak",
+      "short": "KTK",
+      "color": "#e74c3c",
+      "leader": {
+        "name": "Cónclave de los Tres Clanes",
+        "personality": "Especie moluscoide nómada cubierta de implantes metálicos; cultura basada en el reciclaje y el saqueo de civilizaciones jóvenes."
+      }
+    },
+    {
+      "id": "empire_lib",
+      "name": "Los Liberadores",
+      "short": "LIB",
+      "color": "#e67e22",
+      "leader": {
+        "name": "Consejo de los Liberadores",
+        "personality": "Insurgencia surgida en los antiguos territorios panasiáticos durante la economía de guerra."
+      }
+    }
+  ],
+  "systems": [
+    {
+      "id": "sys_sol",
+      "name": "Sol",
+      "starType": "G2V",
+      "owner": "empire_csh",
+      "description": "Sistema Solar — capital de toda la humanidad (Tierra). Centro político, económico, científico y militar. Tras la destrucción de Wolf 359 se convierte en una fortaleza prácticamente inexpugnable, con astilleros colosales, defensas orbitales y la mayor concentración de flotas humanas.",
+      "population": 12000000000,
+      "isCapital": true,
+      "x": 60.266967773437514,
+      "y": 1074.8443247388504,
+      "size": 2.5,
+      "facilities": [
+        "bastion",
+        "shipyard",
+        "logistics"
+      ],
+      "fleets": [
+        {
+          "owner": "empire_csh",
+          "count": 366
+        }
+      ],
+      "timeline": [
+        {
+          "id": "tl-sol-2200-fleet",
+          "year": 2200,
+          "type": "fleet_change",
+          "title": "Flota inicial de la CSH",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 25
+            }
+          ],
+          "description": "1 Carriers, 0 Acorazados, 4 Destructores, 20 Fragatas (total 25)",
+          "flavor": "1 Carriers, 0 Acorazados, 4 Destructores, 20 Fragatas (total 25)"
+        },
+        {
+          "id": "tl-sol-2200",
+          "year": 2200,
+          "type": "colonized",
+          "title": "Fundación de la Confederación Solar Humana",
+          "actorId": "empire_csh",
+          "isCapital": true,
+          "population": "11 mil millones",
+          "description": "La humanidad se unifica bajo un único gobierno y comienza la expansión interestelar."
+        },
+        {
+          "id": "tl-sol-2201-fleet",
+          "year": 2201,
+          "type": "fleet_change",
+          "title": "Expansión colonial",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 50
+            }
+          ],
+          "description": "2 Carriers, 0 Acorazados, 8 Destructores, 40 Fragatas (total 50)",
+          "flavor": "2 Carriers, 0 Acorazados, 8 Destructores, 40 Fragatas (total 50)"
+        },
+        {
+          "id": "tl-sol-2202",
+          "year": 2202,
+          "type": "population",
+          "title": "Explosión demográfica",
+          "population": "12 mil millones",
+          "description": "Construcción masiva de hábitats orbitales en todo el Sistema Solar."
+        },
+        {
+          "id": "tl-sol-2202-fleet",
+          "year": 2202,
+          "type": "fleet_change",
+          "title": "Explosión demográfica e industrial",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 74
+            }
+          ],
+          "description": "2 Carriers, 0 Acorazados, 12 Destructores, 60 Fragatas (total 74)",
+          "flavor": "2 Carriers, 0 Acorazados, 12 Destructores, 60 Fragatas (total 74)"
+        },
+        {
+          "id": "tl-sol-2203-fleet",
+          "year": 2203,
+          "type": "fleet_change",
+          "title": "Consolidación interestelar",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 111
+            }
+          ],
+          "description": "3 Carriers, 0 Acorazados, 18 Destructores, 90 Fragatas (total 111)",
+          "flavor": "3 Carriers, 0 Acorazados, 18 Destructores, 90 Fragatas (total 111)"
+        },
+        {
+          "id": "tl-sol-2204-fleet",
+          "year": 2204,
+          "type": "fleet_change",
+          "title": "Expansión estable",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 152
+            }
+          ],
+          "description": "4 Carriers, 0 Acorazados, 28 Destructores, 120 Fragatas (total 152)",
+          "flavor": "4 Carriers, 0 Acorazados, 28 Destructores, 120 Fragatas (total 152)"
+        },
+        {
+          "id": "tl-sol-2205-fleet",
+          "year": 2205,
+          "type": "fleet_change",
+          "title": "Nuevas colonias",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 215
+            }
+          ],
+          "description": "5 Carriers, 0 Acorazados, 40 Destructores, 170 Fragatas (total 215)",
+          "flavor": "5 Carriers, 0 Acorazados, 40 Destructores, 170 Fragatas (total 215)"
+        },
+        {
+          "id": "tl-sol-2206-fleet",
+          "year": 2206,
+          "type": "fleet_change",
+          "title": "Hipervías adicionales",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 278
+            }
+          ],
+          "description": "6 Carriers, 0 Acorazados, 52 Destructores, 220 Fragatas (total 278)",
+          "flavor": "6 Carriers, 0 Acorazados, 52 Destructores, 220 Fragatas (total 278)"
+        },
+        {
+          "id": "tl-sol-2207-fleet",
+          "year": 2207,
+          "type": "fleet_change",
+          "title": "Alerta máxima tras Ross 128",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 333
+            }
+          ],
+          "description": "8 Carriers, 0 Acorazados, 65 Destructores, 260 Fragatas (total 333)",
+          "flavor": "8 Carriers, 0 Acorazados, 65 Destructores, 260 Fragatas (total 333)"
+        },
+        {
+          "id": "tl-sol-2208-fleet",
+          "year": 2208,
+          "type": "fleet_change",
+          "title": "Fortaleza de frontera en Wolf 359",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 390
+            }
+          ],
+          "description": "10 Carriers, 0 Acorazados, 80 Destructores, 300 Fragatas (total 390)",
+          "flavor": "10 Carriers, 0 Acorazados, 80 Destructores, 300 Fragatas (total 390)"
+        },
+        {
+          "id": "tl-sol-2209-fleet",
+          "year": 2209,
+          "type": "fleet_change",
+          "title": "Tras la Primera Batalla de Wolf 359",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 351
+            }
+          ],
+          "description": "9 Carriers, 0 Acorazados, 72 Destructores, 270 Fragatas (total 351). Pérdida del Grupo de Batalla Wolf (39 naves) y Bastión Helios.",
+          "flavor": "9 Carriers, 0 Acorazados, 72 Destructores, 270 Fragatas (total 351)"
+        },
+        {
+          "id": "tl-sol-2210-eco",
+          "year": 2210,
+          "type": "economy",
+          "title": "Economía de guerra parcial",
+          "economy": "Industria militar total",
+          "description": "El Sistema Solar se fortifica con minas, torretas, asteroides armados y enormes flotas."
+        },
+        {
+          "id": "tl-sol-2210-lib",
+          "year": 2210,
+          "type": "event",
+          "title": "Guerra civil de Los Liberadores",
+          "actorId": "empire_lib",
+          "description": "Estalla una guerra civil en los antiguos territorios panasiáticos protagonizada por Los Liberadores."
+        },
+        {
+          "id": "tl-sol-2210-kthrak-fleet",
+          "year": 2210,
+          "type": "event",
+          "title": "Invasión K'thrak — ~2.000 naves",
+          "actorId": "empire_kthrak",
+          "description": "Llegan al Sistema Solar con la flota reparada (~2.000 naves), aunque muchas siguen mostrando modificaciones improvisadas."
+        },
+        {
+          "id": "tl-sol-2210-kthrak",
+          "year": 2210,
+          "type": "event",
+          "title": "La flota K'thrak entra al Sistema Solar",
+          "actorId": "empire_kthrak",
+          "description": "A finales de 2210 la vanguardia enemiga cruza hacia el núcleo humano."
+        },
+        {
+          "id": "tl-sol-2210-fleet",
+          "year": 2210,
+          "type": "fleet_change",
+          "title": "Reconstrucción — economía de guerra",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 390
+            },
+            {
+              "owner": "empire_kthrak",
+              "count": 2000
+            }
+          ],
+          "description": "CSH: 10 Carriers, 80 Destructores, 300 Fragatas (390). K'thrak: ~2.000 naves reparadas tras Wolf, con modificaciones improvisadas.",
+          "flavor": "10 Carriers, 0 Acorazados, 80 Destructores, 300 Fragatas (total 390)"
+        },
+        {
+          "id": "tl-sol-2211-fase1",
+          "year": 2211,
+          "type": "event",
+          "title": "Batalla del Sistema Solar — Fase I (Kuiper)",
+          "actorId": "empire_csh",
+          "description": "Primera línea: campos minados, torretas orbitales y asteroides fortificados. ~300 naves K'thrak destruidas."
+        },
+        {
+          "id": "tl-sol-2211-fase2",
+          "year": 2211,
+          "type": "event",
+          "title": "Batalla del Sistema Solar — Fase II (Línea Kuiper)",
+          "actorId": "empire_csh",
+          "description": "300 Fragatas, 10.000 Aircraft, ataques furtivos y asteroides proyectil. ~600 K'thrak destruidas; quedan ~1.100. Retirada humana hacia Marte."
+        },
+        {
+          "id": "tl-sol-2211-fase3",
+          "year": 2211,
+          "type": "event",
+          "title": "Batalla del Sistema Solar — Fase III (Cinturón principal)",
+          "actorId": "empire_csh",
+          "description": "Batalla frontal: Destructores en primera línea, Carriers combatiendo directamente. ~500 K'thrak destruidas; quedan ~600."
+        },
+        {
+          "id": "tl-sol-2211-fase4",
+          "year": 2211,
+          "type": "event",
+          "title": "Batalla del Sistema Solar — Fase IV (Abandono del clan)",
+          "actorId": "empire_csh",
+          "description": "Combate nave contra nave. Un clan K'thrak abandona inesperadamente la batalla; la humanidad rompe el frente y aniquila casi por completo a los otros dos. ~210.000 muertos, ~390.000 heridos. Los supervivientes (~300 naves) huyen hacia Ross 128."
+        },
+        {
+          "id": "tl-sol-2211-fleet",
+          "year": 2211,
+          "type": "fleet_change",
+          "title": "Tras la Batalla del Sistema Solar",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 78
+            }
+          ],
+          "description": "7 Carriers, 0 Acorazados, 21 Destructores, 50 Fragatas (total 78). Victoria decisiva pero costosa; más de la mitad del poder naval destruido.",
+          "flavor": "7 Carriers, 0 Acorazados, 21 Destructores, 50 Fragatas (total 78)"
+        },
+        {
+          "id": "tl-sol-2212",
+          "year": 2212,
+          "type": "event",
+          "title": "Área Rag y colapso de la resistencia",
+          "actorId": "empire_csh",
+          "description": "Primer abordaje exitoso de naves K'thrak (~300 capturados vivos). Se crea el Área Rag en la Luna para su estudio; la resistencia interna casi desaparece."
+        },
+        {
+          "id": "tl-sol-2212-fleet",
+          "year": 2212,
+          "type": "fleet_change",
+          "title": "Reconstrucción post-victoria",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 168
+            }
+          ],
+          "description": "8 Carriers, 0 Acorazados, 40 Destructores, 120 Fragatas (total 168)",
+          "flavor": "8 Carriers, 0 Acorazados, 40 Destructores, 120 Fragatas (total 168)"
+        },
+        {
+          "id": "tl-sol-2213-fleet",
+          "year": 2213,
+          "type": "fleet_change",
+          "title": "Flota de la ofensiva final — Clase Arquero",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 366
+            }
+          ],
+          "description": "12 Carriers, 4 Acorazados, 90 Destructores, 260 Fragatas (total 366). 4 acorazados Clase Arquero con cañón de riel y proyectiles de fragmentación.",
+          "flavor": "12 Carriers, 4 Acorazados, 90 Destructores, 260 Fragatas (total 366)"
+        }
+      ]
+    },
+    {
+      "id": "sys_alpha",
+      "name": "Alpha Centauri",
+      "starType": "G2V + K1V",
+      "owner": "empire_csh",
+      "description": "Capital: Fénix. Primer sistema colonial exitoso; principal productor de alimentos y uno de los sistemas más poblados de la CSH.",
+      "population": 350000000,
+      "x": 9.903336958451803,
+      "y": 1055.5715877449372,
+      "size": 1.5,
+      "facilities": [
+        "agri",
+        "trade",
+        "logistics"
+      ],
+      "fleets": [
+        {
+          "owner": "empire_csh",
+          "count": 6
+        }
+      ],
+      "timeline": [
+        {
+          "id": "tl-alpha-2200",
+          "year": 2200,
+          "type": "colonized",
+          "title": "Colonización de Alpha Centauri (Fénix)",
+          "actorId": "empire_csh",
+          "population": "40 millones",
+          "description": "Primer sistema colonial exitoso de la humanidad."
+        },
+        {
+          "id": "tl-alpha-2201",
+          "year": 2201,
+          "type": "event",
+          "title": "Primeros asentamientos permanentes",
+          "actorId": "empire_csh",
+          "description": "Se consolidan las colonias del núcleo interior."
+        },
+        {
+          "id": "tl-alpha-2202",
+          "year": 2202,
+          "type": "population",
+          "title": "Explosión demográfica colonial",
+          "population": "350 millones"
+        }
+      ]
+    },
+    {
+      "id": "sys_barnard",
+      "name": "Barnard Star",
+      "starType": "M4V",
+      "owner": "empire_csh",
+      "description": "Capital: Horizon. Aquí se descubrió una gigantesca nave precursora de ~5 millones de años, cuyos constructores nunca pudieron identificarse. Alberga estaciones científicas replicables sobre superficies planetarias.",
+      "population": 120000000,
+      "x": -30.642123135653264,
+      "y": 1047.8140057038365,
+      "size": 1,
+      "facilities": [
+        "mining",
+        "research",
+        "ruins"
+      ],
+      "fleets": [
+        {
+          "owner": "empire_csh",
+          "count": 3
+        }
+      ],
+      "timeline": [
+        {
+          "id": "tl-barnard-2201",
+          "year": 2201,
+          "type": "colonized",
+          "title": "Fundación de Horizon",
+          "actorId": "empire_csh"
+        },
+        {
+          "id": "tl-barnard-2203",
+          "year": 2203,
+          "type": "event",
+          "title": "Hallazgo de la nave precursora",
+          "description": "Se descubre una nave de ~5 millones de años. No logra extraerse información útil ni identificar a sus constructores."
+        },
+        {
+          "id": "tl-barnard-2205",
+          "year": 2205,
+          "type": "event",
+          "title": "Estaciones científicas replicables",
+          "description": "Barnard desarrolla estaciones científicas que pueden replicarse sobre superficies planetarias."
+        },
+        {
+          "id": "tl-barnard-2213",
+          "year": 2213,
+          "type": "minerals",
+          "title": "Aumento de la producción minera e industrial",
+          "minerals": "Extracción intensiva",
+          "description": "Refuerza el esfuerzo de guerra para la ofensiva final contra los K'thrak."
+        }
+      ]
+    },
+    {
+      "id": "sys_sirius",
+      "name": "Sirius",
+      "starType": "A1V",
+      "owner": "empire_csh",
+      "description": "Capital: Nova Resistencia. La colonización fue muy difícil por las intensas tormentas solares; tras la invención de los escudos modulares se volvió una de las colonias de mayor crecimiento.",
+      "population": 200000000,
+      "x": -8.096679687500028,
+      "y": 1111.753480382196,
+      "size": 1,
+      "facilities": [
+        "energy",
+        "agri",
+        "research"
+      ],
+      "fleets": [
+        {
+          "owner": "empire_csh",
+          "count": 4
+        }
+      ],
+      "timeline": [
+        {
+          "id": "tl-sirius-2205",
+          "year": 2205,
+          "type": "colonized",
+          "title": "Colonización de Sirius — Estación Resistencia",
+          "actorId": "empire_csh",
+          "population": "40 millones",
+          "description": "Las tormentas solares provocan numerosas bajas y destruyen equipos. Se construye la Estación Resistencia."
+        },
+        {
+          "id": "tl-sirius-2206",
+          "year": 2206,
+          "type": "event",
+          "title": "Escudos modulares",
+          "description": "Extremadamente eficaces contra armas cinéticas, aunque no contra misiles. Impulsan el crecimiento de Sirius."
+        },
+        {
+          "id": "tl-sirius-2209",
+          "year": 2209,
+          "type": "population",
+          "title": "Auge demográfico",
+          "population": "200 millones"
+        }
+      ]
+    },
+    {
+      "id": "sys_luhman",
+      "name": "Luhman 16",
+      "starType": "Enana marrón (binaria)",
+      "owner": "empire_csh",
+      "description": "Capital: Prospect. Principal centro de refinamiento industrial de la Confederación.",
+      "population": 70000000,
+      "x": 74.4488192471591,
+      "y": 1129.9958247772881,
+      "size": 1,
+      "facilities": [
+        "refinery",
+        "energy",
+        "logistics"
+      ],
+      "fleets": [
+        {
+          "owner": "empire_csh",
+          "count": 3
+        }
+      ],
+      "timeline": [
+        {
+          "id": "tl-luhman-2206",
+          "year": 2206,
+          "type": "colonized",
+          "title": "Fundación de Prospect",
+          "actorId": "empire_csh",
+          "description": "Comienza la colonización de Luhman 16 tras el descubrimiento de la hipervía."
+        },
+        {
+          "id": "tl-luhman-2213",
+          "year": 2213,
+          "type": "economy",
+          "title": "Máxima producción industrial",
+          "economy": "Refinería a plena capacidad",
+          "description": "Sostiene la reconstrucción militar de la Confederación."
+        }
+      ]
+    },
+    {
+      "id": "sys_epsilon",
+      "name": "Epsilon Eridani",
+      "starType": "K2V",
+      "owner": "empire_csh",
+      "description": "Capital: Kepler. Principal centro científico fuera del Sistema Solar.",
+      "population": 80000000,
+      "x": -65.79361516779124,
+      "y": 1031.632209710307,
+      "size": 1,
+      "facilities": [
+        "research",
+        "mining",
+        "observatory"
+      ],
+      "fleets": [
+        {
+          "owner": "empire_csh",
+          "count": 2
+        }
+      ],
+      "timeline": [
+        {
+          "id": "tl-epsilon-2206",
+          "year": 2206,
+          "type": "colonized",
+          "title": "Fundación de Kepler",
+          "actorId": "empire_csh",
+          "description": "Comienza la colonización de Epsilon Eridani tras el descubrimiento de la hipervía."
+        },
+        {
+          "id": "tl-epsilon-2213",
+          "year": 2213,
+          "type": "minerals",
+          "title": "Incremento de producción minera e industrial",
+          "minerals": "Minería y armamento",
+          "description": "Apoya la ofensiva planeada sobre Ross 128."
+        }
+      ]
+    },
+    {
+      "id": "sys_wolf",
+      "name": "Wolf 359",
+      "starType": "M6V",
+      "owner": "empire_csh",
+      "description": "Capital histórica: Bastión Helios (hasta su destrucción en 2209). Principal sistema militar de frontera; completamente devastado durante la Primera Batalla de Wolf 359, cuando Bastión Helios activó su reactor en una explosión masiva para detener el avance enemigo.",
+      "population": 8000000,
+      "x": 112.44880814985805,
+      "y": 1064.1170339895111,
+      "size": 1,
+      "facilities": [
+        "bastion",
+        "shipyard",
+        "gateway"
+      ],
+      "timeline": [
+        {
+          "id": "tl-wolf-2201",
+          "year": 2201,
+          "type": "colonized",
+          "title": "Fundación de Wolf 359",
+          "actorId": "empire_csh",
+          "population": "15 millones"
+        },
+        {
+          "id": "tl-wolf-2208-bastion",
+          "year": 2208,
+          "type": "event",
+          "title": "Construcción de Bastión Helios",
+          "actorId": "empire_csh",
+          "description": "Wolf 359 se convierte en un enorme bastión defensivo: Bastión Helios, cañón de riel experimental, 48 baterías de misiles y 620 torretas de punto."
+        },
+        {
+          "id": "tl-wolf-2208-kthrak",
+          "year": 2208,
+          "type": "fleet_change",
+          "title": "2 · Flota K'thrak en aproximación",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 39
+            },
+            {
+              "owner": "empire_kthrak",
+              "count": 2500
+            }
+          ],
+          "description": "La flota que entra en Wolf 359 está compuesta por aproximadamente 2.500 naves operativas (3 clanes)."
+        },
+        {
+          "id": "tl-wolf-2208-fleet",
+          "year": 2208,
+          "type": "fleet_change",
+          "title": "1 · Grupo de Batalla Wolf — pre-batalla",
+          "fleets": [
+            {
+              "owner": "empire_csh",
+              "count": 39
+            }
+          ],
+          "description": "1 Carrier Atlas, 8 Destructores Guardian, 30 Fragatas Spear (+ Bastión Helios)."
+        },
+        {
+          "id": "tl-wolf-2209-battle",
+          "year": 2209,
+          "type": "event",
+          "title": "1 · Primera Batalla de Wolf 359 — Protocolo Last Stand",
+          "actorId": "empire_kthrak",
+          "description": "Protocolo Last Stand: retirada simulada, 4 oleadas, combate en Bastión Helios, detonación del reactor. CSH pierde Carrier, 8 Destructores, 30 Fragatas, 1.000 Aircraft y Bastión Helios (~550.000 muertos). K'thrak: ~500 naves destruidas, ~900 dañadas; ~2.000 continúan operativas."
+        },
+        {
+          "id": "tl-wolf-2209-occupied",
+          "year": 2209,
+          "type": "occupied",
+          "title": "2 · Ocupación K'thrak de Wolf 359",
+          "actorId": "empire_kthrak",
+          "description": "Victoria estratégica K'thrak: el bastión fronterizo cae bajo control enemigo."
+        },
+        {
+          "id": "tl-wolf-2209-pop",
+          "year": 2209,
+          "type": "population",
+          "title": "3 · Devastación",
+          "population": "8 millones"
+        },
+        {
+          "id": "tl-wolf-2209-fleet",
+          "year": 2209,
+          "type": "fleet_change",
+          "title": "4 · Flota K'thrak en Wolf",
+          "fleets": [
+            {
+              "owner": "empire_kthrak",
+              "count": 2000
+            }
+          ],
+          "description": "Tras la Batalla de Wolf 359 pierden unas 500 naves. Gran parte de las supervivientes son reparadas utilizando restos humanos, módulos de escudos y secciones de casco recuperadas del campo de batalla."
+        },
+        {
+          "id": "tl-wolf-2210-departure",
+          "year": 2210,
+          "type": "fleet_change",
+          "title": "5 · Avance hacia el Sistema Solar",
+          "fleets": [],
+          "description": "La flota K'thrak (~2.000 naves reparadas) abandona Wolf 359 rumbo al Sistema Solar; muchas naves muestran modificaciones improvisadas."
+        }
+      ],
+      "occupiedBy": "empire_kthrak"
+    },
+    {
+      "id": "sys_ross",
+      "name": "Ross 128",
+      "starType": "M4V",
+      "owner": "empire_kthrak",
+      "description": "Último Campamento de los K'thrak. Capital: Último Campamento. Especie moluscoide nómada de implantes metálicos, dividida en tres clanes. Objetivo de la ofensiva final de la CSH a finales de 2213.",
+      "population": 0,
+      "x": 157.176036487926,
+      "y": 1071.7534047747333,
+      "size": 1,
+      "facilities": [
+        "bastion",
+        "shipyard",
+        "ruins"
+      ],
+      "fleets": [
+        {
+          "owner": "empire_kthrak",
+          "count": 350
+        }
+      ],
+      "timeline": [
+        {
+          "id": "tl-ross-2206",
+          "year": 2206,
+          "type": "colonized",
+          "title": "Expedición Reach a Ross 128",
+          "description": "Comienza la colonización de Ross 128. La expedición Reach desaparece sin dejar rastro."
+        },
+        {
+          "id": "tl-ross-2207",
+          "year": 2207,
+          "type": "event",
+          "title": "Señal SOS desde Ross 128",
+          "description": "Al investigar solo se encuentran restos de la flota Reach. Toda la Confederación entra en alerta máxima."
+        },
+        {
+          "id": "tl-ross-2208",
+          "year": 2208,
+          "type": "event",
+          "title": "Silencio total",
+          "description": "Ninguna sonda enviada a Ross regresa."
+        },
+        {
+          "id": "tl-ross-2209",
+          "year": 2209,
+          "type": "owner_change",
+          "title": "Ross 128 — territorio K'thrak",
+          "actorId": "empire_kthrak",
+          "description": "La CSH declara Ross 128 sistema hostil; queda bajo dominio K'thrak. La flota invasora de ~2.500 naves avanza hacia Wolf 359."
+        },
+        {
+          "id": "tl-ross-2211-fleet",
+          "year": 2211,
+          "type": "fleet_change",
+          "title": "Refugiados tras la Batalla del Sistema Solar",
+          "fleets": [
+            {
+              "owner": "empire_kthrak",
+              "count": 300
+            }
+          ],
+          "description": "Tras la Batalla del Sistema Solar sobreviven unas 300 naves, pertenecientes en su mayoría al clan que abandonó el combate y a pequeños grupos dispersos de los otros dos clanes."
+        },
+        {
+          "id": "tl-ross-2212-fleet",
+          "year": 2212,
+          "type": "fleet_change",
+          "title": "Reparaciones en Ross 128",
+          "fleets": [
+            {
+              "owner": "empire_kthrak",
+              "count": 320
+            }
+          ],
+          "description": "Comienzan reparaciones utilizando chatarra y restos recuperados. La capacidad industrial K'thrak es muy limitada."
+        },
+        {
+          "id": "tl-ross-2213-fleet",
+          "year": 2213,
+          "type": "fleet_change",
+          "title": "Reconstrucción lenta en el Último Campamento",
+          "fleets": [
+            {
+              "owner": "empire_kthrak",
+              "count": 350
+            }
+          ],
+          "description": "Continúan reconstruyéndose lentamente. La CSH desconoce el tamaño real de las fuerzas presentes en Ross 128 y sospecha que podría haber otras flotas K'thrak fuera de su espacio conocido."
+        },
+        {
+          "id": "tl-ross-2213-reveal",
+          "year": 2213,
+          "type": "event",
+          "title": "Último Campamento revelado",
+          "actorId": "empire_kthrak",
+          "description": "Se traduce gran parte del idioma K'thrak y se confirma que Ross 128 es su Último Campamento, hogar de los tres grandes clanes."
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-sol-alpha",
+      "from": "sys_sol",
+      "to": "sys_alpha",
+      "name": "Sol ↔ Alpha Centauri",
+      "routeType": "hyperlane",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-sol-alpha",
+          "year": 2200,
+          "type": "route_open",
+          "title": "Primera hipervía interestelar"
+        }
+      ]
+    },
+    {
+      "id": "conn-alpha-barnard",
+      "from": "sys_alpha",
+      "to": "sys_barnard",
+      "name": "Alpha Centauri ↔ Barnard Star",
+      "routeType": "hyperlane",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-alpha-barnard",
+          "year": 2201,
+          "type": "route_open",
+          "title": "Corredor hacia Barnard"
+        }
+      ]
+    },
+    {
+      "id": "conn-alpha-sirius",
+      "from": "sys_alpha",
+      "to": "sys_sirius",
+      "name": "Alpha Centauri ↔ Sirius",
+      "routeType": "hyperlane",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-alpha-sirius",
+          "year": 2205,
+          "type": "route_open",
+          "title": "Ruta a Sirius certificada"
+        }
+      ]
+    },
+    {
+      "id": "conn-barnard-epsilon",
+      "from": "sys_barnard",
+      "to": "sys_epsilon",
+      "name": "Barnard Star ↔ Epsilon Eridani",
+      "routeType": "hyperlane",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-barnard-epsilon",
+          "year": 2206,
+          "type": "route_open",
+          "title": "Hipervía a Epsilon Eridani"
+        }
+      ]
+    },
+    {
+      "id": "conn-sol-wolf",
+      "from": "sys_sol",
+      "to": "sys_wolf",
+      "name": "Sol ↔ Wolf 359",
+      "routeType": "hyperlane",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-sol-wolf",
+          "year": 2201,
+          "type": "route_open",
+          "title": "Corredor de frontera interior"
+        }
+      ]
+    },
+    {
+      "id": "conn-wolf-ross",
+      "from": "sys_wolf",
+      "to": "sys_ross",
+      "name": "Wolf 359 ↔ Ross 128",
+      "routeType": "military",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-wolf-ross-open",
+          "year": 2205,
+          "type": "route_open",
+          "title": "Descubrimiento de la hipervía hacia Ross",
+          "description": "La única ruta conocida hacia el territorio que será el Último Campamento K'thrak."
+        }
+      ]
+    },
+    {
+      "id": "conn-sol-luhman",
+      "from": "sys_sol",
+      "to": "sys_luhman",
+      "name": "Sol ↔ Luhman 16",
+      "routeType": "hyperlane",
+      "status": "open",
+      "timeline": [
+        {
+          "id": "rt-sol-luhman",
+          "year": 2206,
+          "type": "route_open",
+          "title": "Corredor industrial a Luhman 16"
+        }
+      ]
+    }
+  ],
+  "background": {
+    "src": "backgrounds/csh-galaxy.jpg",
+    "x": 0,
+    "y": 0,
+    "scale": 1,
+    "alpha": 1
+  }
+}

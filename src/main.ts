@@ -22,10 +22,15 @@ import { nodeSearch } from "./ui/NodeSearch";
 import { mapValidationPanel } from "./ui/MapValidationPanel";
 import { exportPlayProgressFile, importPlayProgressFile } from "./ui/playProgressExport";
 import { initPlayModeUi, syncPlayModeUi } from "./ui/playModeUi";
+import { downloadMapJson } from "./data/mapExport";
 import { initMapPersistence } from "./data/mapPersistence";
+import { initDemoMode, isDemoMode } from "./config/demoMode";
 import { startupScreen } from "./ui/StartupScreen";
+import { welcomeScreen } from "./ui/WelcomeScreen";
+import { initExitGuard } from "./ui/exitGuard";
 import { undoManager } from "./editor/UndoManager";
 
+initDemoMode();
 new Game();
 initMapPersistence();
 nodeInspector;
@@ -117,8 +122,14 @@ function bootUi() {
   mapProfilePanel.init();
   mapCalendarSettings.init();
   initPlayModeUi();
+  welcomeScreen.init();
   startupScreen.init();
+  initExitGuard();
   populateFacilityLegend();
+
+  document.getElementById("demo-switch-map")?.addEventListener("click", () => {
+    startupScreen.showDemo();
+  });
 
   document.addEventListener("map:persisted", () => {
     const el = document.getElementById("map-persist-status");
@@ -224,15 +235,8 @@ function bootUi() {
   });
 
   exportMapBtn?.addEventListener("click", () => {
-    const data = galaxyScene.getMapData();
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = getActiveTerminology().exportFilename;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (isDemoMode()) return;
+    downloadMapJson();
   });
 
   exportPngBtn?.addEventListener("click", () => {
@@ -251,6 +255,7 @@ function bootUi() {
   const fileInput = document.getElementById("import-file") as HTMLInputElement | null;
 
   importBtn?.addEventListener("click", () => {
+    if (isDemoMode()) return;
     fileInput?.click();
   });
 
@@ -307,5 +312,14 @@ function bootUi() {
 bootUi();
 
 void Game.whenReady().then(() => {
-  startupScreen.show();
+  if (isDemoMode()) {
+    startupScreen.showDemo();
+    return;
+  }
+  const openGallery = () => startupScreen.show();
+  if (welcomeScreen.shouldShow()) {
+    welcomeScreen.show(openGallery);
+  } else {
+    openGallery();
+  }
 });

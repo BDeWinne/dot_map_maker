@@ -1,47 +1,60 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const webpack = require("webpack");
 
-module.exports = {
-  entry: "./src/boot.ts",
+module.exports = (env = {}) => {
+  const demoBuild = !!env.demo;
 
-  output: {
-    filename: "bundle.js",
-    path: path.resolve(__dirname, "dist"),
-    clean: true
-  },
+  return {
+    entry: "./src/boot.ts",
 
-  resolve: {
-    extensions: [".ts", ".js"]
-  },
+    output: {
+      filename: "bundle.js",
+      path: path.resolve(__dirname, "dist"),
+      clean: true,
+      publicPath: "auto",
+    },
 
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        use: "ts-loader",
-        exclude: /node_modules/
-      }
-    ]
-  },
+    resolve: {
+      extensions: [".ts", ".js"],
+    },
 
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: "./index.html",
-      inject: "body",
-      scriptLoading: "defer",
-    }),
-    new CopyWebpackPlugin({
-      patterns: [{ from: "test-presets", to: "test-presets" }],
-    }),
-  ],
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: "ts-loader",
+          exclude: /node_modules/,
+        },
+      ],
+    },
 
-  devServer: {
-    static: [
-      { directory: path.resolve(__dirname, "dist") },
-      { directory: path.resolve(__dirname, "test-presets"), publicPath: "/test-presets" },
+    plugins: [
+      new webpack.DefinePlugin({
+        __DEMO_BUILD__: JSON.stringify(demoBuild),
+      }),
+      new HtmlWebpackPlugin({
+        template: "./index.html",
+        inject: "body",
+        scriptLoading: "defer",
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          { from: "test-presets", to: "test-presets" },
+          { from: "assets", to: "assets" },
+        ],
+      }),
     ],
-    hot: true,
-    port: 3000,
-  },
+
+    devServer: {
+      static: [
+        { directory: path.resolve(__dirname, "dist") },
+        { directory: path.resolve(__dirname, "test-presets"), publicPath: "/test-presets" },
+        { directory: path.resolve(__dirname, "assets"), publicPath: "/assets" },
+      ],
+      hot: true,
+      port: 3000,
+    },
+  };
 };

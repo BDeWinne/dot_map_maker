@@ -55,6 +55,7 @@ export function createFleetMarker(
   ownerId: string,
   count: number,
   resolution = 2,
+  displayCount?: string,
 ): Container {
   const owner = ownerManager.get(ownerId);
   const root = new Container();
@@ -81,7 +82,7 @@ export function createFleetMarker(
   inner.addChild(ship);
 
   const countLabel = new Text({
-    text: String(count),
+    text: displayCount ?? String(count),
     resolution: resolution * FLEET_SUPERSAMPLE,
     style: {
       fontFamily: "Arial, Helvetica, sans-serif",

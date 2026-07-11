@@ -9,7 +9,10 @@ import { TerritoryRenderer } from "../galaxy/TerritoryRenderer";
 import { normalizeFacilities } from "../data/FacilityTypes";
 import { normalizeFleets, type FleetPresence } from "../data/FleetTypes";
 import { parsePopulationToInt } from "../data/population";
+import { isAtlasNodeVisualEnabled } from "../galaxy/nodeVisualMode";
 import { ownerManager } from "../galaxy/OwnerManager";
+import { isDemoMode } from "../config/demoMode";
+import { appAssetUrl } from "../config/publicPath";
 import {
   getDisplayStateAtYear,
   getMaxTimelineYear,
@@ -67,12 +70,17 @@ export function resolveBackgroundSource(data: GalaxyBackgroundData): string {
   if (
     src.startsWith("http://") ||
     src.startsWith("https://") ||
-    src.startsWith("data:") ||
-    src.startsWith("/")
+    src.startsWith("data:")
   ) {
     return src;
   }
-  return `/test-presets/${src.replace(/^\.\//, "")}`;
+  if (src.startsWith("/test-presets/")) {
+    return appAssetUrl(src.slice(1));
+  }
+  if (src.startsWith("/")) {
+    return src;
+  }
+  return appAssetUrl(`test-presets/${src.replace(/^\.\//, "")}`);
 }
 
 export type MapEditMode = "edit" | "moveBackground" | "moveNodes";
@@ -91,7 +99,7 @@ export class GalaxyScene extends Container {
   public territoryLayer: Container;
   private territoryRenderer: TerritoryRenderer;
   private zoom = 1;
-  private minZoom = 0.2;
+  private minZoom = 0.12;
   private maxZoom = 3;
   private panning = false;
   private panStart = new Point();
@@ -353,6 +361,11 @@ export class GalaxyScene extends Container {
     return this.playMode;
   }
 
+  /** Demo mode or play mode — structural edits disabled. */
+  public isEditorLocked(): boolean {
+    return isDemoMode() || this.playMode;
+  }
+
   public setPlayMode(on: boolean) {
     this.playMode = on;
     this.applyTimelineView();
@@ -497,6 +510,22 @@ export class GalaxyScene extends Container {
     return this.zoom;
   }
 
+  public refreshLabelResolution() {
+    const resolution = Math.max(2, (window.devicePixelRatio || 1) * this.zoom);
+    this.systems.forEach((node) => node.refreshMapOverlays(this.zoom, resolution));
+  }
+
+  public async onAtlasReady(): Promise<void> {
+    if (!isAtlasNodeVisualEnabled()) return;
+    const { preloadFactionEmblems } = await import("../galaxy/factionEmblems");
+    const ownerIds = [...ownerManager.getAll().map((o) => o.id)];
+    await preloadFactionEmblems(ownerIds);
+    for (const node of this.systems) {
+      await node.applyAtlasVisual();
+    }
+    this.refreshLabelResolution();
+  }
+
   public getShowFacilityIcons(): boolean {
     return this.showFacilityIcons;
   }
@@ -507,12 +536,12 @@ export class GalaxyScene extends Container {
 
   public setShowFacilityIcons(value: boolean) {
     this.showFacilityIcons = value;
-    for (const node of this.systems) node.updateFacilityIcons();
+    this.refreshLabelResolution();
   }
 
   public setShowNodeLabels(value: boolean) {
     this.showNodeLabels = value;
-    for (const node of this.systems) node.updateStatusLabel();
+    this.refreshLabelResolution();
   }
 
   public getShowFleets(): boolean {
@@ -521,7 +550,7 @@ export class GalaxyScene extends Container {
 
   public setShowFleets(value: boolean) {
     this.showFleets = value;
-    for (const node of this.systems) node.updateFleetMarkers();
+    this.refreshLabelResolution();
   }
 
   public getMapBounds(): Rectangle {
@@ -530,11 +559,6 @@ export class GalaxyScene extends Container {
       return new Rectangle(b.minX, b.minY, b.width, b.height);
     }
     return new Rectangle(-400, -300, 800, 600);
-  }
-
-  public refreshLabelResolution() {
-    const resolution = Math.max(2, (window.devicePixelRatio || 1) * this.zoom);
-    this.systems.forEach((node) => node.refreshTextResolution(resolution));
   }
 
   public clearCapitalForOwner(ownerId: string, except: NodeSystem) {
@@ -553,7 +577,7 @@ export class GalaxyScene extends Container {
   }
 
   public deleteSelectedConnection() {
-    if (this.playMode) return;
+    if (this.isEditorLocked()) return;
 
     const selectedLine = selectionManager.selectedConnection;
     if (!selectedLine) return;
@@ -651,7 +675,7 @@ export class GalaxyScene extends Container {
       if (this.spacePressed || this.panning) return;
 
       if (this.editMode === "edit") {
-        if (this.playMode) return;
+        if (this.isEditorLocked()) return;
         if (this.isMapEntityTarget(event.target)) return;
 
         const pos = this.world.toLocal(event.global);
@@ -696,7 +720,7 @@ export class GalaxyScene extends Container {
 
   public beginRepositionDrag(event: FederatedPointerEvent) {
     if (event.button !== 0) return;
-    if (this.playMode) return;
+    if (this.isEditorLocked()) return;
     if (this.spacePressed || this.panning) return;
     if (this.editMode === "edit") return;
     if (this.editMode === "moveBackground" && !this.hasBackground()) return;
@@ -791,7 +815,7 @@ export class GalaxyScene extends Container {
     data: SystemData,
     offset = { x: 0, y: 0 },
   ): NodeSystem | undefined {
-    if (this.playMode) return undefined;
+    if (this.isEditorLocked()) return undefined;
     const copy = structuredClone(data);
     copy.id = crypto.randomUUID();
     copy.x = (copy.x ?? 0) + offset.x;
@@ -811,14 +835,14 @@ export class GalaxyScene extends Container {
     source: NodeSystem,
     offset = { x: 24, y: 24 },
   ): NodeSystem | undefined {
-    if (this.playMode) return undefined;
+    if (this.isEditorLocked()) return undefined;
     const data = structuredClone(source.data);
     data.name = `${data.name} copy`;
     return this.duplicateNodeFromData(data, offset);
   }
 
   public renameNodeId(oldId: string, newId: string): boolean {
-    if (this.playMode) return false;
+    if (this.isEditorLocked()) return false;
     const trimmed = newId.trim();
     if (!trimmed || trimmed === oldId) return false;
     if (this.getNodeById(trimmed)) return false;
@@ -865,7 +889,7 @@ export class GalaxyScene extends Container {
   }
 
   public deleteNode(node: NodeSystem) {
-    if (this.playMode) return;
+    if (this.isEditorLocked()) return;
 
     const snapshot = structuredClone(node.data);
     const relatedConnections = this.connections
@@ -901,7 +925,7 @@ export class GalaxyScene extends Container {
   }
 
   public createConnection(nodeA: NodeSystem, nodeB: NodeSystem, data?: SystemConnection) {
-    if (this.playMode && !data) return;
+    if (this.isEditorLocked() && !data) return;
 
     const exists = this.connections.some(
       (c) =>
@@ -949,6 +973,7 @@ export class GalaxyScene extends Container {
   }
 
   public async setBackgroundFromFile(file: File): Promise<void> {
+    if (isDemoMode()) return;
     const dataUrl = await this.readFileAsDataUrl(file);
     await this.setBackground({
       dataUrl,
@@ -1113,6 +1138,7 @@ export class GalaxyScene extends Container {
     }
 
     try {
+      document.dispatchEvent(new CustomEvent("map:loading"));
       this.clearMap();
 
       if (map.metadata) {
@@ -1198,12 +1224,13 @@ export class GalaxyScene extends Container {
       }
 
       this.applyTimelineView();
-      this.refreshLabelResolution();
       document.dispatchEvent(new CustomEvent("map:loaded"));
       return true;
     } catch (err) {
       console.error("Failed to load map data", err);
       return false;
+    } finally {
+      document.dispatchEvent(new CustomEvent("map:load-ended"));
     }
   }
 

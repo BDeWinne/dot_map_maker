@@ -1,4 +1,5 @@
 import type { MapProfileId } from "./MapProfile";
+import { appAssetUrl } from "../config/publicPath";
 
 export interface PresetCatalogEntry {
   id: string;
@@ -7,9 +8,20 @@ export interface PresetCatalogEntry {
   titleKey: string;
   descKey: string;
   featureKeys: string[];
+  /** Shown in online demo gallery (`?demo=1` or `npm run build:demo`). */
+  demoAllowed?: boolean;
 }
 
 export const PRESET_CATALOG: PresetCatalogEntry[] = [
+  {
+    id: "csh",
+    file: "csh-preset.json",
+    profile: "galaxy",
+    titleKey: "preset.csh.title",
+    descKey: "preset.csh.desc",
+    featureKeys: ["preset.feat.timeline", "preset.feat.fleets", "preset.feat.conquest"],
+    demoAllowed: true,
+  },
   {
     id: "galaxy",
     file: "galaxy-preset.json",
@@ -33,6 +45,7 @@ export const PRESET_CATALOG: PresetCatalogEntry[] = [
     titleKey: "preset.dnd.title",
     descKey: "preset.dnd.desc",
     featureKeys: ["preset.feat.locations", "preset.feat.play", "preset.feat.milestones"],
+    demoAllowed: true,
   },
   {
     id: "adventure",
@@ -41,6 +54,7 @@ export const PRESET_CATALOG: PresetCatalogEntry[] = [
     titleKey: "preset.adventure.title",
     descKey: "preset.adventure.desc",
     featureKeys: ["preset.feat.unlock", "preset.feat.encounters", "preset.feat.play"],
+    demoAllowed: true,
   },
   {
     id: "timeline-wars",
@@ -77,5 +91,11 @@ export const PRESET_CATALOG: PresetCatalogEntry[] = [
 ];
 
 export function presetUrl(file: string): string {
-  return `/test-presets/${file}`;
+  return appAssetUrl(`test-presets/${file}`);
+}
+
+export function getPresetsForAppMode(demo: boolean): PresetCatalogEntry[] {
+  if (!demo) return PRESET_CATALOG;
+  const allowed = PRESET_CATALOG.filter((p) => p.demoAllowed);
+  return allowed.length > 0 ? allowed : PRESET_CATALOG.slice(0, 3);
 }
