@@ -361,13 +361,14 @@ export class GalaxyScene extends Container {
     return this.playMode;
   }
 
-  /** Demo mode or play mode — structural edits disabled. */
+  /** Play mode locks structural edits. Demo allows editing but not play. */
   public isEditorLocked(): boolean {
-    return isDemoMode() || this.playMode;
+    return this.playMode;
   }
 
   public setPlayMode(on: boolean) {
-    this.playMode = on;
+    // Demo: try the editor freely, but play mode stays off.
+    this.playMode = isDemoMode() ? false : on;
     this.applyTimelineView();
     document.dispatchEvent(new CustomEvent("playMode:changed"));
   }

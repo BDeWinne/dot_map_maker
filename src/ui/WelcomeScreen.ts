@@ -1,4 +1,5 @@
-import { getLocale } from "../i18n/locale";
+import { getLocale, t } from "../i18n/locale";
+import { isDemoMode } from "../config/demoMode";
 import { getWelcomeHelpHtml } from "./welcomeHelpContent";
 
 const LS_INTRO_SEEN = "dotMapMaker:introSeen";
@@ -7,6 +8,8 @@ export class WelcomeScreen {
   private root = document.getElementById("welcome-overlay");
   private contentEl = document.getElementById("welcome-content");
   private continueBtn = document.getElementById("welcome-continue");
+  private titleEl = document.getElementById("welcome-title");
+  private subEl = document.querySelector(".welcome-sub");
   private onContinue: (() => void) | null = null;
 
   public init() {
@@ -19,10 +22,14 @@ export class WelcomeScreen {
       this.onContinue = null;
     });
 
-    document.addEventListener("locale:changed", () => this.renderContent());
+    document.addEventListener("locale:changed", () => {
+      if (this.root && !this.root.hidden) this.renderContent();
+    });
   }
 
   public shouldShow(): boolean {
+    // Demo visitors should always see the intro before presets.
+    if (isDemoMode()) return true;
     return !this.hasSeen();
   }
 
@@ -43,6 +50,16 @@ export class WelcomeScreen {
   public renderContent() {
     if (!this.contentEl) return;
     this.contentEl.innerHTML = getWelcomeHelpHtml(getLocale());
+
+    if (isDemoMode()) {
+      if (this.titleEl) this.titleEl.textContent = t("welcome.demoTitle");
+      if (this.subEl) this.subEl.textContent = t("welcome.demoSubtitle");
+      if (this.continueBtn) this.continueBtn.textContent = t("welcome.demoContinue");
+    } else {
+      if (this.titleEl) this.titleEl.textContent = t("welcome.title");
+      if (this.subEl) this.subEl.textContent = t("welcome.subtitle");
+      if (this.continueBtn) this.continueBtn.textContent = t("welcome.continue");
+    }
   }
 
   private hasSeen(): boolean {
@@ -54,6 +71,8 @@ export class WelcomeScreen {
   }
 
   private markSeen() {
+    // Demo does not persist "seen" — intro shows every visit.
+    if (isDemoMode()) return;
     try {
       localStorage.setItem(LS_INTRO_SEEN, "1");
     } catch {

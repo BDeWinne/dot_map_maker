@@ -6,12 +6,9 @@
   <title>Dot Map Maker</title>
 </head>
 <body>
-<div id="demo-banner" class="demo-banner" hidden>
-  <span class="demo-banner-label" data-i18n="demo.banner">Modo demo — solo exploración</span>
-  <span class="demo-banner-sep" aria-hidden="true">·</span>
-  <button type="button" id="demo-switch-map" class="demo-banner-link" data-i18n="demo.switchMap">Cambiar mapa</button>
-  <span class="demo-banner-sep" aria-hidden="true">·</span>
-  <a id="demo-full-link" class="demo-banner-link" data-i18n="demo.fullEditor">Editor completo</a>
+<div id="demo-watermark" class="demo-watermark" hidden role="status">
+  <span class="demo-watermark-badge">DEMO</span>
+  <span class="demo-watermark-text" data-i18n="demo.watermark">Cambios no se guardan</span>
 </div>
 
 <div id="exit-guard-overlay" class="exit-guard-overlay" hidden>
@@ -255,7 +252,8 @@
       <label data-i18n="map.bgOpacity" data-demo-hide>Background opacity</label>
       <input type="range" id="background-opacity" min="5" max="100" value="100" disabled data-demo-hide />
       <p id="map-edit-mode-hint" class="mode-hint"></p>
-      <p id="map-persist-status" class="mode-hint map-persist-status" data-i18n="map.persistHint" data-demo-hide>Changes auto-save in this browser.</p>
+      <p id="map-persist-status" class="mode-hint map-persist-status" data-i18n="map.persistHint">Changes auto-save in this browser.</p>
+      <p id="map-demo-persist-hint" class="mode-hint map-persist-status" data-demo-only hidden data-i18n="demo.noSaveHint">Demo: podés editar, pero no se guarda ni se exporta.</p>
       <h4 class="subsection-title" data-i18n="validation.title">Map validation</h4>
       <p id="map-validation-summary" class="map-validation-summary" data-i18n="validation.hint">Checks IDs, routes, unlock refs, and capitals.</p>
       <button type="button" id="map-validate-btn" class="btn-muted" data-i18n="validation.run">Validate map</button>
@@ -265,11 +263,11 @@
       <button type="button" id="import-play-progress" class="btn-muted" data-i18n="play.import" data-demo-hide>Import play progress</button>
       <input type="file" id="import-play-progress-file" accept=".json,application/json" hidden />
       <p id="play-progress-status" class="mode-hint" role="status"></p>
-      <button type="button" id="open-startup-gallery" class="btn-muted" data-i18n="startup.openGallery" data-demo-hide>Map gallery</button>
+      <button type="button" id="open-startup-gallery" class="btn-muted" data-i18n="startup.openGallery">Map gallery</button>
       <button type="button" id="map-new-empty" class="btn-muted" data-i18n="startup.empty" data-demo-hide>Empty map</button>
       <label data-i18n="map.export" data-demo-hide>Export</label>
       <button id="export-map" type="button" data-i18n="map.exportJson" data-demo-hide>Export JSON</button>
-      <button id="export-png" type="button" data-play-allow data-i18n="map.exportPng">Export PNG (view)</button>
+      <button id="export-png" type="button" data-play-allow data-i18n="map.exportPng" data-demo-hide>Export PNG (view)</button>
     <button id="import-map" type="button" data-i18n="map.importJson" data-demo-hide>Import JSON</button>
     <input type="file" id="import-file" accept=".json,application/json" hidden />
     <p id="import-status" class="mode-hint" role="status"></p>
@@ -1579,98 +1577,58 @@
   }
 
   /* —— Demo mode (online showcase) —— */
-  .demo-banner {
+  .demo-watermark {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 130;
+    left: 12px;
+    bottom: 58px;
+    z-index: 125;
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 6px 10px;
-    padding: 8px 14px;
-    background: linear-gradient(180deg, #1a2838 0%, #121820 100%);
-    border-bottom: 1px solid #3d5166;
+    gap: 8px;
+    padding: 7px 12px;
+    background: rgba(26, 18, 6, 0.82);
+    border: 1px solid rgba(255, 210, 122, 0.55);
+    border-radius: 999px;
     font-family: system-ui, sans-serif;
     font-size: 12px;
-    color: #b8cce0;
+    color: #ffe8c2;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
   }
 
-  .demo-banner[hidden] {
+  .demo-watermark[hidden] {
     display: none !important;
   }
 
-  .demo-banner-label {
-    color: #8ec8ff;
-    font-weight: 600;
-  }
-
-  .demo-banner-sep {
-    opacity: 0.45;
-  }
-
-  .demo-banner-link {
-    color: #e8c878;
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
-  .demo-banner-link:hover {
-    color: #ffe8a0;
-  }
-
-  body.is-demo-mode {
-    padding-top: 36px;
+  .demo-watermark-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #ffd27a;
+    color: #1a1206;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 1.5px;
   }
 
   body.is-demo-mode [data-demo-hide] {
     display: none !important;
   }
 
-  body.is-demo-mode #hud-map-profile,
-  body.is-demo-mode .map-hud-play-toggle,
-  body.is-demo-mode #hud-edit-mode-row,
-  body.is-demo-mode #map-edit-mode-hint {
+  body.is-demo-mode [data-demo-only] {
+    display: block !important;
+  }
+
+  body.is-demo-mode #map-persist-status {
     display: none !important;
   }
 
-  body.is-demo-mode #ui-wrapper .tab-panel :is(input, textarea, select, button:not([data-play-allow])) {
-    pointer-events: none;
-    opacity: 0.65;
-  }
-
-  body.is-demo-mode #ui-wrapper .tab-panel button[data-play-allow] {
-    pointer-events: auto;
-    opacity: 1;
-  }
-
-  body.is-demo-mode #ui-wrapper .global-locale-bar :is(button, input, select) {
-    pointer-events: auto;
-    opacity: 1;
-  }
-
-  body.is-demo-mode .map-milestone-hud :is(input, textarea, select, button) {
-    pointer-events: none;
-    opacity: 0.65;
+  body.is-demo-mode .map-hud-play-toggle {
+    display: none !important;
   }
 
   body.is-demo-mode .startup-overlay .startup-actions {
     display: none;
-  }
-
-  body.is-demo-mode .year-scrubber {
-    top: 44px;
-  }
-
-  body.is-demo-mode .map-view-toggles {
-    top: 44px;
   }
 
   .year-scrubber {

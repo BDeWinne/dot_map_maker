@@ -145,7 +145,10 @@ export class StartupScreen {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = (await res.json()) as unknown;
       const ok = await galaxyScene.loadMapData(data);
-      if (ok) this.hide();
+      if (ok) {
+        if (isDemoMode()) galaxyScene.setPlayMode(false);
+        this.hide();
+      }
     } catch (err) {
       console.error("Failed to load preset", file, err);
     }

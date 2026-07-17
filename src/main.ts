@@ -127,10 +127,6 @@ function bootUi() {
   initExitGuard();
   populateFacilityLegend();
 
-  document.getElementById("demo-switch-map")?.addEventListener("click", () => {
-    startupScreen.showDemo();
-  });
-
   document.addEventListener("map:persisted", () => {
     const el = document.getElementById("map-persist-status");
     if (el) el.textContent = t("map.persisted");
@@ -176,11 +172,15 @@ function bootUi() {
   const playProgressStatus = document.getElementById("play-progress-status");
 
   exportPlayBtn?.addEventListener("click", () => {
+    if (isDemoMode()) return;
     exportPlayProgressFile();
     if (playProgressStatus) playProgressStatus.textContent = t("play.export");
   });
 
-  importPlayBtn?.addEventListener("click", () => importPlayFile?.click());
+  importPlayBtn?.addEventListener("click", () => {
+    if (isDemoMode()) return;
+    importPlayFile?.click();
+  });
 
   importPlayFile?.addEventListener("change", () => {
     const file = importPlayFile.files?.[0];
@@ -207,7 +207,10 @@ function bootUi() {
   const clearBackgroundBtn = document.getElementById("clear-background");
   const backgroundOpacityInput = document.getElementById("background-opacity") as HTMLInputElement | null;
 
-  setBackgroundBtn?.addEventListener("click", () => backgroundFileInput?.click());
+  setBackgroundBtn?.addEventListener("click", () => {
+    if (isDemoMode()) return;
+    backgroundFileInput?.click();
+  });
 
   backgroundFileInput?.addEventListener("change", async () => {
     const file = backgroundFileInput.files?.[0];
@@ -240,6 +243,7 @@ function bootUi() {
   });
 
   exportPngBtn?.addEventListener("click", () => {
+    if (isDemoMode()) return;
     setImportStatus(t("map.exportPngBusy"));
     void exportMapAsPng()
       .then((ok) => {
@@ -260,6 +264,10 @@ function bootUi() {
   });
 
   fileInput?.addEventListener("change", () => {
+    if (isDemoMode()) {
+      fileInput.value = "";
+      return;
+    }
     const file = fileInput.files?.[0];
     if (!file) return;
 
@@ -312,11 +320,11 @@ function bootUi() {
 bootUi();
 
 void Game.whenReady().then(() => {
-  if (isDemoMode()) {
-    startupScreen.showDemo();
-    return;
-  }
-  const openGallery = () => startupScreen.show();
+  const openGallery = () => {
+    if (isDemoMode()) startupScreen.showDemo();
+    else startupScreen.show();
+  };
+
   if (welcomeScreen.shouldShow()) {
     welcomeScreen.show(openGallery);
   } else {

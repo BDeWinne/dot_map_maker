@@ -1,5 +1,6 @@
 import { galaxyScene } from "../scene/GalaxyScene";
 import type { PlayProgress } from "../data/playProgress";
+import { isDemoMode } from "../config/demoMode";
 import { t } from "../i18n/locale";
 
 export interface PlayProgressFile {
@@ -9,6 +10,7 @@ export interface PlayProgressFile {
 }
 
 export function exportPlayProgressFile() {
+  if (isDemoMode()) return;
   const payload: PlayProgressFile = {
     version: 1,
     playProgress: galaxyScene.getPlayProgress(),
@@ -25,6 +27,7 @@ export function exportPlayProgressFile() {
 }
 
 export async function importPlayProgressFile(file: File): Promise<string> {
+  if (isDemoMode()) return t("demo.noSaveHint");
   const text = await file.text();
   const json = JSON.parse(text) as Partial<PlayProgressFile> & Partial<PlayProgress>;
 

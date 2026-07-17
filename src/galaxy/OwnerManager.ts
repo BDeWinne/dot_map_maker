@@ -1,4 +1,5 @@
 import ownersData from "../owners.json";
+import { isDemoMode } from "../config/demoMode";
 
 export const OWNERS_STORAGE_KEY = "galaxy-map-owners";
 
@@ -131,6 +132,7 @@ export class OwnerManager {
   }
 
   public persist() {
+    if (isDemoMode()) return;
     try {
       localStorage.setItem(OWNERS_STORAGE_KEY, JSON.stringify(this.exportData()));
     } catch (err) {

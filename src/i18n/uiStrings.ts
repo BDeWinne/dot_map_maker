@@ -441,6 +441,18 @@ export const UI_STRINGS = {
     es: "Entendido, elegir mapa",
     en: "Got it, choose a map",
   },
+  "welcome.demoTitle": {
+    es: "Demo de Dot Map Maker",
+    en: "Dot Map Maker Demo",
+  },
+  "welcome.demoSubtitle": {
+    es: "Leé esto primero — después elegís un mapa de ejemplo",
+    en: "Read this first — then pick a sample map",
+  },
+  "welcome.demoContinue": {
+    es: "Entendido, ver presets",
+    en: "Got it, see presets",
+  },
 
   "exitGuard.title": { es: "¿Salir del mapa?", en: "Leave the map?" },
   "exitGuard.lead": {
@@ -469,8 +481,8 @@ export const UI_STRINGS = {
   },
 
   "demo.banner": {
-    es: "Modo demo — solo exploración",
-    en: "Demo mode — explore only",
+    es: "Modo demo — edición sin guardar",
+    en: "Demo mode — edit without saving",
   },
   "demo.fullEditor": {
     es: "Editor completo",
@@ -485,12 +497,20 @@ export const UI_STRINGS = {
     en: "Dot Map Maker — Demo",
   },
   "demo.startupLead": {
-    es: "Elegí un mapa de ejemplo para explorar timeline, flotas, rutas y más. Sin edición ni export — para crear mapas usá el editor completo.",
-    en: "Pick a sample map to explore timeline, fleets, routes, and more. No editing or export — use the full editor to create maps.",
+    es: "Cargá un preset y editá a gusto: nodos, rutas, timeline, facciones. No se guarda en el navegador, no hay play mode ni import/export.",
+    en: "Load a preset and edit freely: nodes, routes, timeline, factions. Nothing is saved in the browser — no play mode, import, or export.",
   },
   "demo.loadExplore": {
-    es: "Explorar",
-    en: "Explore",
+    es: "Probar",
+    en: "Try it",
+  },
+  "demo.watermark": {
+    es: "Cambios no se guardan",
+    en: "Changes are not saved",
+  },
+  "demo.noSaveHint": {
+    es: "Demo: podés editar, pero no se guarda ni se exporta. Al recargar se pierde todo.",
+    en: "Demo: you can edit, but nothing is saved or exported. Reload clears everything.",
   },
 
   "preset.csh.title": { es: "Confederación Solar Humana", en: "Human Solar Confederation" },

@@ -1,5 +1,5 @@
 /** Default showcase map when entering demo without a picker choice. */
-export const DEMO_DEFAULT_PRESET = "csh-preset.json";
+export const DEMO_DEFAULT_PRESET = "galaxy-preset.json";
 
 /** Injected by webpack DefinePlugin (`--env demo`). */
 declare const __DEMO_BUILD__: boolean;
@@ -37,7 +37,7 @@ export function getFullEditorUrl(): string {
   }
 }
 
-/** Call once at boot — sets body class and demo banner. */
+/** Call once at boot — sets body class and demo watermark. */
 export function initDemoMode(): boolean {
   demoActive = detectDemoFromLocation();
   if (!demoActive) return false;
@@ -45,13 +45,12 @@ export function initDemoMode(): boolean {
   document.body.classList.add("is-demo-mode");
   document.documentElement.dataset.appMode = "demo";
 
-  const banner = document.getElementById("demo-banner");
-  if (banner) banner.hidden = false;
+  const watermark = document.getElementById("demo-watermark");
+  if (watermark) watermark.hidden = false;
 
-  const fullLink = document.getElementById("demo-full-link") as HTMLAnchorElement | null;
-  if (fullLink) {
-    fullLink.href = getFullEditorUrl();
-  }
+  document.querySelectorAll<HTMLElement>("[data-demo-only]").forEach((el) => {
+    el.hidden = false;
+  });
 
   return true;
 }

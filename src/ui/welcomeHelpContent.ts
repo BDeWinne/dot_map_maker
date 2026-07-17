@@ -1,4 +1,5 @@
 import type { Locale } from "../i18n/locale";
+import { isDemoMode } from "../config/demoMode";
 
 const WELCOME_ES = `
 <p class="welcome-lead">Motor de mapas por <strong>nodos</strong> y <strong>rutas</strong>. El diseño se guarda como <strong>JSON en localStorage</strong> de este navegador (~700 ms después de cada cambio). Para no perderlo: exportá el JSON desde Mapa, o usá <strong>Continuar último mapa</strong> al volver.</p>
@@ -54,6 +55,67 @@ const WELCOME_EN = `
 <p class="welcome-foot">Full documentation lives in the sidebar <strong>Help</strong> tab.</p>
 `;
 
+const WELCOME_DEMO_ES = `
+<p class="welcome-lead"><strong>Estás en modo demo.</strong> Podés editar un mapa de ejemplo a fondo, pero <strong>nada se guarda</strong> ni se exporta. Al recargar se pierde todo.</p>
+
+<h4 class="welcome-section">Qué podés hacer</h4>
+<ul class="welcome-bullets">
+  <li><strong>Elegir un preset</strong> — después de esta guía vas a la galería.</li>
+  <li><strong>Editar</strong> — nodos, rutas, facciones, timeline, hitos…</li>
+  <li><strong>Explorar la UI</strong> — paneles, scrubber de año, búsqueda, toggles.</li>
+</ul>
+
+<h4 class="welcome-section">Qué no está disponible</h4>
+<ul class="welcome-bullets">
+  <li>Auto-guardado / continuar último mapa</li>
+  <li>Import / export (JSON, PNG)</li>
+  <li>Play mode</li>
+  <li>Mapa vacío desde cero</li>
+</ul>
+
+<h4 class="welcome-section">Atajos útiles</h4>
+<dl class="welcome-shortcuts">
+  <div><dt>Clic en vacío</dt><dd>Añadir nodo</dd></div>
+  <div><dt>Shift + clic</dt><dd>Crear ruta entre nodos</dd></div>
+  <div><dt>Rueda del ratón</dt><dd>Zoom del mapa</dd></div>
+  <div><dt>Clic en nodo</dt><dd>Ver detalle en el panel derecho</dd></div>
+</dl>
+
+<p class="welcome-foot">Cuando termines, elegí un mapa de ejemplo. La ayuda completa está en la pestaña <strong>Ayuda</strong>.</p>
+`;
+
+const WELCOME_DEMO_EN = `
+<p class="welcome-lead"><strong>You are in demo mode.</strong> You can fully edit a sample map, but <strong>nothing is saved</strong> or exported. Reloading clears everything.</p>
+
+<h4 class="welcome-section">What you can do</h4>
+<ul class="welcome-bullets">
+  <li><strong>Pick a preset</strong> — after this guide you get the gallery.</li>
+  <li><strong>Edit</strong> — nodes, routes, factions, timeline, milestones…</li>
+  <li><strong>Explore the UI</strong> — panels, year scrubber, search, toggles.</li>
+</ul>
+
+<h4 class="welcome-section">What is locked</h4>
+<ul class="welcome-bullets">
+  <li>Auto-save / continue last map</li>
+  <li>Import / export (JSON, PNG)</li>
+  <li>Play mode</li>
+  <li>Empty map from scratch</li>
+</ul>
+
+<h4 class="welcome-section">Handy shortcuts</h4>
+<dl class="welcome-shortcuts">
+  <div><dt>Click empty space</dt><dd>Add node</dd></div>
+  <div><dt>Shift + click</dt><dd>Create route between nodes</dd></div>
+  <div><dt>Mouse wheel</dt><dd>Zoom the map</dd></div>
+  <div><dt>Click a node</dt><dd>Inspect it in the right panel</dd></div>
+</dl>
+
+<p class="welcome-foot">When you are ready, pick a sample map. Full docs are in the sidebar <strong>Help</strong> tab.</p>
+`;
+
 export function getWelcomeHelpHtml(lang: Locale): string {
+  if (isDemoMode()) {
+    return lang === "en" ? WELCOME_DEMO_EN : WELCOME_DEMO_ES;
+  }
   return lang === "en" ? WELCOME_EN : WELCOME_ES;
 }

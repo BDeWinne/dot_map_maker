@@ -1,11 +1,13 @@
 import { normalizeMapProfile, type MapProfileId } from "../data/MapProfile";
 import { getLocalizedMapProfile } from "../i18n/mapProfileLocale";
 import { getLocale } from "../i18n/locale";
+import { isDemoMode } from "../config/demoMode";
 import { galaxyScene } from "../scene/GalaxyScene";
 
 const LS_PLAY_MODE = "mapPlayMode";
 
 function readPlayMode(): boolean {
+  if (isDemoMode()) return false;
   try {
     return localStorage.getItem(LS_PLAY_MODE) === "1";
   } catch {
@@ -14,6 +16,7 @@ function readPlayMode(): boolean {
 }
 
 function writePlayMode(value: boolean) {
+  if (isDemoMode()) return;
   try {
     localStorage.setItem(LS_PLAY_MODE, value ? "1" : "0");
   } catch {
@@ -60,6 +63,11 @@ export class MapProfilePanel {
 
     const playModeCheck = document.getElementById("hud-play-mode") as HTMLInputElement | null;
     playModeCheck?.addEventListener("change", () => {
+      if (isDemoMode()) {
+        playModeCheck.checked = false;
+        galaxyScene.setPlayMode(false);
+        return;
+      }
       galaxyScene.setPlayMode(playModeCheck.checked);
       writePlayMode(playModeCheck.checked);
     });

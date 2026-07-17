@@ -1,5 +1,6 @@
 import { Rectangle } from "pixi.js";
 import { Game } from "../core/Game";
+import { isDemoMode } from "../config/demoMode";
 import { galaxyScene } from "../scene/GalaxyScene";
 
 const EXPORT_PADDING = 48;
@@ -15,6 +16,7 @@ function padBounds(bounds: Rectangle, padding: number): Rectangle {
 }
 
 export async function exportMapAsPng(filename = "galaxy-map.png"): Promise<boolean> {
+  if (isDemoMode()) return false;
   await Game.whenReady();
   const app = Game.getInstance()?.getApp();
   if (!app) {
